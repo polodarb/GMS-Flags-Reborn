@@ -1,0 +1,80 @@
+# Gradle
+.gradle/
+**/build/
+build/
+
+# Kotlin
+.kotlin/
+
+# Android Studio / IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+captures/
+.navigation/
+
+# Local Android configuration
+local.properties
+
+# Generated Android artifacts
+*.apk
+*.apks
+*.aab
+*.aar
+*.ap_
+*.dex
+*.class
+bin/
+gen/
+/core-entry/release/
+
+# Native builds and profiling
+.cxx/
+.externalNativeBuild/
+*.hprof
+
+# Signing material
+*.jks
+*.keystore
+keystore.properties
+signing.properties
+
+# Local overrides for Secrets Gradle Plugin (per-module local.defaults.properties are committed)
+secrets.properties
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+*.swo
+*.orig
+*~
+
+# Local Markdown notes
+*.md
+!/README.md
+docs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Real experimental-hook implementation - local only. debug-public ships a no-op stub
+/xposed/src/debug-internal/
+/presentation-feature-apps/src/debug-internal/
+/core-entry/src/debug-internal/
+.analysis/
+
+# Real Firebase config - local only. The google-services plugin natively prefers a
+# build-type-specific file over the root one, so debug/release builds pick this up
+# automatically; the placeholder at core-entry/google-services.json (tracked) covers
+# every other build (e.g. anyone else's checkout, CI without the real file).
+/core-entry/src/debug/google-services.json
+/core-entry/src/release/google-services.json
+
+# Local-only reverse-engineering tooling and shelved experiments - not part of any
+# build variant, never meant to reach an exported public snapshot of this repo.
+/inactive/
+/tools/

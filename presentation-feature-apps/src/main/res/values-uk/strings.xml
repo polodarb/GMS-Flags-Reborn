@@ -1,0 +1,36 @@
+<resources>
+    <string name="apps_settings">Налаштування</string>
+    <string name="apps_settings_unavailable">Налаштування поки недоступні</string>
+    <string name="apps_empty">Підтримувані застосунки не знайдено</string>
+    <string name="apps_dialog_choose_package">Оберіть пакет</string>
+    <string name="packages_search_advice">Пошук по пакетах</string>
+    <string name="close">Закрити</string>
+    <string name="primary">Основні</string>
+    <string name="secondary">Інші</string>
+    <string name="clear_search">Очистити пошук</string>
+    <string name="apps_scope_missing_badge">Не у scope</string>
+    <string name="apps_unsupported_badge">Не підтримується</string>
+    <string name="apps_pairip_badge">Несумісно</string>
+    <string name="apps_unsupported_sheet_title">Прапорці не підтримуються</string>
+    <string name="apps_unsupported_sheet_body">Прапорці цього застосунку тимчасово не підтримуються на встановленій версії.</string>
+    <string name="apps_unsupported_sheet_body_version">Прапорці цього застосунку тимчасово не підтримуються після оновлення v%1$d.</string>
+    <string name="apps_unsupported_sheet_point_paused_title">Доступ призупинено</string>
+    <string name="apps_unsupported_sheet_point_paused_desc">Керування прапорцями вимкнено, щоб зламаний прапорець не вплинув на застосунок.</string>
+    <string name="apps_unsupported_sheet_point_fix_title">Виправлення в дорозі</string>
+    <string name="apps_unsupported_sheet_point_fix_desc">Підтримка повернеться, щойно застосунок знову стане сумісним.</string>
+    <string name="apps_unsupported_sheet_action">Зрозуміло</string>
+    <string name="apps_scope_missing_title">Scope LSPosed вимкнено</string>
+    <string name="apps_scope_missing_explanation">GMS Flags не зможе підключити хук до %1$s, доки застосунок не ввімкнено у scope модуля.</string>
+    <string name="apps_scope_steps_title">Як увімкнути</string>
+    <string name="apps_scope_step_open_lsposed">Відкрийте LSPosed</string>
+    <string name="apps_scope_step_open_modules">Виберіть «Модулі»</string>
+    <string name="apps_scope_step_open_gms_flags">Відкрийте GMS Flags</string>
+    <string name="apps_scope_step_enable_app">Увімкніть %1$s і перезапустіть застосунок</string>
+    <string name="apps_module_scope_banner_title">GMS Flags не активовано в LSPosed</string>
+    <string name="apps_module_scope_banner_description">Активуйте модуль, щоб застосовувати перевизначення прапорців.</string>
+    <string name="apps_module_scope_sheet_title">Модуль LSPosed не активовано</string>
+    <string name="apps_module_scope_sheet_explanation">Активуйте %1$s у LSPosed перед застосуванням перевизначень прапорців.</string>
+    <string name="apps_module_scope_step_enable">Увімкніть модуль %1$s і перезапустіть цільові застосунки</string>
+    <string name="apps_search_placeholder">Пошук застосунків і пакетів</string>
+    <string name="apps_search_empty">Відповідних застосунків не знайдено</string>
+</resources>

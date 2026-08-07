@@ -1,0 +1,239 @@
+<resources>
+    <string name="suggestions_title">Suggestions</string>
+    <string name="suggestions_refresh">Refresh recommendations</string>
+    <string name="suggestions_search_placeholder">Search recommendations</string>
+    <string name="suggestions_search_empty_title">No matching recommendations</string>
+    <string name="suggestions_search_empty_description">Try another title, description, or flag name.</string>
+    <plurals name="suggestions_filter_all_count">
+        <item quantity="one">All · %1$d</item>
+        <item quantity="other">All · %1$d</item>
+    </plurals>
+    <string name="suggestions_filter_apps">Apps</string>
+    <string name="suggestions_filter_not_enabled">Not enabled</string>
+    <string name="suggestions_filter_enabled">Enabled</string>
+    <string name="suggestions_filter_more">Filters</string>
+    <string name="suggestions_filter_more_count">Filters · %1$d</string>
+    <string name="suggestions_filter_empty_description">Try changing the selected application or filters.</string>
+    <string name="suggestions_filter_reset_all">Show all recommendations</string>
+    <string name="suggestions_recommendation_moved_to_stack">"%1$s moved to the app stack"</string>
+    <string name="suggestions_recommendation_moved_to_stack_hint">Move to app stack</string>
+    <string name="suggestions_undo_action">Undo</string>
+    <string name="suggestions_application_filter_title">Choose an application</string>
+    <string name="suggestions_application_filter_description">Show recommendations for one application.</string>
+    <string name="suggestions_application_filter_search">Search applications</string>
+    <string name="suggestions_application_filter_all">All applications</string>
+    <plurals name="suggestions_recommendations_count">
+        <item quantity="one">%1$d recommendation</item>
+        <item quantity="other">%1$d recommendations</item>
+    </plurals>
+    <string name="suggestions_filter_device_status">Status on this device</string>
+    <string name="suggestions_filter_support_status">Testing status</string>
+    <string name="suggestions_filter_sort">Sort by</string>
+    <string name="suggestions_filter_status_all">Any status</string>
+    <string name="suggestions_filter_different_setup">Different setup</string>
+    <string name="suggestions_filter_unknown">Status unknown</string>
+    <string name="suggestions_filter_sort_recommended">Recommended</string>
+    <string name="suggestions_filter_sort_application">Application</string>
+    <string name="suggestions_filter_reset">Reset</string>
+    <plurals name="suggestions_filter_show_count">
+        <item quantity="one">Show %1$d result</item>
+        <item quantity="other">Show %1$d results</item>
+    </plurals>
+    <string name="suggestions_empty_title">No recommendations yet</string>
+    <string name="suggestions_empty_description">New flag recommendations will appear here when they’re published.</string>
+    <string name="suggestions_featured_badge_description">Hot</string>
+    <string name="suggestions_scope_missing_badge">Not in scope · won\'t apply</string>
+    <string name="suggestions_support_verified">Verified</string>
+    <string name="suggestions_support_partial">Partially supported</string>
+    <string name="suggestions_support_experimental">Experimental</string>
+    <string name="suggestions_support_unknown">Support unknown</string>
+    <string name="suggestions_support_verified_description">Tested on a supported app version and expected to work as described.</string>
+    <string name="suggestions_support_partial_description">Works only on some app versions, devices, or with part of the configuration.</string>
+    <string name="suggestions_support_experimental_description">Has limited testing and may behave unexpectedly or affect app stability.</string>
+    <string name="suggestions_support_unknown_description">There is not enough compatibility data to confirm how reliably it works.</string>
+    <string name="suggestions_support_sheet_title">Recommendation status</string>
+    <string name="suggestions_support_sheet_description">The status reflects how thoroughly this recommendation has been tested. It does not guarantee identical behavior on every device or app version.</string>
+    <string name="suggestions_support_sheet_close">Got it</string>
+    <string name="suggestions_details_title">Recommendation</string>
+    <string name="suggestions_details_installed_version">Installed version: %1$s</string>
+    <string name="suggestions_details_learn_more">Learn more</string>
+    <string name="suggestions_details_source">Source: %1$s</string>
+    <string name="suggestions_details_screenshots">Preview</string>
+    <string name="suggestions_details_screenshot_description">Screenshot %1$d of %2$d</string>
+    <string name="suggestions_details_screenshot_counter">%1$d of %2$d</string>
+    <string name="suggestions_details_close_screenshot">Close preview</string>
+    <string name="suggestions_details_configuration">Configuration</string>
+    <string name="suggestions_details_choose_configuration">Choose configuration</string>
+    <string name="suggestions_details_configuration_position">Configuration %1$d of %2$d</string>
+    <string name="suggestions_details_variant_number">Variant %1$d</string>
+    <string name="suggestions_details_any_version">Works with any application version</string>
+    <string name="suggestions_details_version_from">Version code %1$d and newer</string>
+    <string name="suggestions_details_version_until">Up to version code %1$d</string>
+    <string name="suggestions_details_version_range">Version codes %1$d–%2$d</string>
+    <string name="suggestions_details_version_unknown">Version compatibility is unknown</string>
+    <string name="suggestions_details_compatible">Compatible with the installed version</string>
+    <string name="suggestions_details_incompatible">Not compatible with the installed version</string>
+    <string name="suggestions_details_compatibility_unknown">Install the application to check compatibility</string>
+    <plurals name="suggestions_details_flags_count">
+        <item quantity="one">%1$d flag</item>
+        <item quantity="other">%1$d flags</item>
+    </plurals>
+    <plurals name="suggestions_details_hooks_count">
+        <item quantity="one">%1$d patch</item>
+        <item quantity="other">%1$d patches</item>
+    </plurals>
+    <string name="suggestions_details_no_variants">This recommendation has no configurations yet.</string>
+    <string name="suggestions_details_apply">Apply recommendation</string>
+    <string name="suggestions_details_restore">Apply this setup</string>
+    <string name="suggestions_details_applied_state">Recommendation applied</string>
+    <string name="suggestions_details_disable">Disable recommendation</string>
+    <string name="suggestions_details_scope_action">Enable in LSPosed to apply flag overrides</string>
+    <string name="suggestions_details_status_applied">Enabled</string>
+    <string name="suggestions_details_status_partial">Different setup</string>
+    <string name="suggestions_details_status_not_applied">Disabled</string>
+    <string name="suggestions_details_status_unavailable">Status unknown</string>
+    <string name="suggestions_application_status_sheet_title">Status on this device</string>
+    <string name="suggestions_application_status_sheet_description">This status is calculated from the current local overrides for the selected recommendation.</string>
+    <string name="suggestions_application_status_applied_description">All required overrides are present and match the recommendation.</string>
+    <string name="suggestions_application_status_partial_description">Some values are missing or differ from this setup. Apply it to replace the current values.</string>
+    <string name="suggestions_application_status_not_applied_description">The required overrides are not currently enabled on this device.</string>
+    <string name="suggestions_application_status_unavailable_description">GMS Flags could not read or compare the current overrides.</string>
+    <string name="suggestions_details_not_installed">Application not installed</string>
+    <string name="suggestions_details_version_unsupported">Version not supported</string>
+    <string name="suggestions_details_unsupported_types">Unsupported flag types</string>
+    <string name="suggestions_details_no_flags">Recommendation not configured</string>
+    <string name="suggestions_details_unavailable">Recommendation unavailable</string>
+    <string name="suggestions_details_reason_app_unknown">The backend did not provide a target application for this recommendation.</string>
+    <string name="suggestions_details_reason_not_installed">Install the target application before applying this recommendation.</string>
+    <string name="suggestions_details_reason_flag_package">The application’s primary flag package could not be determined.</string>
+    <string name="suggestions_details_reason_version">Choose a configuration compatible with the installed application version.</string>
+    <string name="suggestions_details_reason_types">This configuration contains flag types that GMS Flags cannot safely write.</string>
+    <string name="suggestions_details_reason_empty">The backend returned this variant without flag values. Add flag_name, value_type and value to the variant.</string>
+    <string name="suggestions_details_applied">Recommendation applied</string>
+    <string name="suggestions_details_disabled">Recommendation disabled</string>
+    <string name="suggestions_details_disabled_uncertain">Recommendation disabled, but we couldn\'t find an exact record of what it installed - some flags may remain. Use \"Delete all overrides\" for this app in Settings if the change still applies.</string>
+    <string name="suggestions_details_flag_name_copied">Flag name copied</string>
+    <string name="suggestions_details_clipboard_flag_name">flag name</string>
+    <string name="suggestions_details_launch_application">Open application</string>
+    <string name="suggestions_details_launch_unavailable">Unable to open the application</string>
+    <string name="suggestions_details_link_unavailable">Unable to open this link</string>
+    <string name="suggestions_details_flag_type_unsupported">This flag type cannot be applied</string>
+    <string name="suggestions_details_flag_package">Writes to %1$s</string>
+    <string name="suggestions_flag_type_bool">Boolean</string>
+    <string name="suggestions_flag_type_int">Integer</string>
+    <string name="suggestions_flag_type_long">Long integer</string>
+    <string name="suggestions_flag_type_float">Float</string>
+    <string name="suggestions_flag_type_double">Double</string>
+    <string name="suggestions_flag_type_string">String</string>
+    <string name="suggestions_flag_type_bytes">Bytes</string>
+    <string name="suggestions_flag_type_unknown">Unknown type</string>
+
+    <!-- Compatibility patches (a signed, targeted runtime patch that goes beyond a plain flag
+         override). The end-user word is "patch" - "micro-hook" is internal jargon and never shown. -->
+    <string name="suggestions_details_patch_title">Compatibility patch</string>
+    <!-- `purpose` is free-form admin text from the backend (not localized), shown verbatim as a
+         supporting line. It is never the primary label. -->
+    <string name="suggestions_details_patch_note">%1$s</string>
+    <string name="suggestions_details_patch_learn_more">What does this mean?</string>
+
+    <!-- Trust states: short chip label + a full description shown in the explainer sheet. -->
+    <string name="suggestions_details_patch_trust_sheet_title">Patch protection</string>
+    <string name="suggestions_details_patch_trust_sheet_description">A patch can carry a server signature. Before applying one, the app checks that signature against a key built into this version — so a patch can’t be swapped or tampered with on its way to your device.</string>
+    <string name="suggestions_details_patch_trust_verified">Protected &amp; verified</string>
+    <string name="suggestions_details_patch_trust_verified_desc">Signed by the server and checked against this app’s built-in key. It matched, so this patch is genuine and safe to apply.</string>
+    <string name="suggestions_details_patch_trust_not_signed">Not signed</string>
+    <string name="suggestions_details_patch_trust_not_signed_desc">This patch doesn’t carry a signature yet, so there’s nothing to check. It applies like any normal recommendation step.</string>
+    <string name="suggestions_details_patch_trust_unavailable">Not checked here</string>
+    <string name="suggestions_details_patch_trust_unavailable_desc">This build has no verification key, so the signature couldn’t be checked on this device. The patch still applies, but it wasn’t verified here.</string>
+    <string name="suggestions_details_patch_trust_failed">Signature mismatch</string>
+    <string name="suggestions_details_patch_trust_failed_desc">This patch’s signature does NOT match this app’s built-in key. It may have been tampered with, or the app’s key is out of date. It will not be applied — please contact support.</string>
+
+    <!-- Failed-verification card (shown inline in place of the normal patch card). -->
+    <string name="suggestions_details_patch_failed_title">This patch can’t be trusted</string>
+    <string name="suggestions_details_patch_failed_body">Its signature didn’t match, so it won’t be applied. Contact support before continuing.</string>
+    <string name="suggestions_details_patch_failed_required">The whole recommendation stays blocked until this is resolved.</string>
+    <string name="suggestions_details_patch_failed_optional">This patch is skipped; the rest of the recommendation still applies.</string>
+
+    <!-- App-integrity card (shown inline in place of the normal patch card, for every patch, when
+         this APK's own signing certificate doesn't match the official release). Distinct from the
+         patch-signature failure above: this is about whether the APP itself is genuine, not the
+         patch - a modified app could report any patch as "Verified" regardless of its real
+         signature, so per-patch verification alone proves nothing here. Not bypassable. -->
+    <string name="suggestions_details_patch_app_untrusted_title">This app build can’t apply patches</string>
+    <string name="suggestions_details_patch_app_untrusted_body">This copy of the app doesn’t match the official release signature, so patches are blocked regardless of their own signature — a modified app could fake that check too. Reinstall the official build to apply patches.</string>
+
+    <!-- Block card, alarming variant: a required patch's signature actively FAILED (likely tampered). -->
+    <string name="suggestions_details_hook_block_title">Signature mismatch detected</string>
+    <string name="suggestions_details_hook_block_message">A required patch in this configuration did not pass signature verification. It has not been applied. This could mean it was tampered with, or that the app’s built-in key is out of date — please contact support before proceeding.</string>
+    <!-- Block card, calmer variant: a required patch simply couldn't be verified (unsigned, or this
+         build has no key). Still blocked under mandatory signing, but not an alarm. -->
+    <string name="suggestions_details_hook_block_unverified_title">Patch couldn’t be verified</string>
+    <string name="suggestions_details_hook_block_unverified_message">This recommendation needs a patch that the app couldn’t verify — it isn’t signed, or this build has no key to check it against. To keep you safe it wasn’t applied. If you keep seeing this, contact support.</string>
+    <string name="suggestions_details_hook_apply_anyway">Apply anyway</string>
+    <string name="suggestions_details_hook_report">Report a problem</string>
+    <string name="suggestions_details_hook_confirm_title">Apply an unverified patch?</string>
+    <string name="suggestions_details_hook_confirm_message">This patch wasn’t verified by the app — it may be unsigned, or its signature didn’t match. Applying it anyway could let a modified patch change how this app behaves. Continue only if you understand and accept this risk.</string>
+    <string name="suggestions_details_hook_confirm_cancel">Cancel</string>
+    <string name="suggestions_details_hook_confirm_confirm">Apply anyway</string>
+
+    <!-- "View instructions": a plain-English rendering of exactly what a patch's signed recipe
+         says (where it hooks, and under what conditions it changes behavior), decoded on-device.
+         Transparency feature - lets anyone inspect a patch instead of trusting it blindly. -->
+    <string name="suggestions_details_hook_instructions_button">View instructions</string>
+    <string name="suggestions_details_hook_instructions_sheet_title">How this patch works</string>
+    <string name="suggestions_details_hook_instructions_point_before">Before the original code runs</string>
+    <string name="suggestions_details_hook_instructions_point_after">After the original code runs</string>
+    <string name="suggestions_details_hook_instructions_kind_boolean">this patch can adjust its true/false result.</string>
+    <string name="suggestions_details_hook_instructions_kind_numeric">this patch can adjust its numeric result.</string>
+    <string name="suggestions_details_hook_instructions_kind_argument">this patch can replace one of its inputs.</string>
+    <string name="suggestions_details_hook_instructions_kind_string">this patch can replace the text it returns.</string>
+    <string name="suggestions_details_hook_instructions_applies_when">Applies if ANY rule below matches:</string>
+    <string name="suggestions_details_hook_instructions_only_when">Only runs when this also matches:</string>
+    <string name="suggestions_details_hook_instructions_sets_to">Sets it to: %1$s</string>
+    <string name="suggestions_details_hook_instructions_rule">Rule %1$d</string>
+    <string name="suggestions_details_hook_instructions_where_title">Where it hooks</string>
+    <string name="suggestions_details_hook_instructions_where_resource">A fixed, built-in hook on Android’s own resource lookup — it doesn’t search this app’s code at all.</string>
+    <string name="suggestions_details_hook_instructions_returns">Returns: %1$s</string>
+    <string name="suggestions_details_hook_instructions_params_none">Takes no parameters</string>
+    <string name="suggestions_details_hook_instructions_params">Parameters: %1$s</string>
+    <string name="suggestions_details_hook_instructions_modifiers">Modifiers: %1$s</string>
+    <string name="suggestions_details_hook_instructions_references_all">Its code must reference: %1$s</string>
+    <string name="suggestions_details_hook_instructions_references_any">Its code must reference at least one of: %1$s</string>
+    <string name="suggestions_details_hook_instructions_class_references_all">Its containing class must reference: %1$s</string>
+    <string name="suggestions_details_hook_instructions_class_references_any">Its containing class must reference at least one of: %1$s</string>
+
+    <!-- Report a problem surface. Lets the user describe an issue with a recommendation and attach
+         diagnostics so it can be investigated. Opened from the details header (general) or from a
+         blocking patch card (with that patch's context). -->
+    <string name="suggestions_report_action">Report a problem</string>
+    <string name="suggestions_report_title">Report a problem</string>
+    <string name="suggestions_report_subtitle">Tell us what went wrong. Diagnostics about your device and this recommendation are attached to help us investigate.</string>
+    <string name="suggestions_report_message_label">What happened?</string>
+    <string name="suggestions_report_message_placeholder">Describe the problem in as much detail as you can…</string>
+    <string name="suggestions_report_contact_label">Contact (optional)</string>
+    <string name="suggestions_report_contact_placeholder">Email, Telegram, anything…</string>
+    <string name="suggestions_report_contact_hint">Only if you\'d like us to be able to reply.</string>
+    <string name="suggestions_report_disclosure_title">What will be sent</string>
+    <string name="suggestions_report_collecting">Collecting…</string>
+    <string name="suggestions_report_field_device">Device</string>
+    <string name="suggestions_report_field_android">Android</string>
+    <string name="suggestions_report_field_app_version">App version</string>
+    <string name="suggestions_report_field_signature">App signature</string>
+    <string name="suggestions_report_field_target">Target app</string>
+    <string name="suggestions_report_field_target_version">Target version</string>
+    <string name="suggestions_report_field_recommendation">Recommendation</string>
+    <string name="suggestions_report_field_variant">Configuration</string>
+    <string name="suggestions_report_field_patch">Patch recipe</string>
+    <string name="suggestions_report_field_patch_status">Patch status</string>
+    <string name="suggestions_report_value_android">%1$s (API %2$d)</string>
+    <string name="suggestions_report_value_app_version">%1$s (%2$d)</string>
+    <string name="suggestions_report_value_unknown">Unknown</string>
+    <string name="suggestions_report_value_none">Not available</string>
+    <string name="suggestions_report_logs_note">Recent patch logs from the target app will be attached automatically.</string>
+    <string name="suggestions_report_send">Send report</string>
+    <string name="suggestions_report_sending">Sending…</string>
+    <string name="suggestions_report_error">Couldn’t send your report. Check your connection and try again.</string>
+    <string name="suggestions_report_sent_title">Report sent</string>
+    <string name="suggestions_report_sent_message">Thanks — this helps us track down and fix the problem.</string>
+    <string name="suggestions_report_sent_close">Done</string>
+</resources>

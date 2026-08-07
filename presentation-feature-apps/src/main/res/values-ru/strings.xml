@@ -1,0 +1,36 @@
+<resources>
+    <string name="apps_settings">Настройки</string>
+    <string name="apps_settings_unavailable">Настройки пока недоступны</string>
+    <string name="apps_empty">Поддерживаемые приложения не найдены</string>
+    <string name="apps_dialog_choose_package">Выберите пакет</string>
+    <string name="packages_search_advice">Поиск по пакетам</string>
+    <string name="close">Закрыть</string>
+    <string name="primary">Основные</string>
+    <string name="secondary">Остальные</string>
+    <string name="clear_search">Очистить поиск</string>
+    <string name="apps_scope_missing_badge">Не в scope</string>
+    <string name="apps_unsupported_badge">Не поддерживается</string>
+    <string name="apps_pairip_badge">Несовместимо</string>
+    <string name="apps_unsupported_sheet_title">Флаги не поддерживаются</string>
+    <string name="apps_unsupported_sheet_body">Флаги этого приложения временно не поддерживаются на установленной версии.</string>
+    <string name="apps_unsupported_sheet_body_version">Флаги этого приложения временно не поддерживаются после обновления v%1$d.</string>
+    <string name="apps_unsupported_sheet_point_paused_title">Доступ приостановлен</string>
+    <string name="apps_unsupported_sheet_point_paused_desc">Управление флагами отключено, чтобы сломанный флаг не повлиял на приложение.</string>
+    <string name="apps_unsupported_sheet_point_fix_title">Исправление в пути</string>
+    <string name="apps_unsupported_sheet_point_fix_desc">Поддержка вернётся, как только приложение снова станет совместимым.</string>
+    <string name="apps_unsupported_sheet_action">Понятно</string>
+    <string name="apps_scope_missing_title">Scope LSPosed выключен</string>
+    <string name="apps_scope_missing_explanation">GMS Flags не сможет подключить хук к %1$s, пока приложение не включено в scope модуля.</string>
+    <string name="apps_scope_steps_title">Как включить</string>
+    <string name="apps_scope_step_open_lsposed">Откройте LSPosed</string>
+    <string name="apps_scope_step_open_modules">Выберите «Модули»</string>
+    <string name="apps_scope_step_open_gms_flags">Откройте GMS Flags</string>
+    <string name="apps_scope_step_enable_app">Включите %1$s и перезапустите приложение</string>
+    <string name="apps_module_scope_banner_title">GMS Flags не активирован в LSPosed</string>
+    <string name="apps_module_scope_banner_description">Активируйте модуль, чтобы применять переопределения флагов.</string>
+    <string name="apps_module_scope_sheet_title">Модуль LSPosed не активирован</string>
+    <string name="apps_module_scope_sheet_explanation">Активируйте %1$s в LSPosed перед применением переопределений флагов.</string>
+    <string name="apps_module_scope_step_enable">Включите модуль %1$s и перезапустите целевые приложения</string>
+    <string name="apps_search_placeholder">Поиск приложений и пакетов</string>
+    <string name="apps_search_empty">Подходящие приложения не найдены</string>
+</resources>

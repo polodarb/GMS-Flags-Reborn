@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="scope">
+        <item>com.android.vending</item>
+        <item>com.google.android.googlequicksearchbox</item>
+        <item>com.google.android.calendar</item>
+        <item>com.google.android.dialer</item>
+        <item>com.fitbit.FitbitMobile</item>
+        <item>com.google.android.apps.translate</item>
+        <item>com.google.android.keep</item>
+        <item>com.google.android.apps.messaging</item>
+        <item>com.google.android.apps.maps</item>
+        <item>com.google.android.deskclock</item>
+        <item>com.google.android.apps.tasks</item>
+        <item>com.google.android.contacts</item>
+        <item>com.google.android.apps.recorder</item>
+        <item>com.google.pixel.livewallpaper</item>
+        <item>com.google.android.youtube</item>
+        <item>com.google.android.apps.youtube.music</item>
+        <item>com.google.android.inputmethod.latin</item>
+        <item>com.google.android.apps.tips</item>
+        <item>com.google.android.apps.photos</item>
+        <item>com.google.android.apps.weather</item>
+        <item>com.google.android.videos</item>
+        <item>com.google.android.apps.wear.companion</item>
+        <item>com.google.android.apps.credentialmanager</item>
+        <item>com.google.android.apps.wellbeing</item>
+        <item>com.google.android.apps.safetyhub</item>
+        <item>com.google.android.apps.healthdata</item>
+        <item>com.google.android.apps.pixel.nowplaying</item>
+        <item>com.google.android.apps.pixel.customizationbundle</item>
+        <item>com.google.android.aicore</item>
+        <item>com.google.android.apps.adm</item>
+        <item>com.google.android.apps.bard</item>
+        <item>com.google.android.as</item>
+        <item>com.google.android.apps.diagnosticstool</item>
+        <item>com.google.android.apps.tachyon</item>
+        <item>com.google.android.apps.chromecast.app</item>
+        <item>com.google.android.apps.subscriptions.red</item>
+        <item>com.google.android.gm</item>
+        <item>com.google.android.apps.walletnfcrel</item>
+        <item>com.google.android.apps.nbu.files</item>
+        <item>com.google.android.GoogleCamera</item>
+        <item>com.google.android.apps.pixel.creativeassistant</item>
+        <item>com.google.android.apps.pixel.agent</item>
+        <item>com.google.android.apps.docs</item>
+        <item>com.google.android.apps.labs.language.tailwind</item>
+        <item>com.google.android.apps.pixel.aurelius</item>
+        <item>com.google.android.apps.labs.whisk</item>
+        <item>com.google.android.apps.giant</item>
+        <item>com.google.android.apps.kids.familylink</item>
+    </string-array>
+</resources>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_back">Back</string>
+
+    <string name="onboarding_welcome_title">Welcome to your flags layer</string>
+    <string name="onboarding_welcome_body">Your control layer for Google\'s hidden flags.</string>
+    <string name="onboarding_welcome_action">Get started</string>
+    <string name="onboarding_feature_discover">Hundreds of hidden flags across Google apps</string>
+    <string name="onboarding_feature_override">Turn on features before they officially ship</string>
+    <string name="onboarding_feature_restore">Reset any change back to default in one tap</string>
+    <string name="onboarding_legal_prefix">By continuing, you agree to our</string>
+    <string name="onboarding_legal_and">and</string>
+    <string name="onboarding_legal_suffix">.</string>
+    <string name="onboarding_terms">Terms of Use</string>
+    <string name="onboarding_privacy">Privacy Policy</string>
+    <string name="onboarding_terms_url" translatable="false">https://api.polodarb.com/gmsflags/terms</string>
+    <string name="onboarding_privacy_url" translatable="false">https://api.polodarb.com/gmsflags/privacy</string>
+    <string name="onboarding_app_name">GMS Flags</string>
+    <string name="onboarding_version_label" translatable="false">2.0</string>
+    <string name="onboarding_soon">Soon</string>
+
+    <string name="onboarding_disclaimer_title">A quick heads-up</string>
+    <string name="onboarding_disclaimer_body">GMS Flags changes low-level settings inside other apps. Most flags are harmless, but some can affect how an app behaves.</string>
+    <string name="onboarding_disclaimer_point_impact">Changing flags can alter or temporarily break app features</string>
+    <string name="onboarding_disclaimer_point_reversible">Every override is reversible — reset a flag anytime</string>
+    <string name="onboarding_disclaimer_point_responsibility">You apply changes at your own discretion and risk</string>
+    <string name="onboarding_disclaimer_action">I understand</string>
+
+    <string name="onboarding_root_title">Root unlocks the engine</string>
+    <string name="onboarding_root_body">GMS Flags needs superuser access to read protected flag stores and write your overrides. Access is requested only when a privileged operation is required.</string>
+    <string name="onboarding_root_action">Grant root access</string>
+    <string name="onboarding_root_reason_read">Read protected flag packages used by supported apps</string>
+    <string name="onboarding_root_reason_local">Keep overrides local on your device and under your control</string>
+    <string name="onboarding_root_denied">Root access was not granted. Approve the request in your root manager, then try again.</string>
+
+    <string name="onboarding_notifications_title">Know when something changes</string>
+    <string name="onboarding_notifications_body">Enable notifications for new recommendations, compatibility updates, and important hook notices. You can change this later in system settings.</string>
+    <string name="onboarding_notifications_action">Allow notifications</string>
+    <string name="onboarding_notifications_try_again">Try again</string>
+    <string name="onboarding_notifications_skip">Not now</string>
+    <string name="onboarding_notifications_denied">Notifications are currently off. You can try again or continue without them.</string>
+    <string name="onboarding_notification_preview_title">Curated flag setups</string>
+    <string name="onboarding_notification_preview_body">We\'ll let you know when tested setups are ready for your apps.</string>
+    <string name="onboarding_completion_failed">Couldn’t save onboarding progress. Please try again.</string>
+</resources>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_back">Назад</string>
+
+    <string name="onboarding_welcome_title">Ласкаво просимо у світ прапорців</string>
+    <string name="onboarding_welcome_body">Твій шар керування прихованими прапорцями Google.</string>
+    <string name="onboarding_welcome_action">Почати</string>
+    <string name="onboarding_feature_discover">Сотні прихованих прапорців у застосунках Google</string>
+    <string name="onboarding_feature_override">Вмикай функції до офіційного релізу</string>
+    <string name="onboarding_feature_restore">Скидай будь-яку зміну до стандартної одним дотиком</string>
+    <string name="onboarding_legal_prefix">Продовжуючи, ви приймаєте</string>
+    <string name="onboarding_legal_and">та</string>
+    <string name="onboarding_legal_suffix">.</string>
+    <string name="onboarding_terms">Умови використання</string>
+    <string name="onboarding_privacy">Політику конфіденційності</string>
+    <string name="onboarding_app_name">GMS Flags</string>
+    <string name="onboarding_soon">Незабаром</string>
+
+    <string name="onboarding_disclaimer_title">Невелике попередження</string>
+    <string name="onboarding_disclaimer_body">GMS Flags змінює низькорівневі налаштування всередині інших застосунків. Більшість прапорців безпечні, але деякі можуть вплинути на роботу застосунку.</string>
+    <string name="onboarding_disclaimer_point_impact">Зміна прапорців може змінювати або тимчасово ламати функції застосунків</string>
+    <string name="onboarding_disclaimer_point_reversible">Будь-яке перевизначення оборотне — прапорець можна скинути будь-коли</string>
+    <string name="onboarding_disclaimer_point_responsibility">Ви застосовуєте зміни на власний розсуд і ризик</string>
+    <string name="onboarding_disclaimer_action">Зрозуміло</string>
+
+    <string name="onboarding_root_title">Root відкриває рушій</string>
+    <string name="onboarding_root_body">GMS Flags потребує прав суперкористувача, щоб читати захищені сховища прапорців і записувати перевизначення. Доступ використовується лише для привілейованих операцій.</string>
+    <string name="onboarding_root_action">Надати root</string>
+    <string name="onboarding_root_reason_read">Читання захищених пакетів прапорців підтримуваних застосунків</string>
+    <string name="onboarding_root_reason_local">Зберігання перевизначень локально та під вашим контролем</string>
+    <string name="onboarding_root_denied">Root-доступ не надано. Дозвольте запит у root-менеджері та спробуйте ще раз.</string>
+
+    <string name="onboarding_notifications_title">Дізнавайтеся про зміни</string>
+    <string name="onboarding_notifications_body">Увімкніть сповіщення про нові рекомендації, оновлення сумісності та важливі події хуків. Згодом це можна змінити в налаштуваннях системи.</string>
+    <string name="onboarding_notifications_action">Дозволити сповіщення</string>
+    <string name="onboarding_notifications_try_again">Спробувати ще раз</string>
+    <string name="onboarding_notifications_skip">Не зараз</string>
+    <string name="onboarding_notifications_denied">Сповіщення зараз вимкнені. Можна повторити запит або продовжити без них.</string>
+    <string name="onboarding_notification_preview_title">Готові набори прапорців</string>
+    <string name="onboarding_notification_preview_body">Повідомимо, коли зʼявляться перевірені набори для ваших застосунків.</string>
+    <string name="onboarding_completion_failed">Не вдалося зберегти прогрес онбордингу. Спробуйте ще раз.</string>
+</resources>

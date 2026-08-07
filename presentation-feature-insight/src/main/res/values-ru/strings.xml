@@ -1,0 +1,14 @@
+<resources>
+    <string name="insight_title">Узнавайте, что Google готовит дальше</string>
+    <string name="insight_description">Отслеживает, что меняется внутри приложений Google между обновлениями: флаги, строки и ресурсы</string>
+    <string name="insight_open_play_store">Установить GMS Insight из Google Play</string>
+    <string name="insight_open_app">Открыть GMS Insight</string>
+    <string name="insight_what_it_does">Больше, чем история обновлений</string>
+    <string name="insight_capability_flags_description">Отслеживаются вместе со строками и ресурсами — скрытые эксперименты находятся быстрее.</string>
+    <string name="insight_capability_changes_title">Следите за важными изменениями</string>
+    <string name="insight_capability_changes_description">Сравнивайте версии и смотрите, что появилось, изменилось или исчезло.</string>
+    <string name="insight_capability_manifest_title">Понимайте, что находится в разработке</string>
+    <string name="insight_capability_manifest_description">Анализ манифеста и ИИ связывают изменения с функциями.</string>
+    <string name="insight_capability_flags_title">Находите новые флаги</string>
+    <string name="insight_badge_soon">Скоро</string>
+</resources>

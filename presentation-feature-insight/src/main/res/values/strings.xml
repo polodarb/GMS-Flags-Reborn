@@ -1,0 +1,15 @@
+<resources>
+    <string name="insight_app_name" translatable="false">GMS Insight</string>
+    <string name="insight_title">See what Google is building next</string>
+    <string name="insight_description">Tracks what changes inside Google apps between updates: flags, strings and resources</string>
+    <string name="insight_open_play_store">Get GMS Insight on Google Play</string>
+    <string name="insight_open_app">Open GMS Insight</string>
+    <string name="insight_what_it_does">More than an update history</string>
+    <string name="insight_capability_flags_description">Tracked alongside strings and resources, so hidden experiments surface faster.</string>
+    <string name="insight_capability_changes_title">Follow every meaningful change</string>
+    <string name="insight_capability_changes_description">Compare versions and see what appeared, changed or disappeared.</string>
+    <string name="insight_capability_manifest_title">Understand what is being prepared</string>
+    <string name="insight_capability_manifest_description">Manifest and AI analysis connect raw changes to features.</string>
+    <string name="insight_capability_flags_title">Discover new flags</string>
+    <string name="insight_badge_soon">Soon</string>
+</resources>

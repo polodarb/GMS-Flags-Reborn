@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_back">Назад</string>
+
+    <string name="onboarding_welcome_title">Добро пожаловать в мир флагов</string>
+    <string name="onboarding_welcome_body">Твой слой управления скрытыми флагами Google.</string>
+    <string name="onboarding_welcome_action">Начать</string>
+    <string name="onboarding_feature_discover">Сотни скрытых флагов в приложениях Google</string>
+    <string name="onboarding_feature_override">Включай функции до официального релиза</string>
+    <string name="onboarding_feature_restore">Сбрасывай любое изменение к стандартному в один тап</string>
+    <string name="onboarding_legal_prefix">Продолжая, вы принимаете</string>
+    <string name="onboarding_legal_and">и</string>
+    <string name="onboarding_legal_suffix">.</string>
+    <string name="onboarding_terms">Условия использования</string>
+    <string name="onboarding_privacy">Политику конфиденциальности</string>
+    <string name="onboarding_app_name">GMS Flags</string>
+    <string name="onboarding_soon">Скоро</string>
+
+    <string name="onboarding_disclaimer_title">Небольшое предупреждение</string>
+    <string name="onboarding_disclaimer_body">GMS Flags меняет низкоуровневые настройки внутри других приложений. Большинство флагов безобидны, но некоторые могут повлиять на работу приложения.</string>
+    <string name="onboarding_disclaimer_point_impact">Изменение флагов может менять или временно ломать функции приложений</string>
+    <string name="onboarding_disclaimer_point_reversible">Любое переопределение обратимо — флаг можно сбросить в любой момент</string>
+    <string name="onboarding_disclaimer_point_responsibility">Вы применяете изменения на своё усмотрение и риск</string>
+    <string name="onboarding_disclaimer_action">Понятно</string>
+
+    <string name="onboarding_root_title">Root открывает движок</string>
+    <string name="onboarding_root_body">GMS Flags нужны права суперпользователя, чтобы читать защищённые хранилища флагов и записывать переопределения. Доступ используется только для привилегированных операций.</string>
+    <string name="onboarding_root_action">Предоставить root</string>
+    <string name="onboarding_root_reason_read">Чтение защищённых пакетов флагов поддерживаемых приложений</string>
+    <string name="onboarding_root_reason_local">Хранение переопределений локально и под вашим контролем</string>
+    <string name="onboarding_root_denied">Root-доступ не предоставлен. Разрешите запрос в root-менеджере и попробуйте снова.</string>
+
+    <string name="onboarding_notifications_title">Узнавайте об изменениях</string>
+    <string name="onboarding_notifications_body">Включите уведомления о новых рекомендациях, обновлениях совместимости и важных событиях хуков. Позже это можно изменить в настройках системы.</string>
+    <string name="onboarding_notifications_action">Разрешить уведомления</string>
+    <string name="onboarding_notifications_try_again">Попробовать снова</string>
+    <string name="onboarding_notifications_skip">Не сейчас</string>
+    <string name="onboarding_notifications_denied">Уведомления сейчас выключены. Можно повторить запрос или продолжить без них.</string>
+    <string name="onboarding_notification_preview_title">Готовые наборы флагов</string>
+    <string name="onboarding_notification_preview_body">Сообщим, когда появятся проверенные наборы для ваших приложений.</string>
+    <string name="onboarding_completion_failed">Не удалось сохранить прогресс онбординга. Попробуйте снова.</string>
+</resources>

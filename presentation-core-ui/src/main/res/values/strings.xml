@@ -1,0 +1,50 @@
+<resources>
+    <string name="action_back">Back</string>
+    <string name="action_retry">Retry</string>
+    <string name="action_clear_search">Clear search</string>
+    <string name="action_search">Search</string>
+    <string name="action_close_search">Close search</string>
+    <string name="flag_value_empty">Empty value</string>
+    <string name="error_network_title">You’re offline</string>
+    <string name="error_network_description">Check your internet connection and try again.</string>
+    <string name="error_timeout_title">The request took too long</string>
+    <string name="error_timeout_description">The server didn’t respond in time. Please try again.</string>
+    <string name="error_unauthorized_title">Authorization required</string>
+    <string name="error_unauthorized_description">Your session is no longer valid.</string>
+    <string name="error_access_denied_title">Access denied</string>
+    <string name="error_access_denied_description">You don’t have permission to view this content.</string>
+    <string name="error_not_found_title">Nothing found here</string>
+    <string name="error_not_found_description">The requested content is unavailable or has been removed.</string>
+    <string name="error_rate_limit_title">Too many requests</string>
+    <string name="error_rate_limit_description">Please wait a little before trying again.</string>
+    <string name="error_server_title">Server unavailable</string>
+    <string name="error_server_description">There’s a problem on our side. Please try again later.</string>
+    <string name="error_invalid_response_title">Couldn’t read the response</string>
+    <string name="error_invalid_response_description">The server returned data the app couldn’t process.</string>
+    <string name="error_root_unavailable_title">Root access unavailable</string>
+    <string name="error_root_unavailable_description">This device isn’t rooted, root access was denied, or the root manager isn’t responding. Grant GMS Flags root access and try again.</string>
+    <string name="error_root_service_title">Root service didn’t start</string>
+    <string name="error_root_service_description">Root access was granted, but the privileged service couldn’t start. Reopen the app or restart your root manager, then try again.</string>
+    <string name="error_system_data_title">Couldn’t access system flag data</string>
+    <string name="error_system_data_description">Phenotype data is unavailable, inaccessible, or uses an unsupported format. Check root access and try again.</string>
+    <string name="error_generic_title">Something went wrong</string>
+    <string name="error_generic_description">Please try again in a moment.</string>
+    <string name="xposed_scope_close">Close</string>
+    <string name="xposed_scope_missing_title">LSPosed scope is disabled</string>
+    <string name="xposed_scope_missing_explanation">GMS Flags cannot hook %1$s until the app is enabled in the module scope.</string>
+    <string name="xposed_scope_steps_title">How to enable it</string>
+    <string name="xposed_scope_step_open_lsposed">Open LSPosed</string>
+    <string name="xposed_scope_step_open_modules">Select Modules</string>
+    <string name="xposed_scope_step_open_gms_flags">Open GMS Flags</string>
+    <string name="xposed_scope_step_enable_app">Enable %1$s and restart it</string>
+    <string name="pairip_help_title">May crash with hooks</string>
+    <string name="pairip_help_explanation">%1$s bundles PairIP protection, which detects hooking frameworks like Xposed and can crash the app repeatedly. Remove it from the GMS Flags scope in LSPosed to keep it stable — you can still browse its flags here.</string>
+    <string name="pairip_help_steps_title">How to disable it</string>
+    <string name="pairip_help_step_disable_app">Turn off %1$s in the scope and restart it</string>
+    <string name="xposed_module_scope_sheet_title">LSPosed module is inactive</string>
+    <string name="xposed_module_scope_sheet_explanation">Activate %1$s in LSPosed before applying flag overrides.</string>
+    <string name="xposed_module_scope_step_enable">Enable the %1$s module and restart target apps</string>
+    <string name="gms_settings">Settings</string>
+    <string name="gms_app_name" translatable="false">GMS Flags</string>
+    <string name="gms_version_label" translatable="false">2.0</string>
+</resources>

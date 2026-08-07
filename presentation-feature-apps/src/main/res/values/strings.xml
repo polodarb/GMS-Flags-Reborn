@@ -1,0 +1,38 @@
+<resources>
+    <string name="apps_title" translatable="false">GMS Flags</string>
+    <string name="apps_settings">Settings</string>
+    <string name="apps_settings_unavailable">Settings are not available yet</string>
+    <string name="apps_empty">No supported applications found</string>
+    <string name="apps_search_placeholder">Search apps or package names</string>
+    <string name="apps_search_empty">No matching applications</string>
+    <string name="apps_dialog_choose_package">Choose a package</string>
+    <string name="packages_search_advice">Search by package name</string>
+    <string name="close">Close</string>
+    <string name="primary">Primary</string>
+    <string name="secondary">Secondary</string>
+    <string name="clear_search">Clear search</string>
+    <string name="apps_scope_missing_badge">Not in scope</string>
+    <string name="apps_unsupported_badge">Unsupported</string>
+    <string name="apps_pairip_badge">Incompatible</string>
+    <string name="apps_unsupported_sheet_title">Flags are unsupported</string>
+    <string name="apps_unsupported_sheet_body">This app\'s flags are temporarily unsupported on the installed version.</string>
+    <string name="apps_unsupported_sheet_body_version">This app\'s flags are temporarily unsupported after update v%1$d.</string>
+    <string name="apps_unsupported_sheet_point_paused_title">Access paused</string>
+    <string name="apps_unsupported_sheet_point_paused_desc">Managing flags is disabled so a broken flag can\'t affect the app.</string>
+    <string name="apps_unsupported_sheet_point_fix_title">Fix on the way</string>
+    <string name="apps_unsupported_sheet_point_fix_desc">Support returns once the app is compatible again.</string>
+    <string name="apps_unsupported_sheet_action">Got it</string>
+    <string name="apps_scope_missing_title">LSPosed scope is disabled</string>
+    <string name="apps_scope_missing_explanation">GMS Flags cannot hook %1$s until the app is enabled in the module scope.</string>
+    <string name="apps_scope_steps_title">How to enable it</string>
+    <string name="apps_scope_step_open_lsposed">Open LSPosed</string>
+    <string name="apps_scope_step_open_modules">Select Modules</string>
+    <string name="apps_scope_step_open_gms_flags">Open GMS Flags</string>
+    <string name="apps_scope_step_enable_app">Enable %1$s and restart it</string>
+    <string name="apps_module_name" translatable="false">GMS Flags</string>
+    <string name="apps_module_scope_banner_title">GMS Flags is inactive in LSPosed</string>
+    <string name="apps_module_scope_banner_description">Activate the module to apply flag overrides.</string>
+    <string name="apps_module_scope_sheet_title">LSPosed module is inactive</string>
+    <string name="apps_module_scope_sheet_explanation">Activate %1$s in LSPosed before applying flag overrides.</string>
+    <string name="apps_module_scope_step_enable">Enable the %1$s module and restart target apps</string>
+</resources>

@@ -1,0 +1,171 @@
+<resources>
+    <string name="flag_details_back">Back</string>
+    <string name="flag_details_close_selection">Close selection</string>
+    <plurals name="flag_details_selected_count">
+        <item quantity="one">%d selected</item>
+        <item quantity="other">%d selected</item>
+    </plurals>
+    <string name="flag_details_filter">Filter flags</string>
+    <string name="flag_details_bulk_operation_title">Applying to many flags</string>
+    <string name="flag_details_bulk_operation_description">This can take 10–30 seconds for a large selection. Please don\'t close the app.</string>
+    <string name="flag_details_control_help">About flag states</string>
+    <string name="flag_details_search">Search flags</string>
+    <string name="flag_details_clear_search">Clear search</string>
+    <string name="flag_details_copy_selected">Copy flag names</string>
+
+    <string name="flag_type_boolean">Bool</string>
+    <string name="flag_type_integer">Int</string>
+    <string name="flag_type_float">Float</string>
+    <string name="flag_type_string">String</string>
+    <string name="flag_type_boolean_example">Example: enable_new_ui feature_x  or  enable_new_ui=0</string>
+
+    <string name="flag_value_false">Default: False</string>
+    <string name="flag_value_true">Default: True</string>
+    <string name="flag_reset_default_description">Reset to default</string>
+    <string name="flag_delete_description">Delete flag</string>
+    <string name="flag_control_help_title">Flag control states</string>
+    <string name="flag_control_help_description">Each flag switch can be in one of four states:</string>
+    <string name="flag_control_help_state_default_off">Default – off, as reported by GMS</string>
+    <string name="flag_control_help_state_default_on">Default – on, as reported by GMS</string>
+    <string name="flag_control_help_state_overridden_off">Overridden – you forced this off</string>
+    <string name="flag_control_help_state_overridden_on">Overridden – you forced this on</string>
+    <string name="flag_control_help_default_caveat">"Default" only reflects what GMS reports right now – its own internal logic can still change that value later. An override is a hard force: it always wins, no matter what GMS decides internally.</string>
+    <string name="flag_control_help_reset_note_prefix">"The dot marks an override. Tap "</string>
+    <string name="flag_control_help_reset_note_middle">"to reset it – or "</string>
+    <string name="flag_control_help_reset_note_suffix">for flags you added manually, since they have no default to fall back to.</string>
+    <string name="flag_type_integer_example">Example: max_retries=3  timeout_ms=5000</string>
+    <string name="flag_type_float_example">Example: sampling_rate=0.1  scale=1.5</string>
+    <string name="flag_type_string_example">Example: region=eu  default_theme=dark</string>
+
+    <string name="flag_filter_all">All</string>
+    <string name="flag_filter_changed">Changed</string>
+    <string name="flag_filter_disabled">Disabled</string>
+    <string name="flag_filter_enabled">Enabled</string>
+    <string name="flag_list_empty">No flags found</string>
+    <string name="flag_list_no_matches">No matching flags</string>
+
+    <string name="flag_actions">Flag actions</string>
+    <string name="flag_actions_expanded">Expanded</string>
+    <string name="flag_actions_collapsed">Collapsed</string>
+    <string name="flag_details_package">Package: %1$s</string>
+    <string name="flag_details_choose_package">Choose package</string>
+    <string name="flag_details_current_package">Current package</string>
+    <string name="flag_details_primary_package">Primary</string>
+    <string name="flag_action_add">Add flag</string>
+    <string name="flag_action_add_multiple">Add multiple flags</string>
+    <string name="flag_action_import">Import from file</string>
+    <string name="flag_action_delete_all">Delete all overrides</string>
+    <string name="flag_action_launch_app">Open application</string>
+    <string name="flag_action_app_info">App info</string>
+    <string name="flag_action_close_menu">Close menu</string>
+
+    <string name="flag_editor_add_title">Add flag</string>
+    <string name="flag_editor_change_title">Change flag</string>
+    <string name="flag_editor_name">Flag name</string>
+    <string name="flag_editor_type">Value type</string>
+    <string name="flag_editor_default">Default</string>
+    <string name="flag_editor_enabled">Enabled</string>
+    <string name="flag_editor_boolean_supporting">The flag returns true when read</string>
+    <string name="flag_editor_value">Value</string>
+    <string name="flag_editor_add_action">Add flag</string>
+    <string name="flag_details_scope_action">Enable in LSPosed to apply flag overrides</string>
+    <string name="flag_details_pairip_action">This app may crash while hooked — tap for details</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_close">Close</string>
+    <string name="action_save">Save</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_share">Share</string>
+    <string name="action_continue">Continue</string>
+    <string name="action_retry">Retry</string>
+
+    <string name="flag_details_recommendations">Recommendations</string>
+    <string name="flag_details_online_content_unavailable">Online app guidance is unavailable</string>
+    <string name="flag_details_support_verified">Verified</string>
+    <string name="flag_details_support_partial">Partially supported</string>
+    <string name="flag_details_support_experimental">Experimental</string>
+    <string name="flag_details_support_unknown">Support status unknown</string>
+    <string name="flag_annotation_caution">Caution</string>
+    <string name="flag_annotation_dangerous">Dangerous</string>
+
+    <string name="delete_overrides_title">Delete all overrides?</string>
+    <string name="delete_overrides_message">All custom values for this package will be removed.</string>
+    <string name="export_flags_title">Share selected flags</string>
+    <string name="export_file_name">File name</string>
+    <string name="export_file_suffix">.gmsflags</string>
+    <string name="report_flags_title">Report selected flags</string>
+    <string name="report_flags_description">What is wrong?</string>
+
+    <string name="selection_options">Selection options</string>
+    <string name="selection_enable">Enable selected</string>
+    <string name="selection_disable">Disable selected</string>
+    <string name="selection_reset_default">Reset to default</string>
+    <string name="selection_select_all">Select all</string>
+    <string name="selection_report">Report selected flags</string>
+    <string name="selection_share">Share selected flags</string>
+
+    <string name="add_multiple_title">Add multiple flags</string>
+    <string name="add_multiple_enter_flags">Enter flags</string>
+    <string name="add_multiple_boolean_hint">Separate names with spaces or new lines</string>
+    <string name="add_multiple_value_hint">Use name=value, separated by spaces or new lines</string>
+    <string name="add_multiple_enable_flags">Enable added flags</string>
+    <string name="add_multiple_boolean_value">Value for these flags</string>
+    <string name="add_multiple_enabled">Enabled</string>
+    <string name="add_multiple_disabled">Disabled</string>
+    <string name="add_multiple_formed_flags">Formed %1$s flags</string>
+    <string name="add_multiple_empty">No flags added</string>
+    <string name="add_multiple_review_title">Ready to add</string>
+    <string name="add_multiple_review_empty">Flags from every type will appear here and be added together.</string>
+    <string name="add_multiple_more_flags">+%1$d more</string>
+    <string name="add_multiple_save">Add flags</string>
+    <plurals name="add_multiple_invalid_count">
+        <item quantity="one">%1$d entry has an invalid value</item>
+        <item quantity="other">%1$d entries have invalid values</item>
+    </plurals>
+    <plurals name="add_multiple_save_count">
+        <item quantity="one">Add %1$d flag</item>
+        <item quantity="other">Add %1$d flags</item>
+    </plurals>
+
+    <string name="import_flags_title">Import flags</string>
+    <string name="import_flags_selection_summary">%1$d of %2$d flags selected</string>
+    <string name="import_flags_skipped">%1$d unsupported flags skipped</string>
+    <string name="import_flags_select_all">Select all</string>
+    <string name="import_flags_clear_selection">Clear selection</string>
+    <string name="import_flags_apply">Apply %1$d flags</string>
+    <string name="import_flags_retry">Retry</string>
+    <string name="import_flags_choose_another">Choose another file</string>
+    <string name="import_flags_choose_application">Choose an application for this file</string>
+    <string name="import_flags_unsupported_package_title">Package is not supported</string>
+    <string name="import_flags_unsupported_package_message">The package “%1$s” from this file is not supported by the selected application. No flags were changed.</string>
+    <string name="import_flags_unsupported_external_package_message">The package “%1$s” from this file is not supported by any available application. No flags were changed.</string>
+    <string name="import_flags_invalid_file">This .gmsflags file could not be read</string>
+    <string name="import_flags_select_at_least_one">Select at least one flag</string>
+    <string name="import_flags_choose_package">Choose package</string>
+    <string name="import_flags_flag_unresolved_package">No package selected</string>
+    <string name="import_flags_unable_to_apply">Unable to import flags</string>
+
+    <string name="message_flag_reset">Flag reset</string>
+    <string name="message_overrides_deleted">Overrides deleted</string>
+    <string name="message_flag_name_empty">Flag name cannot be empty</string>
+    <string name="message_invalid_flag_value">Invalid flag value</string>
+    <string name="message_unable_access_flags">Unable to access flag data</string>
+    <string name="message_invalid_flags">Invalid flags</string>
+    <string name="message_add_at_least_one_flag">Add at least one flag</string>
+    <string name="message_unable_add_flags">Unable to add flags</string>
+    <string name="message_unable_complete_action">Unable to complete the action</string>
+    <string name="message_package_copied">Package name copied</string>
+    <plurals name="message_flag_names_copied">
+        <item quantity="one">Flag name copied</item>
+        <item quantity="other">%d flag names copied</item>
+    </plurals>
+    <string name="message_unable_launch_app">This application cannot be opened</string>
+    <string name="message_bulk_override_warning">Changing many flags at once may cause application or system errors. If problems appear, delete all overrides.</string>
+
+    <string name="clipboard_package_name">package name</string>
+    <string name="clipboard_flag_names">flag names</string>
+    <string name="share_flags_chooser">Share flags</string>
+    <string name="report_flags_chooser">Report flags</string>
+    <string name="report_email_subject">Problem report</string>
+    <string name="report_email_body">Package: %1$s\n\nDescription:\n%2$s\n\nFlags:\n%3$s</string>
+    <string name="default_export_file_name">flags</string>
+</resources>

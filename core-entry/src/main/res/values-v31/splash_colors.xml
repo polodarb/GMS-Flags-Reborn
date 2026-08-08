@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--
-      Android 12+ exposes the wallpaper-derived Material You palette as system_* resources, which are
-      the same tones Compose's dynamicLightColorScheme reads. Using them here makes the splash icon
-      dynamic without any Application-side activation: surface = neutral tone 99, primary = accent1
-      tone 40. The static seed colors in values/ stay as the pre-Android-12 fallback.
-    -->
     <color name="splash_background">@android:color/system_neutral1_10</color>
     <color name="splash_icon">@android:color/system_accent1_600</color>
+    <color name="splash_branding">@android:color/system_neutral1_900</color>
 </resources>

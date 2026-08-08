@@ -2,4 +2,5 @@
 <resources>
     <color name="splash_background">#111318</color>
     <color name="splash_icon">#D0BCFF</color>
+    <color name="splash_branding">#E2E2E9</color>
 </resources>

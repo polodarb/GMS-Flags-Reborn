@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- surface / primary from the app theme so the splash matches the UI instead of system defaults -->
     <color name="splash_background">#F9F9FF</color>
     <color name="splash_icon">#6650A4</color>
+    <color name="splash_branding">#191C20</color>
 </resources>

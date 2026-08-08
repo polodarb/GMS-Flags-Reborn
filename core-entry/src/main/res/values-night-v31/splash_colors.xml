@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Dark Material You tones: surface = neutral tone 10, primary = accent1 tone 80. -->
     <color name="splash_background">@android:color/system_neutral1_900</color>
     <color name="splash_icon">@android:color/system_accent1_200</color>
+    <color name="splash_branding">@android:color/system_neutral1_100</color>
 </resources>

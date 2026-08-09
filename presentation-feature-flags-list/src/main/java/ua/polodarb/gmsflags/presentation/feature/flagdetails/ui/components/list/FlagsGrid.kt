@@ -43,6 +43,7 @@ import ua.polodarb.gmsflags.presentation.core.ui.adaptive.LocalGmsAdaptiveLayout
 import ua.polodarb.gmsflags.presentation.core.ui.scrollbar.GridScrollbar
 import ua.polodarb.gmsflags.presentation.feature.flagdetails.mvi.FlagDetailsEvent
 import ua.polodarb.gmsflags.presentation.feature.flagdetails.mvi.FlagDetailsState
+import ua.polodarb.gmsflags.presentation.feature.flagdetails.mvi.InlineFlagEditor
 import ua.polodarb.gmsflags.presentation.feature.flagdetails.mvi.SelectedFlag
 import ua.polodarb.gmsflags.presentation.feature.flagdetails.mvi.AppRemoteContentState
 import ua.polodarb.gmsflags.presentation.feature.flagdetails.mvi.FlagFilter
@@ -52,6 +53,9 @@ import ua.polodarb.gmsflags.presentation.feature.flagdetails.ui.components.serve
 private val DragSelectAutoScrollEdge = 56.dp
 
 private const val DragSelectMaxScrollSpeedPxPerTick = 10f
+
+internal fun allowsDragSelection(target: SelectedFlag, openEditor: InlineFlagEditor?): Boolean =
+    openEditor == null || openEditor.name != target.name || openEditor.type != target.type
 
 private class DragSelectionSession {
     var anchorKey: SelectedFlag? = null
@@ -89,6 +93,7 @@ internal fun FlagsGrid(
         flags.associate { "${it.type}:${it.name}" to SelectedFlag(it.type, it.name) }
     }
     val selectedFlagsState = rememberUpdatedState(state.selectedFlags)
+    val inlineEditorState = rememberUpdatedState(state.inlineEditor)
     val onEventState = rememberUpdatedState(onEvent)
     val autoScrollThresholdPx = with(LocalDensity.current) { DragSelectAutoScrollEdge.toPx() }
     var autoScrollSpeed by remember { mutableFloatStateOf(0f) }
@@ -173,22 +178,28 @@ internal fun FlagsGrid(
                             detectDragGesturesAfterLongPress(
                                 onDragStart = { offset ->
                                     dragSession.pointerPosition = offset
-                                    flagAt(offset)?.let { key ->
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        dragSession.anchorKey = key
-                                        dragSession.lastKey = key
-                                        val selected = selectedFlagsState.value
-                                        dragSession.selecting = key !in selected
-                                        onEventState.value(
-                                            FlagDetailsEvent.DragSelectionChanged(
-                                                if (dragSession.selecting) {
-                                                    selected + key
-                                                } else {
-                                                    selected - key
-                                                },
-                                            ),
-                                        )
-                                    }
+                                    flagAt(offset)
+                                        ?.takeIf {
+                                            allowsDragSelection(it, inlineEditorState.value)
+                                        }
+                                        ?.let { key ->
+                                            haptic.performHapticFeedback(
+                                                HapticFeedbackType.LongPress,
+                                            )
+                                            dragSession.anchorKey = key
+                                            dragSession.lastKey = key
+                                            val selected = selectedFlagsState.value
+                                            dragSession.selecting = key !in selected
+                                            onEventState.value(
+                                                FlagDetailsEvent.DragSelectionChanged(
+                                                    if (dragSession.selecting) {
+                                                        selected + key
+                                                    } else {
+                                                        selected - key
+                                                    },
+                                                ),
+                                            )
+                                        }
                                 },
                                 onDragCancel = {
                                     autoScrollSpeed = 0f

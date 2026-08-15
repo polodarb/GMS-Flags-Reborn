@@ -263,39 +263,43 @@ private fun ValueFlagCardContent(
             .fillMaxWidth()
             .heightIn(min = GmsDimensions.FlagCardMinHeight)
             .padding(horizontal = GmsSpacing.ExtraLarge, vertical = GmsSpacing.Large),
-        verticalArrangement = Arrangement.spacedBy(GmsSpacing.Small),
     ) {
-        Row(
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalArrangement = Arrangement.spacedBy(GmsSpacing.Small),
         ) {
-            SelectionIndicatorSlot(
-                visible = selectionMode,
-                selected = selected,
-            )
-            FlagAnnotationContent(
-                flagName = flag.name,
-                annotation = annotation,
-                modifier = Modifier.weight(1f),
-                nameStyle = MaterialTheme.typography.labelLargeEmphasized,
-                nameColor = MaterialTheme.colorScheme.primary,
-            )
-        }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                SelectionIndicatorSlot(
+                    visible = selectionMode,
+                    selected = selected,
+                )
+                FlagAnnotationContent(
+                    flagName = flag.name,
+                    annotation = annotation,
+                    modifier = Modifier.weight(1f),
+                    nameStyle = MaterialTheme.typography.labelLargeEmphasized,
+                    nameColor = MaterialTheme.colorScheme.primary,
+                )
+            }
 
-        if (flag.value.isEmpty()) {
-            GmsEmptyValueBadge()
-        } else {
-            Text(
-                text = flag.value,
-                style = MaterialTheme.typography.bodyLargeEmphasized,
-                color = if (flag.overridden) {
-                    MaterialTheme.colorScheme.onSurface
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
-                maxLines = if (flag.type == FlagType.String) 2 else 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            if (flag.value.isEmpty()) {
+                GmsEmptyValueBadge()
+            } else {
+                Text(
+                    text = flag.value,
+                    style = MaterialTheme.typography.bodyLargeEmphasized,
+                    color = if (flag.overridden) {
+                        MaterialTheme.colorScheme.onSurface
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                    maxLines = if (flag.type == FlagType.String) 2 else 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
         }
 
         InlineEditorAnimatedContent(
@@ -379,7 +383,9 @@ private fun InlineEditorAnimatedContent(
                 onSave = onSave,
                 onReset = onReset,
                 onDismiss = onDismiss,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = GmsSpacing.Small),
             )
         }
     }

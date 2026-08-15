@@ -62,9 +62,9 @@ docs/
 Thumbs.db
 
 # Real experimental-hook implementation - local only. debug-public ships a no-op stub
-/xposed/src/debug-internal/
 /presentation-feature-apps/src/debug-internal/
 /core-entry/src/debug-internal/
+/xposed/src/debug-internal/
 .analysis/
 
 # Real Firebase config - local only. The google-services plugin natively prefers a

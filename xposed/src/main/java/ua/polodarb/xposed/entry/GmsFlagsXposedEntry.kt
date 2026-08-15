@@ -13,7 +13,7 @@ import java.io.File
 import ua.polodarb.xposed.diagnostics.SqliteHookDiagnostics
 import ua.polodarb.xposed.info.XposedConstants
 import ua.polodarb.xposed.info.BuildConfig as XposedInfoBuildConfig
-import ua.polodarb.xposed.experimental.ExperimentalRuntimeHookInstaller
+import ua.polodarb.xposed.hook.strategy.mendel.MendelRuntimeHookInstaller
 import ua.polodarb.xposed.needle.NeedleEngine
 
 @Suppress("unused")
@@ -42,20 +42,16 @@ class GmsFlagsXposedEntry : IXposedHookLoadPackage, IXposedHookZygoteInit {
             trustedPublicKeyBase64 = XposedInfoBuildConfig.NEEDLE_TRUSTED_PUBLIC_KEY_BASE64,
         )
 
-        if (ExperimentalRuntimeHookInstaller.supports(
-                lpparam.packageName,
-                lpparam.processName,
-            )
-        ) {
+        if (MendelRuntimeHookInstaller.supports(lpparam.packageName, lpparam.processName)) {
             val targetRuntimeDirectory = File(
                 lpparam.appInfo.dataDir,
                 XposedConstants.XPOSED_DIR,
             )
             XposedLogger.initFileLogging(targetRuntimeDirectory, lpparam)
             XposedLogger.logI(
-                "Installing experimental runtime hook before Application and ContentProvider startup"
+                "Installing Mendel runtime hook before Application and ContentProvider startup"
             )
-            ExperimentalRuntimeHookInstaller.install(
+            MendelRuntimeHookInstaller.install(
                 runtimeDirectory = targetRuntimeDirectory,
                 lpparam = lpparam,
                 classLoader = lpparam.classLoader,
@@ -121,8 +117,7 @@ class GmsFlagsXposedEntry : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     private fun XC_LoadPackage.LoadPackageParam.isSupportedTarget(): Boolean =
         packageName != BuildConfig.MAIN_APPLICATION_ID &&
-            (XposedTargets.isSupportedProcess(packageName, processName) ||
-                ExperimentalRuntimeHookInstaller.supports(packageName, processName))
+            XposedTargets.isSupportedProcess(packageName, processName)
 
     private companion object {
         @Volatile

@@ -6,4 +6,6 @@ fun interface XposedTargetRegistry {
     fun preferredFlagPackageName(androidPackageName: String): String? = null
 
     fun knownFlagPackageNames(androidPackageName: String): Set<String> = emptySet()
+
+    fun mendelApplicationPackageNames(): Set<String> = emptySet()
 }

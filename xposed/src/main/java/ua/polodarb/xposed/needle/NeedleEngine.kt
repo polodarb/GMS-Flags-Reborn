@@ -202,6 +202,7 @@ internal object NeedleEngine {
         val disabled = AtomicBoolean(false)
         val guardBoxedBoolean = payload.effect.kind == EffectKind.BOOLEAN_RESULT &&
             NeedleEffectTypeRules.requiresBoxedBooleanGuard(method.returnType.name)
+        val nullsArgument = payload.effect.kind == EffectKind.ARGUMENT_NULL
 
         val hook = object : XC_MethodHook() {
             override fun beforeHookedMethod(param: MethodHookParam) {
@@ -210,6 +211,15 @@ internal object NeedleEngine {
             }
 
             override fun afterHookedMethod(param: MethodHookParam) {
+                if (nullsArgument && !disabled.get() && param.hasThrowable()) {
+                    disabled.set(true)
+                    XposedLogger.logW(
+                        "Needle: recipe '${payload.codename}' nulled argument ${payload.effect.argumentIndex} and the " +
+                            "target method then threw ${param.throwable?.javaClass?.name}; disabling this recipe until " +
+                            "the process restarts to avoid a crash loop",
+                    )
+                    return
+                }
                 if (payload.effect.hookPoint != HookPoint.AFTER) return
                 applyEffect(param, payload, lpparam.packageName, overrideStore, appContext, disabled, guardBoxedBoolean)
             }
@@ -243,6 +253,18 @@ internal object NeedleEngine {
                 }.getOrNull()?.value
                     ?: return NeedleEffectTypeCheck.Rejected("ARGUMENT_REPLACE expression is not a value expression")
                 NeedleEffectTypeRules.argumentReplace(parameterTypes[index].name, replacement.valueType)
+            }
+
+            EffectKind.ARGUMENT_NULL -> {
+                val index = payload.effect.argumentIndex
+                    ?: return NeedleEffectTypeCheck.Rejected("ARGUMENT_NULL requires an argument_index")
+                val parameterTypes = method.parameterTypes
+                if (index < 0 || index >= parameterTypes.size) {
+                    return NeedleEffectTypeCheck.Rejected(
+                        "argument_index $index is outside the resolved method's ${parameterTypes.size} parameter(s)",
+                    )
+                }
+                NeedleEffectTypeRules.argumentNull(parameterTypes[index].name)
             }
 
             EffectKind.STRING_RESULT -> NeedleEffectTypeCheck.Rejected(
@@ -295,6 +317,13 @@ internal object NeedleEngine {
                     val args = param.args
                     if (args != null && index < args.size) {
                         args[index] = NeedleExpressionEvaluator.evaluateValue(expression.value, context)
+                    }
+                }
+                EffectKind.ARGUMENT_NULL -> {
+                    val index = payload.effect.argumentIndex ?: return@runCatching
+                    val args = param.args
+                    if (args != null && index < args.size) {
+                        args[index] = null
                     }
                 }
                 EffectKind.STRING_RESULT -> {

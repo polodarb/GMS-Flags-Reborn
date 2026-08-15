@@ -21,7 +21,7 @@ data class HookSelectorDetails(
 )
 
 enum class HookRuntimePoint { BEFORE, AFTER }
-enum class HookEffectKind { BOOLEAN_RESULT, NUMERIC_RESULT, ARGUMENT_REPLACE, STRING_RESULT }
+enum class HookEffectKind { BOOLEAN_RESULT, NUMERIC_RESULT, ARGUMENT_REPLACE, ARGUMENT_NULL, STRING_RESULT }
 enum class HookCompareOp { EQ, NEQ, LT, LTE, GT, GTE }
 enum class HookValueSourceKind {
     ORIGINAL_RESULT, ARGUMENT, CONSTANT, FLAG_OVERRIDE, SYSTEM_FEATURE, SDK_INT, RESOURCE_ID
@@ -53,6 +53,9 @@ data class HookConditionExpression(val orGroups: List<HookConditionGroup>)
 sealed interface HookEffectExpression {
     data class Conditional(val expression: HookConditionExpression) : HookEffectExpression
     data class ValueOnly(val value: HookValueSource) : HookEffectExpression
+    /** For effects that carry neither a value nor a condition tree - e.g. [HookEffectKind.ARGUMENT_NULL],
+     * which simply nulls the argument at [HookEffectDetails.argumentIndex]. */
+    data object None : HookEffectExpression
 }
 
 data class HookEffectDetails(

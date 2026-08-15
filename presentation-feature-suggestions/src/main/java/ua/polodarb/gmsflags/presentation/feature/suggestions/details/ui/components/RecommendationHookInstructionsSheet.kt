@@ -202,6 +202,7 @@ private fun effectSummary(effect: HookEffectDetails): String {
             HookEffectKind.BOOLEAN_RESULT -> R.string.suggestions_details_hook_instructions_kind_boolean
             HookEffectKind.NUMERIC_RESULT -> R.string.suggestions_details_hook_instructions_kind_numeric
             HookEffectKind.ARGUMENT_REPLACE -> R.string.suggestions_details_hook_instructions_kind_argument
+            HookEffectKind.ARGUMENT_NULL -> R.string.suggestions_details_hook_instructions_kind_argument_null
             HookEffectKind.STRING_RESULT -> R.string.suggestions_details_hook_instructions_kind_string
         }
     )
@@ -225,6 +226,7 @@ private fun EffectExpressionContent(effect: HookEffectDetails) {
                 ),
                 style = MaterialTheme.typography.bodyMedium,
             )
+            HookEffectExpression.None -> Unit
         }
         effect.whenExpression?.let { whenExpression ->
             RuleGroup(

@@ -111,9 +111,10 @@ object NeedleRecipeValidation {
             )
         }
 
-        collectSelectorTypeNames(selector).firstOrNull { !NeedleTypeNames.isKnown(it) }?.let { unknown ->
+        collectSelectorTypeNames(selector).firstOrNull { it.isBlank() || !NeedleTypeNames.isWellFormed(it) }?.let { bad ->
             return NeedleRecipeValidationResult.Invalid(
-                "type name '$unknown' is not in this engine's allowlist ${NeedleTypeNames.ALL}",
+                "type name '$bad' is not a well-formed type name; effect write-target types are checked " +
+                    "separately against the engine's allowlist, but selector match types may be any valid name",
             )
         }
         collectSelectorModifiers(selector).firstOrNull { !NeedleModifierNames.isKnown(it) }?.let { unknown ->
@@ -154,15 +155,43 @@ object NeedleRecipeValidation {
 
         EffectKind.ARGUMENT_REPLACE -> validateV2ArgumentReplace(selector, effect)
 
+        EffectKind.ARGUMENT_NULL -> validateV2ArgumentNull(selector, effect)
+
         EffectKind.STRING_RESULT -> NeedleRecipeValidationResult.Invalid(
             "effect kind STRING_RESULT is only supported with selector type ANDROID_RESOURCE_STRING",
         )
+    }
+
+    private fun validateV2ArgumentNull(
+        selector: MicroHookSelector,
+        effect: MicroHookEffect,
+    ): NeedleRecipeValidationResult {
+        if (effect.hookPoint != HookPoint.BEFORE) {
+            return NeedleRecipeValidationResult.Invalid(
+                "ARGUMENT_NULL requires hook_point BEFORE; nulling an argument after the method has run has no effect",
+            )
+        }
+        val index = effect.argumentIndex
+            ?: return NeedleRecipeValidationResult.Invalid("ARGUMENT_NULL requires an argument_index")
+        if (index < 0 || index >= selector.methodParameterTypes.size) {
+            return NeedleRecipeValidationResult.Invalid(
+                "argument_index $index is outside the selector's declared parameter list " +
+                    "${selector.methodParameterTypes}",
+            )
+        }
+        return NeedleEffectTypeRules.argumentNull(selector.methodParameterTypes[index]).asValidationResult()
     }
 
     private fun validateV2ArgumentReplace(
         selector: MicroHookSelector,
         effect: MicroHookEffect,
     ): NeedleRecipeValidationResult {
+        if (effect.hookPoint != HookPoint.BEFORE) {
+            return NeedleRecipeValidationResult.Invalid(
+                "ARGUMENT_REPLACE requires hook_point BEFORE; replacing an argument after the method has run " +
+                    "has no effect",
+            )
+        }
         val index = effect.argumentIndex
             ?: return NeedleRecipeValidationResult.Invalid("ARGUMENT_REPLACE requires an argument_index")
         if (index < 0 || index >= selector.methodParameterTypes.size) {
@@ -273,6 +302,11 @@ object NeedleRecipeValidation {
             return NeedleRecipeValidationResult.Invalid(
                 "effect kind STRING_RESULT is only supported with selector type ANDROID_RESOURCE_STRING " +
                     "(a DEX_METHOD selector's resolved return type is not guaranteed to be String)",
+            )
+        }
+        if (effectKind == EffectKind.ARGUMENT_NULL) {
+            return NeedleRecipeValidationResult.Invalid(
+                "effect kind ARGUMENT_NULL requires schema_version $SCHEMA_VERSION_V2",
             )
         }
         if (selector.methodReturnType !in SUPPORTED_DEX_METHOD_RETURN_TYPES) {

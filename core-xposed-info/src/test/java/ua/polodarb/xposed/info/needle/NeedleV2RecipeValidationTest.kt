@@ -169,13 +169,23 @@ class NeedleV2RecipeValidationTest {
     }
 
     @Test
-    fun `a type name outside the allowlist is rejected instead of silently becoming Object`() {
+    fun `a write-target return type outside the allowlist is rejected`() {
         assertRejected(
             v2Payload(
-                selector = languageSelector().copy(methodReturnType = "java.util.Locate"),
-                effect = languageEffect(),
+                selector = entrypointSelector().copy(methodReturnType = "com.foo.Bar", semanticResultType = null),
+                effect = entrypointEffect(),
             ),
         )
+    }
+
+    @Test
+    fun `a matching-only return type may be any well-formed name and fails closed later, not at validation`() {
+        val payload = v2Payload(
+            selector = languageSelector().copy(methodReturnType = "java.util.Locate"),
+            effect = languageEffect(),
+            capabilities = listOf(NeedleCapabilities.REFERENCE_TYPES),
+        )
+        assertEquals(NeedleRecipeValidationResult.Valid, NeedleRecipeValidation.validate(payload))
     }
 
     @Test
@@ -248,6 +258,98 @@ class NeedleV2RecipeValidationTest {
         assertRejected(
             v2Payload(selector = languageSelector(), effect = languageEffect(), minimumEngineVersion = 99),
         )
+    }
+
+    private fun dropdownFixSelector() = MicroHookSelector(
+        type = SelectorKind.DEX_METHOD,
+        methodUsingStringsAll = listOf("ButtonUiModel(buttonText="),
+        methodReturnType = "void",
+        methodParameterTypes = listOf("bbpo", "bbpj", "ilg", "hrk", "int"),
+        methodModifiersAll = listOf("public", "static", "final"),
+    )
+
+    private fun argumentNullEffect(index: Int = 0, hookPoint: HookPoint = HookPoint.BEFORE) = MicroHookEffect(
+        hookPoint = hookPoint,
+        kind = EffectKind.ARGUMENT_NULL,
+        argumentIndex = index,
+        expression = kotlinx.serialization.json.JsonNull,
+    )
+
+    @Test
+    fun `an ARGUMENT_NULL recipe nulling an obfuscated reference arg is valid`() {
+        val payload = v2Payload(
+            selector = dropdownFixSelector(),
+            effect = argumentNullEffect(index = 0),
+            versionConstraint = NeedleVersionConstraint(min = "85262640", max = "85262640"),
+        )
+        assertEquals(NeedleRecipeValidationResult.Valid, NeedleRecipeValidation.validate(payload))
+    }
+
+    @Test
+    fun `ARGUMENT_NULL targeting a primitive parameter is rejected`() {
+        assertRejected(
+            v2Payload(
+                selector = dropdownFixSelector(),
+                effect = argumentNullEffect(index = 4),
+                versionConstraint = NeedleVersionConstraint(min = "85262640", max = "85262640"),
+            ),
+        )
+    }
+
+    @Test
+    fun `ARGUMENT_NULL with AFTER hook point is rejected`() {
+        assertRejected(
+            v2Payload(
+                selector = dropdownFixSelector(),
+                effect = argumentNullEffect(index = 0, hookPoint = HookPoint.AFTER),
+                versionConstraint = NeedleVersionConstraint(min = "85262640", max = "85262640"),
+            ),
+        )
+    }
+
+    @Test
+    fun `ARGUMENT_NULL with an out-of-range index is rejected`() {
+        assertRejected(
+            v2Payload(
+                selector = dropdownFixSelector(),
+                effect = argumentNullEffect(index = 9),
+                versionConstraint = NeedleVersionConstraint(min = "85262640", max = "85262640"),
+            ),
+        )
+    }
+
+    @Test
+    fun `obfuscated selector parameter types are accepted for matching`() {
+        val payload = v2Payload(
+            selector = dropdownFixSelector(),
+            effect = argumentNullEffect(index = 0),
+            versionConstraint = NeedleVersionConstraint(min = "85262640", max = "85262640"),
+        )
+        assertEquals(NeedleRecipeValidationResult.Valid, NeedleRecipeValidation.validate(payload))
+    }
+
+    @Test
+    fun `a malformed selector type name is still rejected`() {
+        assertRejected(
+            v2Payload(
+                selector = dropdownFixSelector().copy(methodParameterTypes = listOf("bad name", "bbpj", "ilg", "hrk", "int")),
+                effect = argumentNullEffect(index = 0),
+                versionConstraint = NeedleVersionConstraint(min = "85262640", max = "85262640"),
+            ),
+        )
+    }
+
+    @Test
+    fun `a v1 payload using ARGUMENT_NULL is rejected`() {
+        val payload = NeedleRecipePayload(
+            schemaVersion = 1,
+            recipeId = "12",
+            codename = "v1-argnull",
+            appPackageName = "com.example.app",
+            selector = MicroHookSelector(type = SelectorKind.DEX_METHOD, methodReturnType = "void", methodParameterTypes = listOf("java.lang.Object")),
+            effect = MicroHookEffect(hookPoint = HookPoint.BEFORE, kind = EffectKind.ARGUMENT_NULL, argumentIndex = 0, expression = kotlinx.serialization.json.JsonNull),
+        )
+        assertRejected(payload)
     }
 
     @Test

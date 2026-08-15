@@ -28,6 +28,10 @@ object NeedleTypeNames {
     val ALL: Set<String> = PRIMITIVES + REFERENCES
 
     fun isKnown(name: String): Boolean = name in ALL
+
+    private val WELL_FORMED = Regex("^[A-Za-z_\$][A-Za-z0-9_\$]*(\\.[A-Za-z_\$][A-Za-z0-9_\$]*)*(\\[\\])*$")
+
+    fun isWellFormed(name: String): Boolean = name in PRIMITIVES || WELL_FORMED.matches(name)
 }
 
 object NeedleModifierNames {
@@ -105,6 +109,15 @@ object NeedleEffectTypeRules {
             )
         }
     }
+
+    fun argumentNull(parameterTypeName: String): NeedleEffectTypeCheck =
+        if (parameterTypeName in NeedleTypeNames.PRIMITIVES) {
+            NeedleEffectTypeCheck.Rejected(
+                "ARGUMENT_NULL cannot null a primitive '$parameterTypeName' parameter; only reference types are nullable",
+            )
+        } else {
+            NeedleEffectTypeCheck.Allowed
+        }
 
     fun requiresBoxedBooleanGuard(returnTypeName: String): Boolean = returnTypeName == NeedleTypeNames.OBJECT
 

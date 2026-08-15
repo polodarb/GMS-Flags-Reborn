@@ -142,7 +142,14 @@ enum class HookPoint { BEFORE, AFTER }
 /** [STRING_RESULT] is only ever valid paired with [SelectorKind.ANDROID_RESOURCE_STRING] (enforced
  * by NeedleRecipeValidation) - its resolved method is guaranteed to return String, unlike a
  * DEX_METHOD selector's return type, which is never statically guaranteed. */
-enum class EffectKind { BOOLEAN_RESULT, NUMERIC_RESULT, ARGUMENT_REPLACE, STRING_RESULT }
+enum class EffectKind { BOOLEAN_RESULT, NUMERIC_RESULT, ARGUMENT_REPLACE, ARGUMENT_NULL, STRING_RESULT }
+
+object NeedleBooleans {
+    fun parse(value: String?): Boolean = when (value?.trim()?.lowercase()) {
+        "true", "1" -> true
+        else -> false
+    }
+}
 enum class CompareOp { EQ, NEQ, LT, LTE, GT, GTE }
 enum class SourceKind { ORIGINAL_RESULT, ARGUMENT, CONSTANT, FLAG_OVERRIDE, SYSTEM_FEATURE, SDK_INT, RESOURCE_ID }
 enum class ConstantValueType { BOOL, INT, LONG, FLOAT, DOUBLE, STRING, BYTES }

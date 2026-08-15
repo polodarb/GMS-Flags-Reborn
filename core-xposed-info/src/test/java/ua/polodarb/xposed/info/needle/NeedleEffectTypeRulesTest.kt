@@ -70,6 +70,39 @@ class NeedleEffectTypeRulesTest {
     }
 
     @Test
+    fun `ARGUMENT_NULL is allowed on any reference type including obfuscated app types, rejected on primitives`() {
+        assertAllowed(NeedleEffectTypeRules.argumentNull("bbpo"))
+        assertAllowed(NeedleEffectTypeRules.argumentNull(NeedleTypeNames.STRING))
+        assertAllowed(NeedleEffectTypeRules.argumentNull("java.util.List"))
+        assertRejected(NeedleEffectTypeRules.argumentNull("boolean"))
+        assertRejected(NeedleEffectTypeRules.argumentNull("int"))
+        assertRejected(NeedleEffectTypeRules.argumentNull("void"))
+    }
+
+    @Test
+    fun `NeedleBooleans parse treats 1 and true as true, everything else false`() {
+        assertTrue(NeedleBooleans.parse("1"))
+        assertTrue(NeedleBooleans.parse("true"))
+        assertTrue(NeedleBooleans.parse("TRUE"))
+        assertTrue(NeedleBooleans.parse(" true "))
+        assertTrue(!NeedleBooleans.parse("0"))
+        assertTrue(!NeedleBooleans.parse("false"))
+        assertTrue(!NeedleBooleans.parse(null))
+        assertTrue(!NeedleBooleans.parse(""))
+    }
+
+    @Test
+    fun `well-formed type names accept obfuscated and dotted names, reject garbage`() {
+        assertTrue(NeedleTypeNames.isWellFormed("bbpo"))
+        assertTrue(NeedleTypeNames.isWellFormed("java.util.Locale"))
+        assertTrue(NeedleTypeNames.isWellFormed("boolean"))
+        assertTrue(NeedleTypeNames.isWellFormed("java.lang.String[]"))
+        assertTrue(!NeedleTypeNames.isWellFormed(""))
+        assertTrue(!NeedleTypeNames.isWellFormed("has space"))
+        assertTrue(!NeedleTypeNames.isWellFormed("bad//name"))
+    }
+
+    @Test
     fun `ARGUMENT_REPLACE only accepts a constant that fits the parameter`() {
         assertAllowed(NeedleEffectTypeRules.argumentReplace("boolean", ConstantValueType.BOOL))
         assertAllowed(NeedleEffectTypeRules.argumentReplace(NeedleTypeNames.STRING, ConstantValueType.STRING))

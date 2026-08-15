@@ -41,7 +41,7 @@ object NeedleExpressionEvaluator {
     private fun parseConstant(valueType: ConstantValueType?, value: String?): Any? {
         if (value == null) return null
         return when (valueType) {
-            ConstantValueType.BOOL -> value.toBoolean()
+            ConstantValueType.BOOL -> NeedleBooleans.parse(value)
             ConstantValueType.INT -> value.toIntOrNull()
             ConstantValueType.LONG -> value.toLongOrNull()
             ConstantValueType.FLOAT -> value.toFloatOrNull()

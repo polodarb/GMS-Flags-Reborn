@@ -77,6 +77,7 @@ private fun MicroHookEffect.toDomain(): HookEffectDetails = HookEffectDetails(
         EffectKind.BOOLEAN_RESULT -> HookEffectKind.BOOLEAN_RESULT
         EffectKind.NUMERIC_RESULT -> HookEffectKind.NUMERIC_RESULT
         EffectKind.ARGUMENT_REPLACE -> HookEffectKind.ARGUMENT_REPLACE
+        EffectKind.ARGUMENT_NULL -> HookEffectKind.ARGUMENT_NULL
         EffectKind.STRING_RESULT -> HookEffectKind.STRING_RESULT
     },
     argumentIndex = argumentIndex,
@@ -84,6 +85,7 @@ private fun MicroHookEffect.toDomain(): HookEffectDetails = HookEffectDetails(
         EffectKind.BOOLEAN_RESULT -> HookEffectExpression.Conditional(
             NeedleJson.decodeFromJsonElement(BooleanExpression.serializer(), expression).toDomain()
         )
+        EffectKind.ARGUMENT_NULL -> HookEffectExpression.None
         else -> HookEffectExpression.ValueOnly(
             NeedleJson.decodeFromJsonElement(ValueExpression.serializer(), expression).value.toDomain()
         )

@@ -42,7 +42,9 @@ class GmsFlagsXposedEntry : IXposedHookLoadPackage, IXposedHookZygoteInit {
             trustedPublicKeyBase64 = XposedInfoBuildConfig.NEEDLE_TRUSTED_PUBLIC_KEY_BASE64,
         )
 
-        if (MendelRuntimeHookInstaller.supports(lpparam.packageName, lpparam.processName)) {
+        val mendelDiagnostics = if (
+            MendelRuntimeHookInstaller.supports(lpparam.packageName, lpparam.processName)
+        ) {
             val targetRuntimeDirectory = File(
                 lpparam.appInfo.dataDir,
                 XposedConstants.XPOSED_DIR,
@@ -57,25 +59,27 @@ class GmsFlagsXposedEntry : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 classLoader = lpparam.classLoader,
                 moduleApkPath = moduleApkPath,
             )
-            return
+        } else {
+            null
         }
 
         applicationLifecycleHook.install(lpparam) { context, classLoader ->
             val targetRuntimeDirectory = runtimeDirectory.resolve(context)
-            XposedLogger.initFileLogging(targetRuntimeDirectory, lpparam)
+            if (XposedLogger.logFilePath == null) {
+                XposedLogger.initFileLogging(targetRuntimeDirectory, lpparam)
+            }
             XposedLogger.logI("Context received, installing runtime flag override hook")
 
-            val versionCode = runCatching {
-                context.packageManager.getPackageInfo(context.packageName, 0).longVersionCode
-            }.getOrDefault(0L)
-            val diagnostics = SqliteHookDiagnostics(
+            val diagnostics = mendelDiagnostics ?: SqliteHookDiagnostics(
                 databaseFile = File(
                     targetRuntimeDirectory,
                     XposedConstants.HOOK_DIAGNOSTICS_DB_FILE_NAME,
                 ),
                 packageName = lpparam.packageName,
                 processName = lpparam.processName,
-                versionCode = versionCode,
+                versionCode = runCatching {
+                    context.packageManager.getPackageInfo(context.packageName, 0).longVersionCode
+                }.getOrDefault(0L),
             )
 
             runCatching {

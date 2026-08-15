@@ -25,6 +25,7 @@ internal class SqliteHookDiagnostics(
     private val appliedIdentities = ConcurrentHashMap.newKeySet<String>()
     private val consumedIdentities = ConcurrentHashMap.newKeySet<String>()
     private val dirty = AtomicBoolean(false)
+    private val started = AtomicBoolean(false)
     private val writer = Executors.newSingleThreadScheduledExecutor { runnable ->
         Thread(runnable, "gmsflags-diagnostics").apply { isDaemon = true }
     }
@@ -37,7 +38,14 @@ internal class SqliteHookDiagnostics(
         this.overrideCount = overrideCount
         dirty.set(true)
         flushSafely()
-        writer.scheduleWithFixedDelay(::flushSafely, FLUSH_INTERVAL_MS, FLUSH_INTERVAL_MS, TimeUnit.MILLISECONDS)
+        if (started.compareAndSet(false, true)) {
+            writer.scheduleWithFixedDelay(
+                ::flushSafely,
+                FLUSH_INTERVAL_MS,
+                FLUSH_INTERVAL_MS,
+                TimeUnit.MILLISECONDS,
+            )
+        }
     }
 
     override fun noOverrides() {

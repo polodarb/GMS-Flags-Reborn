@@ -22,10 +22,10 @@ internal object MendelRuntimeHookInstaller {
         lpparam: XC_LoadPackage.LoadPackageParam,
         classLoader: ClassLoader,
         moduleApkPath: String?,
-    ) {
+    ): SqliteHookDiagnostics? {
         val apkPath = lpparam.appInfo?.sourceDir ?: run {
             XposedLogger.logE("No sourceDir for ${lpparam.packageName}")
-            return
+            return null
         }
 
         val overrideStore = RuntimeFlagOverrideStore(
@@ -47,14 +47,14 @@ internal object MendelRuntimeHookInstaller {
             XposedLogger.logI(
                 "Skipping Mendel flag override hook: overrides are paused for ${lpparam.packageName}"
             )
-            return
+            return diagnostics
         }
         if (!overrideStore.hasOverrides()) {
             diagnostics.noOverrides()
             XposedLogger.logI(
                 "Skipping Mendel flag override hook: no overrides for ${lpparam.packageName}"
             )
-            return
+            return diagnostics
         }
 
         runCatching {
@@ -80,6 +80,8 @@ internal object MendelRuntimeHookInstaller {
                 error,
             )
         }
+
+        return diagnostics
     }
 
     private fun readLongVersionCode(appInfo: ApplicationInfo): Long = runCatching {

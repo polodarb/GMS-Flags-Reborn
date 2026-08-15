@@ -86,7 +86,15 @@ internal object MendelRuntimeHookInstaller {
 
     private fun readLongVersionCode(appInfo: ApplicationInfo): Long = runCatching {
         XposedHelpers.getLongField(appInfo, LONG_VERSION_CODE_FIELD)
-    }.getOrDefault(0L)
+    }.recoverCatching {
+        XposedHelpers.getIntField(appInfo, VERSION_CODE_FIELD).toLong()
+    }.getOrElse { error ->
+        XposedLogger.logW(
+            "Unable to read the version code of ${appInfo.packageName}: ${error.message}"
+        )
+        0L
+    }
 
     private const val LONG_VERSION_CODE_FIELD = "longVersionCode"
+    private const val VERSION_CODE_FIELD = "versionCode"
 }

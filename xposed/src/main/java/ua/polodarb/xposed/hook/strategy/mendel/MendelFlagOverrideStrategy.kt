@@ -2,6 +2,7 @@ package ua.polodarb.xposed.hook.strategy.mendel
 
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge
+import java.lang.reflect.Method
 import java.util.concurrent.ConcurrentHashMap
 import org.luckypray.dexkit.DexKitBridge
 import ua.polodarb.xposed.diagnostics.HookDiagnostics
@@ -23,6 +24,7 @@ internal class MendelFlagOverrideStrategy(
 
     private val identityPackageName = XposedTargets.mendelFlagPackageName(packageName)
     private val loggedOverrides = ConcurrentHashMap.newKeySet<String>()
+    private val loggedIncompatibleOverrides = ConcurrentHashMap.newKeySet<String>()
 
     override fun install(bridge: DexKitBridge) {
         val utilClass = findExperimentFlagUtilClass(bridge) ?: run {
@@ -86,16 +88,22 @@ internal class MendelFlagOverrideStrategy(
         if (param.hasThrowable()) return
         val experimentId = param.args.getOrNull(1) as? Long ?: return
         val override = overrideStore.find(identityPackageName, experimentId.toString()) ?: return
-        val replacement = RuntimeFlagOverrideValueParser.parse(param.result, override) ?: run {
-            XposedLogger.logW(
-                "Incompatible Mendel override $packageName/$experimentId=" +
-                    "${override.value} for ${param.method.name}"
-            )
+        val identity = "$packageName/$experimentId"
+        val replacement = RuntimeFlagOverrideValueParser.parse(
+            original = param.result,
+            override = override,
+            declaredType = (param.method as? Method)?.returnType,
+        ) ?: run {
+            if (loggedIncompatibleOverrides.add(identity)) {
+                XposedLogger.logW(
+                    "Incompatible Mendel override $identity=" +
+                        "${override.value} for ${param.method.name}"
+                )
+            }
             return
         }
 
         param.result = replacement
-        val identity = "$packageName/$experimentId"
         diagnostics.overrideAppliedAndConsumed(diagnosticName, identity)
         if (loggedOverrides.add(identity)) {
             XposedLogger.logD(

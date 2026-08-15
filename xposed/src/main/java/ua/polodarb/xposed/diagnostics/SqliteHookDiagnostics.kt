@@ -49,13 +49,13 @@ internal class SqliteHookDiagnostics(
     }
 
     override fun noOverrides() {
-        state = HookDiagnosticContract.STATE_NO_OVERRIDES
+        demoteState(HookDiagnosticContract.STATE_NO_OVERRIDES)
         dirty.set(true)
         flushSafely()
     }
 
     override fun paused() {
-        state = HookDiagnosticContract.STATE_PAUSED
+        demoteState(HookDiagnosticContract.STATE_PAUSED)
         dirty.set(true)
         flushSafely()
     }
@@ -107,10 +107,16 @@ internal class SqliteHookDiagnostics(
     }
 
     override fun failure(message: String) {
-        state = HookDiagnosticContract.STATE_FAILED
+        demoteState(HookDiagnosticContract.STATE_FAILED)
         error = message.take(MAX_MESSAGE_LENGTH)
         dirty.set(true)
         flushSafely()
+    }
+
+    private fun demoteState(next: String) {
+        if (state != HookDiagnosticContract.STATE_INSTALLED) {
+            state = next
+        }
     }
 
     private fun flushSafely() {

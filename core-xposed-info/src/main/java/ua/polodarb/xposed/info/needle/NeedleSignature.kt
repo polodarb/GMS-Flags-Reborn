@@ -11,14 +11,28 @@ import java.util.Base64
  * recipe signed offline for the backend verifies identically here.
  */
 object NeedleSignature {
-    fun verify(payload: ByteArray, signatureBase64: String, publicKeyBase64: String): Boolean = runCatching {
+    fun verify(
+        payload: ByteArray,
+        signatureBase64: String,
+        publicKeyBase64: String,
+        domainSeparator: String = NeedleProtocol.DOMAIN_SEPARATOR,
+    ): Boolean = runCatching {
         val signatureBytes = Base64.getDecoder().decode(signatureBase64)
         val keySpec = X509EncodedKeySpec(Base64.getDecoder().decode(publicKeyBase64))
         val publicKey = KeyFactory.getInstance("EC").generatePublic(keySpec)
         val verifier = Signature.getInstance("SHA256withECDSA")
         verifier.initVerify(publicKey)
-        verifier.update(NeedleProtocol.DOMAIN_SEPARATOR.toByteArray(Charsets.UTF_8))
+        verifier.update(domainSeparator.toByteArray(Charsets.UTF_8))
         verifier.update(payload)
         verifier.verify(signatureBytes)
     }.getOrDefault(false)
+
+    fun verifiedSchemaVersion(
+        payload: ByteArray,
+        signatureBase64: String,
+        publicKeyBase64: String,
+    ): Int? = NeedleProtocol.SUPPORTED_SCHEMA_VERSIONS.firstOrNull { schemaVersion ->
+        val separator = NeedleProtocol.domainSeparatorFor(schemaVersion) ?: return@firstOrNull false
+        verify(payload, signatureBase64, publicKeyBase64, separator)
+    }
 }

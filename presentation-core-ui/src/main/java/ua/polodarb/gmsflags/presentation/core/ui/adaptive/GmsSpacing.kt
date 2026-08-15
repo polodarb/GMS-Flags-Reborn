@@ -23,6 +23,7 @@ object GmsDimensions {
     val DetailsHeaderActionSize = 44.dp
     val DetailsBottomBarHeight = 46.dp
     val DetailsPackageMenuItemMinHeight = 72.dp
+    val DetailsPackageFilterHeight = 56.dp
     val DetailsMenuMaxWidth = 280.dp
     val FlagCardMinHeight = 88.dp
     val ApplicationIconSize = 64.dp

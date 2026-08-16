@@ -3,6 +3,7 @@ package ua.polodarb.gmsflags.presentation.feature.suggestions.details.ui.compone
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.GppMaybe
 import androidx.compose.material.icons.outlined.Shield
+import androidx.compose.material.icons.outlined.SystemUpdate
 import androidx.compose.material.icons.rounded.GppBad
 import androidx.compose.material.icons.rounded.VerifiedUser
 import androidx.compose.material3.MaterialTheme
@@ -51,5 +52,12 @@ internal fun HookTrustStatus.appearance(): HookTrustAppearance = when (this) {
         icon = Icons.Rounded.GppBad,
         containerColor = MaterialTheme.colorScheme.errorContainer,
         contentColor = MaterialTheme.colorScheme.onErrorContainer,
+    )
+    HookTrustStatus.APP_UPDATE_REQUIRED -> HookTrustAppearance(
+        labelRes = R.string.suggestions_details_patch_trust_update_required,
+        descriptionRes = R.string.suggestions_details_patch_trust_update_required_desc,
+        icon = Icons.Outlined.SystemUpdate,
+        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
     )
 }

@@ -20,6 +20,8 @@ enum class HookTrustStatus {
 
     /** This build has no local trusted key to check against (e.g. a release build). Not alarming. */
     CANNOT_VERIFY_IN_THIS_BUILD,
+
+    APP_UPDATE_REQUIRED,
 }
 
 /**

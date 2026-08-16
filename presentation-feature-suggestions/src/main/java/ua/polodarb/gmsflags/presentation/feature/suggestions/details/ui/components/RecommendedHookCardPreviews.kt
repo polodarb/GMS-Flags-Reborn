@@ -89,3 +89,13 @@ private fun HookCardAppUntrustedPreview() = HookCardPreview(
     sampleHook(HookTrustStatus.VERIFIED),
     appIntegrityBlocked = true,
 )
+
+@Preview(name = "Update required", showBackground = true, widthDp = 400)
+@Composable
+private fun HookCardUpdateRequiredPreview() =
+    HookCardPreview(sampleHook(HookTrustStatus.APP_UPDATE_REQUIRED))
+
+@Preview(name = "Update required · dark", showBackground = true, widthDp = 400)
+@Composable
+private fun HookCardUpdateRequiredDarkPreview() =
+    HookCardPreview(sampleHook(HookTrustStatus.APP_UPDATE_REQUIRED), dark = true)

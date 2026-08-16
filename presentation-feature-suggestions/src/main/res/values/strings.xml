@@ -147,6 +147,9 @@
     <string name="suggestions_details_patch_trust_unavailable_desc">This build has no verification key, so the signature couldn’t be checked on this device. The patch still applies, but it wasn’t verified here.</string>
     <string name="suggestions_details_patch_trust_failed">Signature mismatch</string>
     <string name="suggestions_details_patch_trust_failed_desc">This patch’s signature does NOT match this app’s built-in key. It may have been tampered with, or the app’s key is out of date. It will not be applied — please contact support.</string>
+    <string name="suggestions_details_patch_trust_update_required">Update required</string>
+    <string name="suggestions_details_patch_trust_update_required_desc">This patch needs a newer version of GMS Flags than you have. It won’t be applied until you update. Grab the latest release to enable it.</string>
+    <string name="suggestions_details_patch_trust_update_button">Download update</string>
 
     <!-- Failed-verification card (shown inline in place of the normal patch card). -->
     <string name="suggestions_details_patch_failed_title">This patch can’t be trusted</string>

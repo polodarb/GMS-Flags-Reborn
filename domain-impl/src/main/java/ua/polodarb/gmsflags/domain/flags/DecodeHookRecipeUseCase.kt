@@ -58,6 +58,7 @@ private fun MicroHookSelector.toDomain(): HookSelectorDetails = HookSelectorDeta
     kind = when (type) {
         SelectorKind.DEX_METHOD -> HookSelectorKind.DEX_METHOD
         SelectorKind.ANDROID_RESOURCE_STRING -> HookSelectorKind.ANDROID_RESOURCE_STRING
+        SelectorKind.VIEW_RESOURCE_ID -> HookSelectorKind.VIEW_RESOURCE_ID
     },
     classUsingStringsAll = classUsingStringsAll,
     classUsingStringsAny = classUsingStringsAny,
@@ -66,6 +67,8 @@ private fun MicroHookSelector.toDomain(): HookSelectorDetails = HookSelectorDeta
     methodModifiersAll = methodModifiersAll,
     methodUsingStringsAll = methodUsingStringsAll,
     methodUsingStringsAny = methodUsingStringsAny,
+    viewResourceName = viewResourceName,
+    viewResourcePackage = viewResourcePackage,
 )
 
 private fun MicroHookEffect.toDomain(): HookEffectDetails = HookEffectDetails(
@@ -79,13 +82,14 @@ private fun MicroHookEffect.toDomain(): HookEffectDetails = HookEffectDetails(
         EffectKind.ARGUMENT_REPLACE -> HookEffectKind.ARGUMENT_REPLACE
         EffectKind.ARGUMENT_NULL -> HookEffectKind.ARGUMENT_NULL
         EffectKind.STRING_RESULT -> HookEffectKind.STRING_RESULT
+        EffectKind.ADD_IMAGE_OVERLAY -> HookEffectKind.ADD_IMAGE_OVERLAY
     },
     argumentIndex = argumentIndex,
     expression = when (kind) {
         EffectKind.BOOLEAN_RESULT -> HookEffectExpression.Conditional(
             NeedleJson.decodeFromJsonElement(BooleanExpression.serializer(), expression).toDomain()
         )
-        EffectKind.ARGUMENT_NULL -> HookEffectExpression.None
+        EffectKind.ARGUMENT_NULL, EffectKind.ADD_IMAGE_OVERLAY -> HookEffectExpression.None
         else -> HookEffectExpression.ValueOnly(
             NeedleJson.decodeFromJsonElement(ValueExpression.serializer(), expression).value.toDomain()
         )

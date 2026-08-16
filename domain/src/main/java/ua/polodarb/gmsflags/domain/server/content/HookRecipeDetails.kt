@@ -7,7 +7,7 @@ data class HookRecipeDetails(
     val effect: HookEffectDetails,
 )
 
-enum class HookSelectorKind { DEX_METHOD, ANDROID_RESOURCE_STRING }
+enum class HookSelectorKind { DEX_METHOD, ANDROID_RESOURCE_STRING, VIEW_RESOURCE_ID }
 
 data class HookSelectorDetails(
     val kind: HookSelectorKind,
@@ -18,10 +18,12 @@ data class HookSelectorDetails(
     val methodModifiersAll: List<String>,
     val methodUsingStringsAll: List<String>,
     val methodUsingStringsAny: List<String>,
+    val viewResourceName: String = "",
+    val viewResourcePackage: String = "",
 )
 
 enum class HookRuntimePoint { BEFORE, AFTER }
-enum class HookEffectKind { BOOLEAN_RESULT, NUMERIC_RESULT, ARGUMENT_REPLACE, ARGUMENT_NULL, STRING_RESULT }
+enum class HookEffectKind { BOOLEAN_RESULT, NUMERIC_RESULT, ARGUMENT_REPLACE, ARGUMENT_NULL, STRING_RESULT, ADD_IMAGE_OVERLAY }
 enum class HookCompareOp { EQ, NEQ, LT, LTE, GT, GTE }
 enum class HookValueSourceKind {
     ORIGINAL_RESULT, ARGUMENT, CONSTANT, FLAG_OVERRIDE, SYSTEM_FEATURE, SDK_INT, RESOURCE_ID

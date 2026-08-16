@@ -1,6 +1,7 @@
 package ua.polodarb.xposed.info.needle
 
 import kotlinx.serialization.json.JsonElement
+import java.util.Base64
 
 sealed interface NeedleRecipeValidationResult {
     data object Valid : NeedleRecipeValidationResult
@@ -16,6 +17,7 @@ sealed interface NeedleRecipeValidationResult {
 object NeedleRecipeValidation {
     private const val SUPPORTED_SCHEMA_VERSION = 1
     private const val SCHEMA_VERSION_V2 = 2
+    private const val ANDROID_RESOURCE_PACKAGE = "android"
 
     /** v1 only allows a literal String here - computing it from ARGUMENT/FLAG_OVERRIDE/etc. would
      * reopen the type-confusion risk this effect kind exists to close off. */
@@ -39,6 +41,10 @@ object NeedleRecipeValidation {
             return when (payload.selector.type) {
                 SelectorKind.ANDROID_RESOURCE_STRING -> validateResourceStringRecipe(payload)
                 SelectorKind.DEX_METHOD -> validateDexMethodRecipe(payload.selector, payload.effect.kind)
+                SelectorKind.VIEW_RESOURCE_ID -> NeedleRecipeValidationResult.Invalid(
+                    "selector type VIEW_RESOURCE_ID requires schema_version $SCHEMA_VERSION_V2 and capability " +
+                        NeedleCapabilities.VIEW_IMAGE_OVERLAY,
+                )
             }
         }
         return validateV2(payload)
@@ -50,6 +56,8 @@ object NeedleRecipeValidation {
             selector.classHasFieldsAll.isNotEmpty() ||
             selector.methodInvokesAll.isNotEmpty() ||
             selector.semanticResultType != null ||
+            selector.viewResourceName.isNotBlank() ||
+            selector.viewResourcePackage.isNotBlank() ||
             payload.requiredCapabilities.isNotEmpty() ||
             payload.versionConstraint != null ||
             payload.minimumEngineVersion > 1
@@ -79,8 +87,113 @@ object NeedleRecipeValidation {
         return when (payload.selector.type) {
             SelectorKind.ANDROID_RESOURCE_STRING -> validateResourceStringRecipe(payload)
             SelectorKind.DEX_METHOD -> validateV2DexMethodRecipe(payload)
+            SelectorKind.VIEW_RESOURCE_ID -> validateV2ImageOverlayRecipe(payload)
         }
     }
+
+    private fun validateV2ImageOverlayRecipe(payload: NeedleRecipePayload): NeedleRecipeValidationResult {
+        val selector = payload.selector
+        val effect = payload.effect
+
+        if (NeedleCapabilities.VIEW_IMAGE_OVERLAY !in payload.requiredCapabilities) {
+            return NeedleRecipeValidationResult.Invalid(
+                "VIEW_RESOURCE_ID recipes must declare required_capability ${NeedleCapabilities.VIEW_IMAGE_OVERLAY}, " +
+                    "so an engine that cannot draw overlays reports app-update-required instead of a silent no-op",
+            )
+        }
+        if (payload.minimumEngineVersion < NeedleCapabilities.IMAGE_OVERLAY_ENGINE_VERSION) {
+            return NeedleRecipeValidationResult.Invalid(
+                "VIEW_RESOURCE_ID recipes must declare minimum_engine_version >= " +
+                    "${NeedleCapabilities.IMAGE_OVERLAY_ENGINE_VERSION}, got ${payload.minimumEngineVersion}",
+            )
+        }
+        if (selectorCarriesMethodShape(selector)) {
+            return NeedleRecipeValidationResult.Invalid(
+                "a VIEW_RESOURCE_ID selector must carry only view_resource_name/view_resource_package, not dex/method fields",
+            )
+        }
+        if (selector.viewResourceName.isBlank()) {
+            return NeedleRecipeValidationResult.Invalid("VIEW_RESOURCE_ID requires a non-blank view_resource_name")
+        }
+        val pkg = selector.viewResourcePackage
+        if (pkg != payload.appPackageName && pkg != ANDROID_RESOURCE_PACKAGE) {
+            return NeedleRecipeValidationResult.Invalid(
+                "view_resource_package must be the target package '${payload.appPackageName}' or " +
+                    "'$ANDROID_RESOURCE_PACKAGE', got '$pkg'",
+            )
+        }
+
+        if (effect.kind != EffectKind.ADD_IMAGE_OVERLAY) {
+            return NeedleRecipeValidationResult.Invalid(
+                "selector type VIEW_RESOURCE_ID only supports effect kind ADD_IMAGE_OVERLAY, got ${effect.kind}",
+            )
+        }
+        if (effect.hookPoint != HookPoint.AFTER) {
+            return NeedleRecipeValidationResult.Invalid(
+                "ADD_IMAGE_OVERLAY requires hook_point AFTER; the overlay is drawn once the view has painted itself",
+            )
+        }
+        if (effect.argumentIndex != null) {
+            return NeedleRecipeValidationResult.Invalid("ADD_IMAGE_OVERLAY does not use argument_index")
+        }
+        if (effect.`when` != null) {
+            return NeedleRecipeValidationResult.Invalid("ADD_IMAGE_OVERLAY does not support a `when` gate")
+        }
+        val overlay = runCatching {
+            NeedleJson.decodeFromJsonElement(NeedleImageOverlay.serializer(), effect.expression)
+        }.getOrNull()
+            ?: return NeedleRecipeValidationResult.Invalid("ADD_IMAGE_OVERLAY expression is not a valid image overlay")
+        return validateOverlayImage(overlay)
+    }
+
+    private fun validateOverlayImage(overlay: NeedleImageOverlay): NeedleRecipeValidationResult {
+        val bytes = runCatching { Base64.getDecoder().decode(overlay.imageBase64) }.getOrNull()
+            ?: return NeedleRecipeValidationResult.Invalid("image_base64 is not valid base64")
+        if (bytes.isEmpty()) {
+            return NeedleRecipeValidationResult.Invalid("image is empty")
+        }
+        if (bytes.size > NeedleImageOverlayLimits.MAX_IMAGE_BYTES) {
+            return NeedleRecipeValidationResult.Invalid(
+                "image is ${bytes.size} bytes, exceeds the ${NeedleImageOverlayLimits.MAX_IMAGE_BYTES}-byte limit",
+            )
+        }
+        if (NeedleImageOverlayLimits.detectFormat(bytes) == null) {
+            return NeedleRecipeValidationResult.Invalid("image must be PNG or WEBP (checked by magic bytes)")
+        }
+        if (!NeedleImageOverlayLimits.isRenderDpInRange(overlay.widthDp) ||
+            !NeedleImageOverlayLimits.isRenderDpInRange(overlay.heightDp)
+        ) {
+            return NeedleRecipeValidationResult.Invalid(
+                "width_dp/height_dp must be in ${NeedleImageOverlayLimits.MIN_RENDER_DP}.." +
+                    "${NeedleImageOverlayLimits.MAX_RENDER_DP}, got ${overlay.widthDp}x${overlay.heightDp}",
+            )
+        }
+        if (!NeedleImageOverlayLimits.isOffsetDpInRange(overlay.offsetXDp) ||
+            !NeedleImageOverlayLimits.isOffsetDpInRange(overlay.offsetYDp)
+        ) {
+            return NeedleRecipeValidationResult.Invalid(
+                "offset_x_dp/offset_y_dp must be in -${NeedleImageOverlayLimits.MAX_OFFSET_DP}.." +
+                    "${NeedleImageOverlayLimits.MAX_OFFSET_DP}",
+            )
+        }
+        if (!NeedleImageOverlayLimits.isAlphaInRange(overlay.alpha)) {
+            return NeedleRecipeValidationResult.Invalid("alpha must be a finite value in 0.0..1.0, got ${overlay.alpha}")
+        }
+        return NeedleRecipeValidationResult.Valid
+    }
+
+    private fun selectorCarriesMethodShape(selector: MicroHookSelector): Boolean =
+        selector.classUsingStringsAll.isNotEmpty() ||
+            selector.classUsingStringsAny.isNotEmpty() ||
+            selector.methodReturnType.isNotBlank() ||
+            selector.methodParameterTypes.isNotEmpty() ||
+            selector.methodModifiersAll.isNotEmpty() ||
+            selector.methodUsingStringsAll.isNotEmpty() ||
+            selector.methodUsingStringsAny.isNotEmpty() ||
+            selector.classHasMethodsAll.isNotEmpty() ||
+            selector.classHasFieldsAll.isNotEmpty() ||
+            selector.methodInvokesAll.isNotEmpty() ||
+            selector.semanticResultType != null
 
     private fun validateV2DexMethodRecipe(payload: NeedleRecipePayload): NeedleRecipeValidationResult {
         val selector = payload.selector
@@ -159,6 +272,10 @@ object NeedleRecipeValidation {
 
         EffectKind.STRING_RESULT -> NeedleRecipeValidationResult.Invalid(
             "effect kind STRING_RESULT is only supported with selector type ANDROID_RESOURCE_STRING",
+        )
+
+        EffectKind.ADD_IMAGE_OVERLAY -> NeedleRecipeValidationResult.Invalid(
+            "effect kind ADD_IMAGE_OVERLAY is only supported with selector type VIEW_RESOURCE_ID",
         )
     }
 
@@ -307,6 +424,11 @@ object NeedleRecipeValidation {
         if (effectKind == EffectKind.ARGUMENT_NULL) {
             return NeedleRecipeValidationResult.Invalid(
                 "effect kind ARGUMENT_NULL requires schema_version $SCHEMA_VERSION_V2",
+            )
+        }
+        if (effectKind == EffectKind.ADD_IMAGE_OVERLAY) {
+            return NeedleRecipeValidationResult.Invalid(
+                "effect kind ADD_IMAGE_OVERLAY is only supported with selector type VIEW_RESOURCE_ID",
             )
         }
         if (selector.methodReturnType !in SUPPORTED_DEX_METHOD_RETURN_TYPES) {

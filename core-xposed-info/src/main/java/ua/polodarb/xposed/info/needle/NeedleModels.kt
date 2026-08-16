@@ -18,7 +18,7 @@ object NeedleProtocol {
     const val SIGNATURE_ALGORITHM = "ECDSA_P256_SHA256"
     const val DOMAIN_SEPARATOR = "GMSFLAGS_NEEDLE_RECIPE_V1 "
     const val DOMAIN_SEPARATOR_V2 = "GMSFLAGS_NEEDLE_RECIPE_V2 "
-    const val ENGINE_VERSION = 2
+    const val ENGINE_VERSION = 3
 
     val SUPPORTED_SCHEMA_VERSIONS: Set<Int> = setOf(1, 2)
 
@@ -40,12 +40,16 @@ object NeedleCapabilities {
     const val EXACT_PARAMETER_TYPES = "EXACT_PARAMETER_TYPES"
     const val BOXED_BOOLEAN_RESULT = "BOXED_BOOLEAN_RESULT"
     const val STRUCTURAL_SELECTORS = "STRUCTURAL_SELECTORS"
+    const val VIEW_IMAGE_OVERLAY = "VIEW_IMAGE_OVERLAY"
+
+    const val IMAGE_OVERLAY_ENGINE_VERSION = 3
 
     val SUPPORTED: Set<String> = setOf(
         REFERENCE_TYPES,
         EXACT_PARAMETER_TYPES,
         BOXED_BOOLEAN_RESULT,
         STRUCTURAL_SELECTORS,
+        VIEW_IMAGE_OVERLAY,
     )
 }
 
@@ -99,11 +103,13 @@ data class NeedleVersionConstraint(
 /** [DEX_METHOD] searches the target APK's own dex via DexKit. [ANDROID_RESOURCE_STRING] installs
  * exactly one engine-hardcoded framework hook (`Resources#getString(int)`) - a recipe can only
  * pick which resource id to react to, never an arbitrary framework class/method. */
-enum class SelectorKind { DEX_METHOD, ANDROID_RESOURCE_STRING }
+enum class SelectorKind { DEX_METHOD, ANDROID_RESOURCE_STRING, VIEW_RESOURCE_ID }
 
 @Serializable
 data class MicroHookSelector(
     val type: SelectorKind = SelectorKind.DEX_METHOD,
+    @SerialName("view_resource_name") val viewResourceName: String = "",
+    @SerialName("view_resource_package") val viewResourcePackage: String = "",
     @SerialName("class_using_strings_all") val classUsingStringsAll: List<String> = emptyList(),
     @SerialName("class_using_strings_any") val classUsingStringsAny: List<String> = emptyList(),
     @SerialName("method_return_type") val methodReturnType: String = "",
@@ -142,7 +148,7 @@ enum class HookPoint { BEFORE, AFTER }
 /** [STRING_RESULT] is only ever valid paired with [SelectorKind.ANDROID_RESOURCE_STRING] (enforced
  * by NeedleRecipeValidation) - its resolved method is guaranteed to return String, unlike a
  * DEX_METHOD selector's return type, which is never statically guaranteed. */
-enum class EffectKind { BOOLEAN_RESULT, NUMERIC_RESULT, ARGUMENT_REPLACE, ARGUMENT_NULL, STRING_RESULT }
+enum class EffectKind { BOOLEAN_RESULT, NUMERIC_RESULT, ARGUMENT_REPLACE, ARGUMENT_NULL, STRING_RESULT, ADD_IMAGE_OVERLAY }
 
 object NeedleBooleans {
     fun parse(value: String?): Boolean = when (value?.trim()?.lowercase()) {

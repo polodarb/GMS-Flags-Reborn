@@ -1,8 +1,10 @@
 package ua.polodarb.xposed.needle
 
 import android.content.Context
+import android.graphics.Canvas
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge
+import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import org.luckypray.dexkit.DexKitBridge
 import ua.polodarb.xposed.info.XposedConstants
@@ -10,6 +12,8 @@ import ua.polodarb.xposed.info.needle.BooleanExpression
 import ua.polodarb.xposed.info.needle.EffectKind
 import ua.polodarb.xposed.info.needle.HookPoint
 import ua.polodarb.xposed.info.needle.NeedleEffectTypeCheck
+import ua.polodarb.xposed.info.needle.NeedleImageOverlay
+import ua.polodarb.xposed.info.needle.NeedleImageOverlayLimits
 import ua.polodarb.xposed.info.needle.NeedleEffectTypeRules
 import ua.polodarb.xposed.info.needle.NeedleEnvelope
 import ua.polodarb.xposed.info.needle.NeedleExpressionEvaluator
@@ -59,9 +63,9 @@ internal object NeedleEngine {
         }
         if (payloads.isEmpty()) return
 
-        val (resourceStringPayloads, dexMethodPayloads) = payloads.partition {
-            it.selector.type == SelectorKind.ANDROID_RESOURCE_STRING
-        }
+        val viewOverlayPayloads = payloads.filter { it.selector.type == SelectorKind.VIEW_RESOURCE_ID }
+        val resourceStringPayloads = payloads.filter { it.selector.type == SelectorKind.ANDROID_RESOURCE_STRING }
+        val dexMethodPayloads = payloads.filter { it.selector.type == SelectorKind.DEX_METHOD }
 
         runCatching {
             if (dexMethodPayloads.isNotEmpty()) {
@@ -77,6 +81,9 @@ internal object NeedleEngine {
             }
             if (resourceStringPayloads.isNotEmpty()) {
                 installResourceStringDispatcher(resourceStringPayloads, lpparam.packageName, overrideStore)
+            }
+            if (viewOverlayPayloads.isNotEmpty()) {
+                installImageOverlayDispatcher(viewOverlayPayloads, classLoader)
             }
         }.onFailure { error ->
             XposedLogger.logE("NeedleEngine: failed for ${lpparam.packageName}", error)
@@ -94,6 +101,13 @@ internal object NeedleEngine {
                 XposedLogger.logW("NeedleEngine: envelope payload is not valid base64")
                 return null
             }
+        if (payloadBytes.size > NeedleImageOverlayLimits.MAX_PAYLOAD_BYTES) {
+            XposedLogger.logW(
+                "NeedleEngine: recipe payload is ${payloadBytes.size} bytes, exceeds the " +
+                    "${NeedleImageOverlayLimits.MAX_PAYLOAD_BYTES}-byte limit, skipping",
+            )
+            return null
+        }
 
         val verifiedSchemaVersion = NeedleSignature.verifiedSchemaVersion(
             payload = payloadBytes,
@@ -270,6 +284,10 @@ internal object NeedleEngine {
             EffectKind.STRING_RESULT -> NeedleEffectTypeCheck.Rejected(
                 "STRING_RESULT is not valid for a DEX_METHOD recipe",
             )
+
+            EffectKind.ADD_IMAGE_OVERLAY -> NeedleEffectTypeCheck.Rejected(
+                "ADD_IMAGE_OVERLAY is not valid for a DEX_METHOD recipe",
+            )
         }
     }
 
@@ -281,6 +299,43 @@ internal object NeedleEngine {
         val method = NeedleSelectorResolver.resolveResourceGetString() ?: return
         XposedBridge.hookMethod(method, ResourceStringDispatcher(payloads, packageName, overrideStore))
         XposedLogger.logI("Needle: installed resource-string dispatcher for ${payloads.size} recipe(s) in $packageName")
+    }
+
+    private fun installImageOverlayDispatcher(
+        payloads: List<NeedleRecipePayload>,
+        classLoader: ClassLoader,
+    ) {
+        val resolved = payloads.mapNotNull { payload ->
+            val overlay = runCatching {
+                NeedleJson.decodeFromJsonElement(NeedleImageOverlay.serializer(), payload.effect.expression)
+            }.getOrNull()
+            if (overlay == null) {
+                XposedLogger.logW("Needle: recipe '${payload.codename}' has an invalid image overlay expression, skipping")
+                return@mapNotNull null
+            }
+            val bytes = runCatching { Base64.getDecoder().decode(overlay.imageBase64) }.getOrNull()
+            if (bytes == null) {
+                XposedLogger.logW("Needle: recipe '${payload.codename}' image_base64 is not valid base64, skipping")
+                return@mapNotNull null
+            }
+            when (val result = NeedleImageOverlayDecoder.decode(bytes)) {
+                is NeedleImageOverlayDecoder.Result.Success -> ResolvedImageOverlay(
+                    recipeId = payload.recipeId,
+                    resourceName = payload.selector.viewResourceName,
+                    resourcePackage = payload.selector.viewResourcePackage,
+                    bitmap = result.bitmap,
+                    overlay = overlay,
+                )
+                is NeedleImageOverlayDecoder.Result.Failure -> {
+                    XposedLogger.logW("Needle: recipe '${payload.codename}' image rejected: ${result.reason}")
+                    null
+                }
+            }
+        }
+        if (resolved.isEmpty()) return
+        val dispatcher = NeedleImageOverlayDispatcher(resolved)
+        XposedHelpers.findAndHookMethod("android.view.View", classLoader, "draw", Canvas::class.java, dispatcher)
+        XposedLogger.logI("Needle: installed image-overlay dispatcher for ${resolved.size} recipe(s)")
     }
 
     private fun applyEffect(
@@ -327,6 +382,8 @@ internal object NeedleEngine {
                     }
                 }
                 EffectKind.STRING_RESULT -> {
+                }
+                EffectKind.ADD_IMAGE_OVERLAY -> {
                 }
             }
         }.onFailure { error ->

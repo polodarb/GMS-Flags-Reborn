@@ -55,6 +55,15 @@ data class HookConditionExpression(val orGroups: List<HookConditionGroup>)
 sealed interface HookEffectExpression {
     data class Conditional(val expression: HookConditionExpression) : HookEffectExpression
     data class ValueOnly(val value: HookValueSource) : HookEffectExpression
+    data class ImageOverlay(
+        val imageBase64: String,
+        val gravity: String,
+        val widthDp: Int,
+        val heightDp: Int,
+        val offsetXDp: Int,
+        val offsetYDp: Int,
+        val alpha: Float,
+    ) : HookEffectExpression
     data object None : HookEffectExpression
 }
 

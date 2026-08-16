@@ -198,6 +198,8 @@
     <string name="suggestions_details_hook_instructions_rule">Rule %1$d</string>
     <string name="suggestions_details_hook_instructions_where_title">Where it hooks</string>
     <string name="suggestions_details_hook_instructions_where_resource">A fixed, built-in hook on Android’s own resource lookup — it doesn’t search this app’s code at all.</string>
+    <string name="suggestions_details_hook_instructions_where_view">Draws over the view %1$s, found by its resource id.</string>
+    <string name="suggestions_details_hook_instructions_overlay_undecodable">Image could not be decoded</string>
     <string name="suggestions_details_hook_instructions_returns">Returns: %1$s</string>
     <string name="suggestions_details_hook_instructions_params_none">Takes no parameters</string>
     <string name="suggestions_details_hook_instructions_params">Parameters: %1$s</string>

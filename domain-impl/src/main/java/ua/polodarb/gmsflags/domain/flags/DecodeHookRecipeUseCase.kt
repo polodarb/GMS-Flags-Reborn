@@ -20,6 +20,7 @@ import ua.polodarb.xposed.info.needle.Condition
 import ua.polodarb.xposed.info.needle.EffectKind
 import ua.polodarb.xposed.info.needle.MicroHookEffect
 import ua.polodarb.xposed.info.needle.MicroHookSelector
+import ua.polodarb.xposed.info.needle.NeedleImageOverlay
 import ua.polodarb.xposed.info.needle.NeedleJson
 import ua.polodarb.xposed.info.needle.NeedleRecipePayload
 import ua.polodarb.xposed.info.needle.SelectorKind
@@ -89,7 +90,19 @@ private fun MicroHookEffect.toDomain(): HookEffectDetails = HookEffectDetails(
         EffectKind.BOOLEAN_RESULT -> HookEffectExpression.Conditional(
             NeedleJson.decodeFromJsonElement(BooleanExpression.serializer(), expression).toDomain()
         )
-        EffectKind.ARGUMENT_NULL, EffectKind.ADD_IMAGE_OVERLAY -> HookEffectExpression.None
+        EffectKind.ARGUMENT_NULL -> HookEffectExpression.None
+        EffectKind.ADD_IMAGE_OVERLAY -> runCatching {
+            val overlay = NeedleJson.decodeFromJsonElement(NeedleImageOverlay.serializer(), expression)
+            HookEffectExpression.ImageOverlay(
+                imageBase64 = overlay.imageBase64,
+                gravity = overlay.gravity.name,
+                widthDp = overlay.widthDp,
+                heightDp = overlay.heightDp,
+                offsetXDp = overlay.offsetXDp,
+                offsetYDp = overlay.offsetYDp,
+                alpha = overlay.alpha,
+            )
+        }.getOrDefault(HookEffectExpression.None)
         else -> HookEffectExpression.ValueOnly(
             NeedleJson.decodeFromJsonElement(ValueExpression.serializer(), expression).value.toDomain()
         )

@@ -2,10 +2,13 @@
 
 package ua.polodarb.gmsflags.presentation.feature.suggestions.details.ui.components
 
+import android.graphics.BitmapFactory
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,7 +52,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.Dp
+import kotlin.math.ceil
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.Alignment
@@ -57,6 +67,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -72,6 +83,7 @@ import ua.polodarb.gmsflags.presentation.core.ui.adaptive.GmsDimensions
 import ua.polodarb.gmsflags.presentation.core.ui.adaptive.GmsSpacing
 import ua.polodarb.gmsflags.presentation.core.ui.shape.gmsGroupPositionOf
 import ua.polodarb.gmsflags.presentation.core.ui.shape.gmsGroupedCardShape
+import ua.polodarb.gmsflags.presentation.core.ui.theme.GMSFlags20Theme
 import ua.polodarb.gmsflags.presentation.feature.suggestions.R
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -220,6 +232,7 @@ private fun EffectExpressionContent(effect: HookEffectDetails) {
                 accent = MaterialTheme.colorScheme.primaryContainer,
                 onAccent = MaterialTheme.colorScheme.onPrimaryContainer,
             )
+
             is HookEffectExpression.ValueOnly -> Text(
                 text = stringResource(
                     R.string.suggestions_details_hook_instructions_sets_to,
@@ -227,6 +240,8 @@ private fun EffectExpressionContent(effect: HookEffectDetails) {
                 ),
                 style = MaterialTheme.typography.bodyMedium,
             )
+
+            is HookEffectExpression.ImageOverlay -> ImageOverlayContent(expression)
             HookEffectExpression.None -> Unit
         }
         effect.whenExpression?.let { whenExpression ->
@@ -236,6 +251,85 @@ private fun EffectExpressionContent(effect: HookEffectDetails) {
                 accent = MaterialTheme.colorScheme.secondaryContainer,
                 onAccent = MaterialTheme.colorScheme.onSecondaryContainer,
             )
+        }
+    }
+}
+
+private val OverlayCheckerLight = Color(0xFFD0D0D0)
+private val OverlayCheckerDark = Color(0xFFA6A6A6)
+
+private fun Modifier.overlayCheckerboard(cellDp: Dp = 10.dp): Modifier = drawBehind {
+    drawRect(OverlayCheckerLight)
+    val cell = cellDp.toPx()
+    val cols = ceil(size.width / cell).toInt()
+    val rows = ceil(size.height / cell).toInt()
+    for (row in 0 until rows) {
+        for (col in 0 until cols) {
+            if ((row + col) % 2 == 1) {
+                drawRect(
+                    OverlayCheckerDark,
+                    topLeft = Offset(col * cell, row * cell),
+                    size = Size(cell, cell)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ImageOverlayContent(overlay: HookEffectExpression.ImageOverlay) {
+    val imageBitmap = remember(overlay.imageBase64) {
+        runCatching {
+            val bytes = java.util.Base64.getDecoder().decode(overlay.imageBase64)
+            BitmapFactory.decodeByteArray(bytes, 0, bytes.size)?.asImageBitmap()
+        }.getOrNull()
+    }
+    Column(verticalArrangement = Arrangement.spacedBy(GmsSpacing.Medium)) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(140.dp)
+                .clip(MaterialTheme.shapes.medium)
+                .overlayCheckerboard()
+                .border(
+                    1.dp,
+                    MaterialTheme.colorScheme.outlineVariant,
+                    MaterialTheme.shapes.medium
+                ),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (imageBitmap != null) {
+                Image(
+                    bitmap = imageBitmap,
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.size(72.dp),
+                )
+            } else {
+                Text(
+                    text = stringResource(R.string.suggestions_details_hook_instructions_overlay_undecodable),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .padding(GmsSpacing.Medium)
+                        .background(
+                            MaterialTheme.colorScheme.surfaceContainerHigh,
+                            MaterialTheme.shapes.medium
+                        )
+                        .padding(GmsSpacing.Medium)
+                )
+            }
+        }
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(GmsSpacing.Small),
+            verticalArrangement = Arrangement.spacedBy(GmsSpacing.Small),
+        ) {
+            SpecChip(overlay.gravity)
+            SpecChip("${overlay.widthDp}×${overlay.heightDp} dp")
+            if (overlay.offsetXDp != 0 || overlay.offsetYDp != 0) {
+                SpecChip("offset ${overlay.offsetXDp}/${overlay.offsetYDp} dp")
+            }
+            SpecChip("${(overlay.alpha * 100).toInt()}%")
         }
     }
 }
@@ -311,6 +405,17 @@ private fun HookValueSourceKind.icon(): ImageVector = when (this) {
 
 @Composable
 private fun SelectorDetailsContent(selector: HookSelectorDetails) {
+    if (selector.kind == HookSelectorKind.VIEW_RESOURCE_ID) {
+        Text(
+            text = stringResource(
+                R.string.suggestions_details_hook_instructions_where_view,
+                "${selector.viewResourcePackage}:id/${selector.viewResourceName}",
+            ),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        return
+    }
     if (selector.kind == HookSelectorKind.ANDROID_RESOURCE_STRING) {
         Text(
             text = stringResource(R.string.suggestions_details_hook_instructions_where_resource),
@@ -416,8 +521,73 @@ private fun SpecChip(text: String) {
     ) {
         Text(
             text = text,
-            modifier = Modifier.padding(horizontal = GmsSpacing.Small, vertical = GmsSpacing.ExtraSmall),
+            modifier = Modifier.padding(
+                horizontal = GmsSpacing.Small,
+                vertical = GmsSpacing.ExtraSmall
+            ),
             style = MaterialTheme.typography.labelMedium,
         )
+    }
+}
+
+private const val SAMPLE_OVERLAY_PNG_BASE64 =
+    "iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAIAAADYYG7QAAAAxElEQVR4nO2WMRLCQAwDFQ1vcAmP" +
+        "g2fxOUr8CnoofHZyGR3jLTPnSKfYE2/v6x1KEGIQYhBiEGIQYhBiEGIQYhBiEGIQYhBiEGJcdtbb" +
+        "6/n1xG+PPS/cyuuH/Vg5xBZnuMHAgSMN2ZhYzVPakGVkCp5yhiwvkC2RG3uOH7Vqn6YKV07oHNrQ" +
+        "Pyfk1d9TqnDlhFAKKVvCqQKev0Dlk/mYTK3nij3kkVh5Auobo9wKO4nFx/4E2lBEJxTRCUV0QhGd" +
+        "UIRcQh9gEi0HclbYUgAAAABJRU5ErkJggg=="
+
+private fun sampleImageOverlay() = HookEffectExpression.ImageOverlay(
+    imageBase64 = SAMPLE_OVERLAY_PNG_BASE64,
+    gravity = "TOP_LEFT",
+    widthDp = 24,
+    heightDp = 24,
+    offsetXDp = 0,
+    offsetYDp = 0,
+    alpha = 1f,
+)
+
+@Preview(name = "Overlay effect", showBackground = true, widthDp = 360)
+@Composable
+private fun ImageOverlayContentPreview() {
+    GMSFlags20Theme(dynamicColor = false) {
+        Surface(color = MaterialTheme.colorScheme.surface) {
+            Column(Modifier.padding(16.dp)) { ImageOverlayContent(sampleImageOverlay()) }
+        }
+    }
+}
+
+@Preview(name = "Overlay effect · dark", showBackground = true, widthDp = 360)
+@Composable
+private fun ImageOverlayContentDarkPreview() {
+    GMSFlags20Theme(darkTheme = true, dynamicColor = false) {
+        Surface(color = MaterialTheme.colorScheme.surface) {
+            Column(Modifier.padding(16.dp)) { ImageOverlayContent(sampleImageOverlay()) }
+        }
+    }
+}
+
+@Preview(name = "Overlay target selector", showBackground = true, widthDp = 360)
+@Composable
+private fun ViewResourceSelectorPreview() {
+    GMSFlags20Theme(dynamicColor = false) {
+        Surface(color = MaterialTheme.colorScheme.surface) {
+            Column(Modifier.padding(16.dp)) {
+                SelectorDetailsContent(
+                    HookSelectorDetails(
+                        kind = HookSelectorKind.VIEW_RESOURCE_ID,
+                        classUsingStringsAll = emptyList(),
+                        classUsingStringsAny = emptyList(),
+                        methodReturnType = "",
+                        methodParameterTypes = emptyList(),
+                        methodModifiersAll = emptyList(),
+                        methodUsingStringsAll = emptyList(),
+                        methodUsingStringsAny = emptyList(),
+                        viewResourceName = "key_pos_space",
+                        viewResourcePackage = "com.google.android.inputmethod.latin",
+                    ),
+                )
+            }
+        }
     }
 }

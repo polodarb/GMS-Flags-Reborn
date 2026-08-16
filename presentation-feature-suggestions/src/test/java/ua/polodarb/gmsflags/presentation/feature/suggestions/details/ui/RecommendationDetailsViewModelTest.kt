@@ -36,6 +36,7 @@ import ua.polodarb.gmsflags.domain.server.content.AppliedRecommendationSetup
 import ua.polodarb.gmsflags.domain.server.content.AppliedRecommendationSetupStore
 import ua.polodarb.gmsflags.domain.server.content.DangerLevel
 import ua.polodarb.gmsflags.domain.server.content.DecodeHookRecipe
+import ua.polodarb.gmsflags.domain.server.content.HookEngineSupport
 import ua.polodarb.gmsflags.domain.server.content.GetRecommendationExperience
 import ua.polodarb.gmsflags.domain.server.content.RecommendationExperience
 import ua.polodarb.gmsflags.domain.server.content.RecommendationFlagVariant
@@ -137,6 +138,7 @@ class RecommendationDetailsViewModelTest {
             applyMicroHooks = ApplyMicroHooks { _, _ -> Result.success(Unit) },
             verifyHookTrust = VerifyHookTrust { HookTrustStatus.NOT_SIGNED },
             decodeHookRecipe = NoOpDecodeHookRecipe,
+            hookEngineSupport = HookEngineSupport { true },
             isOfficialAppBuild = IsOfficialAppBuild { true },
             collectReportDiagnostics = NoOpReportDiagnostics,
             submitProblemReport = NoOpSubmitProblemReport,
@@ -187,6 +189,7 @@ class RecommendationDetailsViewModelTest {
                 applyMicroHooks = ApplyMicroHooks { _, _ -> Result.success(Unit) },
                 verifyHookTrust = VerifyHookTrust { HookTrustStatus.NOT_SIGNED },
             decodeHookRecipe = NoOpDecodeHookRecipe,
+            hookEngineSupport = HookEngineSupport { true },
                 isOfficialAppBuild = IsOfficialAppBuild { true },
                 collectReportDiagnostics = NoOpReportDiagnostics,
                 submitProblemReport = NoOpSubmitProblemReport,
@@ -244,6 +247,7 @@ class RecommendationDetailsViewModelTest {
                 applyMicroHooks = ApplyMicroHooks { _, _ -> Result.success(Unit) },
                 verifyHookTrust = VerifyHookTrust { HookTrustStatus.NOT_SIGNED },
             decodeHookRecipe = NoOpDecodeHookRecipe,
+            hookEngineSupport = HookEngineSupport { true },
                 isOfficialAppBuild = IsOfficialAppBuild { true },
                 collectReportDiagnostics = NoOpReportDiagnostics,
                 submitProblemReport = NoOpSubmitProblemReport,
@@ -300,6 +304,7 @@ class RecommendationDetailsViewModelTest {
                 },
                 verifyHookTrust = VerifyHookTrust { HookTrustStatus.NOT_SIGNED },
             decodeHookRecipe = NoOpDecodeHookRecipe,
+            hookEngineSupport = HookEngineSupport { true },
                 isOfficialAppBuild = IsOfficialAppBuild { true },
                 collectReportDiagnostics = NoOpReportDiagnostics,
                 submitProblemReport = NoOpSubmitProblemReport,
@@ -373,6 +378,7 @@ class RecommendationDetailsViewModelTest {
                 },
                 verifyHookTrust = VerifyHookTrust { HookTrustStatus.NOT_SIGNED },
             decodeHookRecipe = NoOpDecodeHookRecipe,
+            hookEngineSupport = HookEngineSupport { true },
                 isOfficialAppBuild = IsOfficialAppBuild { true },
                 collectReportDiagnostics = NoOpReportDiagnostics,
                 submitProblemReport = NoOpSubmitProblemReport,
@@ -424,6 +430,7 @@ class RecommendationDetailsViewModelTest {
             },
             verifyHookTrust = VerifyHookTrust { HookTrustStatus.VERIFIED },
             decodeHookRecipe = NoOpDecodeHookRecipe,
+            hookEngineSupport = HookEngineSupport { true },
             isOfficialAppBuild = IsOfficialAppBuild { false },
             collectReportDiagnostics = NoOpReportDiagnostics,
             submitProblemReport = NoOpSubmitProblemReport,
@@ -460,6 +467,7 @@ class RecommendationDetailsViewModelTest {
             applyMicroHooks = ApplyMicroHooks { _, _ -> Result.success(Unit) },
             verifyHookTrust = VerifyHookTrust { HookTrustStatus.NOT_SIGNED },
             decodeHookRecipe = NoOpDecodeHookRecipe,
+            hookEngineSupport = HookEngineSupport { true },
             isOfficialAppBuild = IsOfficialAppBuild { true },
             collectReportDiagnostics = NoOpReportDiagnostics,
             submitProblemReport = SubmitProblemReport { report ->

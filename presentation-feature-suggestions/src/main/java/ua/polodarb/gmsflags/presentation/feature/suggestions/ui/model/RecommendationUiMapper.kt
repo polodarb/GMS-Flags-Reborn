@@ -55,6 +55,7 @@ internal fun RecommendationApplicationStatus.toUiModel() = when (this) {
         RecommendationApplicationUiStatus.PartiallyApplied
     RecommendationApplicationStatus.NotApplied -> RecommendationApplicationUiStatus.NotApplied
     RecommendationApplicationStatus.Unavailable -> RecommendationApplicationUiStatus.Unavailable
+    RecommendationApplicationStatus.ClientUpdateRequired -> RecommendationApplicationUiStatus.Unavailable
 }
 
 internal fun RecommendationSupportStatus.toUiModel() = when (this) {

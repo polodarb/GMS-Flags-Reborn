@@ -136,6 +136,31 @@ class RecommendationApplicationStatusTest {
         )
     }
 
+    @Test
+    fun `a required hook the engine cannot run is client-update-required, never applied`() {
+        assertEquals(
+            RecommendationApplicationStatus.ClientUpdateRequired,
+            resolveHookApplicationStatus(
+                expectedHooks = listOf(hook(recipeId = 1, sha256 = "current-hash")),
+                appliedHooks = setOf(AppliedHookRef(recipeId = 1, payloadSha256 = "current-hash", required = true)),
+                unsupportedRequiredRecipeIds = setOf(1),
+            ),
+        )
+    }
+
+    @Test
+    fun `client-update-required dominates an otherwise-applied recommendation`() {
+        assertEquals(
+            RecommendationApplicationStatus.ClientUpdateRequired,
+            combineRecommendationApplicationStatuses(
+                listOf(
+                    RecommendationApplicationStatus.Applied,
+                    RecommendationApplicationStatus.ClientUpdateRequired,
+                ),
+            ),
+        )
+    }
+
     private fun hook(recipeId: Long, sha256: String) = RecommendationVariantHook(
         recipeId = recipeId,
         required = true,

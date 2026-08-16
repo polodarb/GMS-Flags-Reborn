@@ -143,7 +143,43 @@ object NeedleRecipeValidation {
             NeedleJson.decodeFromJsonElement(NeedleImageOverlay.serializer(), effect.expression)
         }.getOrNull()
             ?: return NeedleRecipeValidationResult.Invalid("ADD_IMAGE_OVERLAY expression is not a valid image overlay")
-        return validateOverlayImage(overlay)
+        val imageResult = validateOverlayImage(overlay)
+        if (imageResult is NeedleRecipeValidationResult.Invalid) return imageResult
+        return validateOverlayTint(payload, overlay)
+    }
+
+    private fun validateOverlayTint(
+        payload: NeedleRecipePayload,
+        overlay: NeedleImageOverlay,
+    ): NeedleRecipeValidationResult {
+        if (overlay.tint.isEmpty()) return NeedleRecipeValidationResult.Valid
+        if (NeedleCapabilities.VIEW_IMAGE_TINT !in payload.requiredCapabilities) {
+            return NeedleRecipeValidationResult.Invalid(
+                "a tinted overlay must declare required_capability ${NeedleCapabilities.VIEW_IMAGE_TINT}, so an " +
+                    "engine that cannot tint reports app-update-required instead of drawing an untinted image",
+            )
+        }
+        if (payload.minimumEngineVersion < NeedleCapabilities.IMAGE_TINT_ENGINE_VERSION) {
+            return NeedleRecipeValidationResult.Invalid(
+                "a tinted overlay must declare minimum_engine_version >= " +
+                    "${NeedleCapabilities.IMAGE_TINT_ENGINE_VERSION}, got ${payload.minimumEngineVersion}",
+            )
+        }
+        if (overlay.tint.any { it.kind == OverlayTintKind.SYSTEM_NIGHT_MODE } &&
+            payload.minimumEngineVersion < NeedleCapabilities.IMAGE_TINT_NIGHT_MODE_ENGINE_VERSION
+        ) {
+            return NeedleRecipeValidationResult.Invalid(
+                "a SYSTEM_NIGHT_MODE tint source requires minimum_engine_version >= " +
+                    "${NeedleCapabilities.IMAGE_TINT_NIGHT_MODE_ENGINE_VERSION}, got ${payload.minimumEngineVersion}",
+            )
+        }
+        overlay.tint.firstOrNull { !NeedleOverlayTint.isWellFormed(it) }?.let { bad ->
+            return NeedleRecipeValidationResult.Invalid(
+                "tint source ${bad.kind} is malformed: THEME_ATTRIBUTE must be one of " +
+                    "${NeedleOverlayTint.SUPPORTED_THEME_ATTRIBUTES}, FIXED_ARGB must be #AARRGGBB",
+            )
+        }
+        return NeedleRecipeValidationResult.Valid
     }
 
     private fun validateOverlayImage(overlay: NeedleImageOverlay): NeedleRecipeValidationResult {

@@ -20,7 +20,24 @@ class NeedleImageOverlayValidationTest {
         widthDp: Int = 24,
         heightDp: Int = 24,
         alpha: Float = 1f,
-    ) = NeedleImageOverlay(imageBase64, gravity, offsetXDp, offsetYDp, widthDp, heightDp, alpha)
+        tint: List<OverlayTintSource> = emptyList(),
+    ) = NeedleImageOverlay(imageBase64, gravity, offsetXDp, offsetYDp, widthDp, heightDp, alpha, tint)
+
+    private val tintChain = listOf(
+        OverlayTintSource(OverlayTintKind.FIRST_DESCENDANT_TEXT_COLOR),
+        OverlayTintSource(OverlayTintKind.THEME_ATTRIBUTE, themeAttribute = "colorOnSurface"),
+        OverlayTintSource(OverlayTintKind.FIXED_ARGB, argb = "#FF202124"),
+    )
+
+    private fun tintedPayload(
+        tint: List<OverlayTintSource> = tintChain,
+        capabilities: List<String> = listOf(NeedleCapabilities.VIEW_IMAGE_OVERLAY, NeedleCapabilities.VIEW_IMAGE_TINT),
+        minimumEngineVersion: Int = NeedleCapabilities.IMAGE_TINT_ENGINE_VERSION,
+    ) = overlayPayload(
+        effect = overlayEffect(overlay = overlay(tint = tint)),
+        capabilities = capabilities,
+        minimumEngineVersion = minimumEngineVersion,
+    )
 
     private fun overlaySelector(
         name: String = "translate_button",
@@ -176,4 +193,55 @@ class NeedleImageOverlayValidationTest {
         assertInvalid(
             overlayPayload(schemaVersion = 1, capabilities = emptyList(), minimumEngineVersion = 1),
         )
+
+    @Test
+    fun `a well-formed tinted overlay is valid`() = assertValid(tintedPayload())
+
+    @Test
+    fun `a tinted overlay without the tint capability is rejected`() =
+        assertInvalid(tintedPayload(capabilities = listOf(NeedleCapabilities.VIEW_IMAGE_OVERLAY)))
+
+    @Test
+    fun `a tinted overlay below the tint engine version is rejected`() =
+        assertInvalid(tintedPayload(minimumEngineVersion = NeedleCapabilities.IMAGE_OVERLAY_ENGINE_VERSION))
+
+    @Test
+    fun `a tint with an unknown theme attribute is rejected`() =
+        assertInvalid(tintedPayload(tint = listOf(OverlayTintSource(OverlayTintKind.THEME_ATTRIBUTE, themeAttribute = "notAColor"))))
+
+    @Test
+    fun `a tint with a malformed argb is rejected`() =
+        assertInvalid(tintedPayload(tint = listOf(OverlayTintSource(OverlayTintKind.FIXED_ARGB, argb = "nope"))))
+
+    @Test
+    fun `a system night mode tint is valid at engine 5`() = assertValid(
+        tintedPayload(
+            tint = listOf(OverlayTintSource(OverlayTintKind.SYSTEM_NIGHT_MODE, lightArgb = "#FF202124", darkArgb = "#FFFFFFFF")),
+            minimumEngineVersion = NeedleCapabilities.IMAGE_TINT_NIGHT_MODE_ENGINE_VERSION,
+        ),
+    )
+
+    @Test
+    fun `a system night mode tint below engine 5 is rejected`() = assertInvalid(
+        tintedPayload(
+            tint = listOf(OverlayTintSource(OverlayTintKind.SYSTEM_NIGHT_MODE, lightArgb = "#FF202124", darkArgb = "#FFFFFFFF")),
+            minimumEngineVersion = NeedleCapabilities.IMAGE_TINT_ENGINE_VERSION,
+        ),
+    )
+
+    @Test
+    fun `a system night mode tint missing a colour is rejected`() = assertInvalid(
+        tintedPayload(
+            tint = listOf(OverlayTintSource(OverlayTintKind.SYSTEM_NIGHT_MODE, lightArgb = "#FF202124")),
+            minimumEngineVersion = NeedleCapabilities.IMAGE_TINT_NIGHT_MODE_ENGINE_VERSION,
+        ),
+    )
+
+    @Test
+    fun `argb parsing accepts hex with and without prefix and rejects garbage`() {
+        assertEquals(0xFF202124.toInt(), NeedleOverlayTint.parseArgb("#FF202124"))
+        assertEquals(0xFF202124.toInt(), NeedleOverlayTint.parseArgb("202124"))
+        assertTrue(NeedleOverlayTint.parseArgb("nope") == null)
+        assertTrue(NeedleOverlayTint.parseArgb("#12345") == null)
+    }
 }

@@ -11,6 +11,24 @@ enum class OverlayGravity {
 
 enum class OverlayImageFormat { PNG, WEBP }
 
+/** How one link in an overlay's tint chain derives a colour. Resolved in list order; the first that
+ * yields a colour wins, and a monochrome image is recoloured with it via PorterDuff SRC_IN. */
+enum class OverlayTintKind { FIRST_DESCENDANT_TEXT_COLOR, THEME_ATTRIBUTE, FIXED_ARGB, SYSTEM_NIGHT_MODE }
+
+@Serializable
+data class OverlayTintSource(
+    val kind: OverlayTintKind,
+    /** Only for [OverlayTintKind.THEME_ATTRIBUTE] - an Android theme attr name resolved against the
+     * target view's own theme (e.g. "colorOnSurface"), NOT a Compose Material token. */
+    @SerialName("theme_attribute") val themeAttribute: String? = null,
+    /** Only for [OverlayTintKind.FIXED_ARGB] - "#AARRGGBB" or "AARRGGBB". */
+    val argb: String? = null,
+    /** [OverlayTintKind.SYSTEM_NIGHT_MODE] only - the colour used when the device is in light/day mode. */
+    @SerialName("light_argb") val lightArgb: String? = null,
+    /** [OverlayTintKind.SYSTEM_NIGHT_MODE] only - the colour used when the device is in dark/night mode. */
+    @SerialName("dark_argb") val darkArgb: String? = null,
+)
+
 @Serializable
 data class NeedleImageOverlay(
     @SerialName("image_base64") val imageBase64: String,
@@ -20,7 +38,43 @@ data class NeedleImageOverlay(
     @SerialName("width_dp") val widthDp: Int,
     @SerialName("height_dp") val heightDp: Int,
     val alpha: Float = 1f,
+    /** Optional recolour chain; empty means the image is drawn as-is. */
+    val tint: List<OverlayTintSource> = emptyList(),
 )
+
+object NeedleOverlayTint {
+    /** Theme attrs a recipe may resolve - all standard colour attrs, so a non-colour attr can never
+     * be coerced into a bogus tint. */
+    val SUPPORTED_THEME_ATTRIBUTES: Set<String> = setOf(
+        "colorOnSurface",
+        "colorOnSurfaceVariant",
+        "colorPrimary",
+        "colorOnPrimary",
+        "colorSecondary",
+        "colorOnBackground",
+        "textColorPrimary",
+        "textColorSecondary",
+    )
+
+    /** Parses "#AARRGGBB"/"AARRGGBB" (and "#RRGGBB"/"RRGGBB", assumed opaque) to a colour int, or null. */
+    fun parseArgb(value: String?): Int? {
+        val hex = value?.trim()?.removePrefix("#") ?: return null
+        if (!hex.all { it.isDigit() || it in 'a'..'f' || it in 'A'..'F' }) return null
+        val normalized = when (hex.length) {
+            6 -> "FF$hex"
+            8 -> hex
+            else -> return null
+        }
+        return normalized.toLongOrNull(16)?.toInt()
+    }
+
+    fun isWellFormed(source: OverlayTintSource): Boolean = when (source.kind) {
+        OverlayTintKind.FIRST_DESCENDANT_TEXT_COLOR -> true
+        OverlayTintKind.THEME_ATTRIBUTE -> source.themeAttribute in SUPPORTED_THEME_ATTRIBUTES
+        OverlayTintKind.FIXED_ARGB -> parseArgb(source.argb) != null
+        OverlayTintKind.SYSTEM_NIGHT_MODE -> parseArgb(source.lightArgb) != null && parseArgb(source.darkArgb) != null
+    }
+}
 
 object NeedleImageOverlayLimits {
     const val MAX_IMAGE_BYTES = 96 * 1024

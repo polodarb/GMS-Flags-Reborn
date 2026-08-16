@@ -83,7 +83,7 @@ internal object NeedleEngine {
                 installResourceStringDispatcher(resourceStringPayloads, lpparam.packageName, overrideStore)
             }
             if (viewOverlayPayloads.isNotEmpty()) {
-                installImageOverlayDispatcher(viewOverlayPayloads, classLoader)
+                installImageOverlayDispatcher(viewOverlayPayloads, classLoader, appContext)
             }
         }.onFailure { error ->
             XposedLogger.logE("NeedleEngine: failed for ${lpparam.packageName}", error)
@@ -304,6 +304,7 @@ internal object NeedleEngine {
     private fun installImageOverlayDispatcher(
         payloads: List<NeedleRecipePayload>,
         classLoader: ClassLoader,
+        systemContext: Context?,
     ) {
         val resolved = payloads.mapNotNull { payload ->
             val overlay = runCatching {
@@ -333,7 +334,7 @@ internal object NeedleEngine {
             }
         }
         if (resolved.isEmpty()) return
-        val dispatcher = NeedleImageOverlayDispatcher(resolved)
+        val dispatcher = NeedleImageOverlayDispatcher(resolved, systemContext)
         XposedHelpers.findAndHookMethod("android.view.View", classLoader, "draw", Canvas::class.java, dispatcher)
         XposedLogger.logI("Needle: installed image-overlay dispatcher for ${resolved.size} recipe(s)")
     }

@@ -127,7 +127,7 @@ internal fun RecommendationDetailsUiModel.applyAvailability(
     if (variant.unsupportedFlagCount > 0) {
         return RecommendationApplyAvailability.ContainsUnsupportedFlags
     }
-    if (variant.overrides.isEmpty()) return RecommendationApplyAvailability.NoFlags
+    if (variant.overrides.isEmpty() && variant.hooks.isEmpty()) return RecommendationApplyAvailability.NoFlags
     return RecommendationApplyAvailability.Available
 }
 

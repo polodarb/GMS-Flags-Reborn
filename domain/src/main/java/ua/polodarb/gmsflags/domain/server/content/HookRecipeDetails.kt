@@ -7,7 +7,7 @@ data class HookRecipeDetails(
     val effect: HookEffectDetails,
 )
 
-enum class HookSelectorKind { DEX_METHOD, ANDROID_RESOURCE_STRING }
+enum class HookSelectorKind { DEX_METHOD, ANDROID_RESOURCE_STRING, VIEW_RESOURCE_ID }
 
 data class HookSelectorDetails(
     val kind: HookSelectorKind,
@@ -18,10 +18,12 @@ data class HookSelectorDetails(
     val methodModifiersAll: List<String>,
     val methodUsingStringsAll: List<String>,
     val methodUsingStringsAny: List<String>,
+    val viewResourceName: String = "",
+    val viewResourcePackage: String = "",
 )
 
 enum class HookRuntimePoint { BEFORE, AFTER }
-enum class HookEffectKind { BOOLEAN_RESULT, NUMERIC_RESULT, ARGUMENT_REPLACE, STRING_RESULT }
+enum class HookEffectKind { BOOLEAN_RESULT, NUMERIC_RESULT, ARGUMENT_REPLACE, ARGUMENT_NULL, STRING_RESULT, ADD_IMAGE_OVERLAY }
 enum class HookCompareOp { EQ, NEQ, LT, LTE, GT, GTE }
 enum class HookValueSourceKind {
     ORIGINAL_RESULT, ARGUMENT, CONSTANT, FLAG_OVERRIDE, SYSTEM_FEATURE, SDK_INT, RESOURCE_ID
@@ -53,6 +55,16 @@ data class HookConditionExpression(val orGroups: List<HookConditionGroup>)
 sealed interface HookEffectExpression {
     data class Conditional(val expression: HookConditionExpression) : HookEffectExpression
     data class ValueOnly(val value: HookValueSource) : HookEffectExpression
+    data class ImageOverlay(
+        val imageBase64: String,
+        val gravity: String,
+        val widthDp: Int,
+        val heightDp: Int,
+        val offsetXDp: Int,
+        val offsetYDp: Int,
+        val alpha: Float,
+    ) : HookEffectExpression
+    data object None : HookEffectExpression
 }
 
 data class HookEffectDetails(

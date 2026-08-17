@@ -20,7 +20,9 @@ import ua.polodarb.gmsflags.domain.flags.GetPhenotypeFlagsUseCase
 import ua.polodarb.gmsflags.domain.flags.ObserveFlagOverrideChanges
 import ua.polodarb.gmsflags.domain.flags.ObserveFlagOverrideChangesUseCase
 import ua.polodarb.gmsflags.domain.flags.VerifyHookTrustUseCase
+import ua.polodarb.gmsflags.domain.flags.CheckHookEngineSupportUseCase
 import ua.polodarb.gmsflags.domain.server.content.DecodeHookRecipe
+import ua.polodarb.gmsflags.domain.server.content.HookEngineSupport
 import ua.polodarb.gmsflags.domain.server.content.VerifyHookTrust
 
 /** Qualifier for the injected trusted Needle public key - see :core-entry's di/AppKoin.kt. */
@@ -39,4 +41,5 @@ val flagsDomainModule = module {
         VerifyHookTrustUseCase(get(qualifier = NEEDLE_TRUSTED_PUBLIC_KEY_QUALIFIER))
     }
     factory<DecodeHookRecipe> { DecodeHookRecipeUseCase() }
+    factory<HookEngineSupport> { CheckHookEngineSupportUseCase() }
 }

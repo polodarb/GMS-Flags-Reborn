@@ -2,24 +2,28 @@ package ua.polodarb.xposed.needle
 
 import android.content.res.Resources
 import org.luckypray.dexkit.DexKitBridge
+import org.luckypray.dexkit.query.enums.StringMatchType
+import org.luckypray.dexkit.query.matchers.MethodMatcher
+import org.luckypray.dexkit.result.MethodData
 import ua.polodarb.xposed.info.needle.MicroHookSelector
+import ua.polodarb.xposed.info.needle.NeedleModifierNames
+import ua.polodarb.xposed.info.needle.NeedleRecipePayload
 import ua.polodarb.xposed.logging.XposedLogger
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 
-/**
- * Resolves a [MicroHookSelector] against the real installed target APK, on this device, right
- * now - the same live, on-device DexKit resolution pattern other strategies in this module already
- * use in production/debug today. Fails closed: anything other than exactly one match is treated as
- * "not resolvable" (never guesses).
- */
+internal sealed interface NeedleResolution {
+    data class Resolved(val method: Method) : NeedleResolution
+    data object NoMatch : NeedleResolution
+    data class Ambiguous(val count: Int, val descriptors: List<String>) : NeedleResolution
+    data class InvalidSelector(val reason: String) : NeedleResolution
+    data class BindFailed(val reason: String) : NeedleResolution
+}
+
 internal object NeedleSelectorResolver {
 
-    /**
-     * Recipe-authored modifier/return-type names are plain server-controlled strings, not a
-     * Kotlin enum - matching against named maps here (rather than inline literals) keeps a typo
-     * from silently falling through to "match everything" or "no type constraint".
-     */
+    private const val SCHEMA_VERSION_V2 = 2
+
     private val MODIFIER_FLAGS: Map<String, Int> = mapOf(
         "public" to Modifier.PUBLIC,
         "private" to Modifier.PRIVATE,
@@ -37,54 +41,153 @@ internal object NeedleSelectorResolver {
         "void" to Void.TYPE,
     )
 
-    fun resolve(bridge: DexKitBridge, selector: MicroHookSelector, classLoader: ClassLoader): Method? {
-        val candidates = bridge.findMethod {
-            matcher {
-                if (selector.classUsingStringsAll.isNotEmpty()) {
-                    declaredClass { usingStrings(selector.classUsingStringsAll) }
-                }
-                if (selector.methodUsingStringsAll.isNotEmpty()) {
-                    usingStrings(selector.methodUsingStringsAll)
-                }
-                returnType(returnTypeFor(selector.methodReturnType))
-            }
-        }.filter { methodData ->
-            val modifiers = methodData.modifiers
-            val isConcrete = (modifiers and Modifier.ABSTRACT) == 0
-            val matchesParamCount = selector.methodParameterTypes.isEmpty() ||
-                methodData.paramTypes.size == selector.methodParameterTypes.size
-            val matchesModifiers = selector.methodModifiersAll.all { required ->
-                val flag = MODIFIER_FLAGS[required] ?: return@all true
-                (modifiers and flag) != 0
-            }
-            isConcrete && matchesParamCount && matchesModifiers
-        }.distinctBy { it.descriptor }
+    fun resolve(
+        bridge: DexKitBridge,
+        payload: NeedleRecipePayload,
+        classLoader: ClassLoader,
+    ): NeedleResolution {
+        val selector = payload.selector
+        val isV2 = payload.schemaVersion >= SCHEMA_VERSION_V2
 
-        if (candidates.size != 1) {
-            XposedLogger.logW(
-                "NeedleSelectorResolver: expected exactly 1 match, found ${candidates.size} " +
-                    "for selector (returnType=${selector.methodReturnType}, strings=${selector.methodUsingStringsAll})",
-            )
-            return null
+        if (isV2) {
+            selector.methodModifiersAll.firstOrNull { !NeedleModifierNames.isKnown(it) }?.let { unknown ->
+                return NeedleResolution.InvalidSelector("unknown method modifier '$unknown'")
+            }
+            selector.classHasFieldsAll.flatMap { it.modifiersAll }
+                .firstOrNull { !NeedleModifierNames.isKnown(it) }
+                ?.let { unknown -> return NeedleResolution.InvalidSelector("unknown field modifier '$unknown'") }
+        }
+
+        val candidates = queryVariants(selector, isV2)
+            .flatMap { variant -> runQuery(bridge, selector, variant, isV2) }
+            .filter { methodData -> matchesPostFilters(methodData, selector, isV2) }
+            .distinctBy { it.descriptor }
+
+        if (candidates.isEmpty()) return NeedleResolution.NoMatch
+        if (candidates.size > 1) {
+            return NeedleResolution.Ambiguous(candidates.size, candidates.map { it.descriptor })
         }
 
         return runCatching { candidates.single().getMethodInstance(classLoader) }
-            .onFailure { error -> XposedLogger.logE("NeedleSelectorResolver: failed to bind resolved method", error) }
-            .getOrNull()
+            .fold(
+                onSuccess = { NeedleResolution.Resolved(it) },
+                onFailure = { error ->
+                    NeedleResolution.BindFailed(error.message ?: error.javaClass.simpleName)
+                },
+            )
     }
 
-    /** The single engine-hardcoded framework hook target for
-     * [ua.polodarb.xposed.info.needle.SelectorKind.ANDROID_RESOURCE_STRING] recipes. Deliberately
-     * not driven by any selector field - a recipe can pick which resource id to react to (via its
-     * effect's `when` condition), never which framework class/method gets hooked.
-     * `Resources#getString(int)` is not present in a third-party APK's own dex, so unlike
-     * [resolve] this does not use DexKit at all - it's a direct JVM reflection lookup against the
-     * framework class, available in any classloader. */
+    private data class QueryVariant(val classAnyString: String?, val methodAnyString: String?)
+
+    private fun queryVariants(selector: MicroHookSelector, isV2: Boolean): List<QueryVariant> {
+        if (!isV2) return listOf(QueryVariant(null, null))
+        val classAlternatives = selector.classUsingStringsAny.ifEmpty { listOf(null) }
+        val methodAlternatives = selector.methodUsingStringsAny.ifEmpty { listOf(null) }
+        return classAlternatives.flatMap { classAny ->
+            methodAlternatives.map { methodAny -> QueryVariant(classAny, methodAny) }
+        }
+    }
+
+    private fun runQuery(
+        bridge: DexKitBridge,
+        selector: MicroHookSelector,
+        variant: QueryVariant,
+        isV2: Boolean,
+    ): List<MethodData> = runCatching {
+        bridge.findMethod {
+            matcher {
+                buildClassMatcher(selector, variant, isV2, this)
+
+                val methodStrings = selector.methodUsingStringsAll + listOfNotNull(variant.methodAnyString)
+                if (methodStrings.isNotEmpty()) {
+                    if (isV2) usingStrings(methodStrings, StringMatchType.Equals) else usingStrings(methodStrings)
+                }
+
+                if (isV2) {
+                    returnType(selector.methodReturnType, StringMatchType.Equals)
+                    paramTypes(selector.methodParameterTypes)
+                    selector.methodInvokesAll.forEach { invoked ->
+                        addInvoke(
+                            MethodMatcher()
+                                .declaredClass(invoked.declaringType, StringMatchType.Equals)
+                                .name(invoked.name)
+                                .returnType(invoked.returnType, StringMatchType.Equals)
+                                .paramTypes(invoked.parameterTypes),
+                        )
+                    }
+                } else {
+                    returnType(legacyReturnTypeFor(selector.methodReturnType))
+                }
+            }
+        }.toList()
+    }.getOrElse { error ->
+        XposedLogger.logE("NeedleSelectorResolver: dex query failed", error)
+        emptyList()
+    }
+
+    private fun buildClassMatcher(
+        selector: MicroHookSelector,
+        variant: QueryVariant,
+        isV2: Boolean,
+        matcher: MethodMatcher,
+    ) {
+        val classStrings = selector.classUsingStringsAll + listOfNotNull(variant.classAnyString)
+        val hasClassConstraint = classStrings.isNotEmpty() ||
+            (isV2 && (selector.classHasMethodsAll.isNotEmpty() || selector.classHasFieldsAll.isNotEmpty()))
+        if (!hasClassConstraint) return
+
+        matcher.declaredClass {
+            if (classStrings.isNotEmpty()) {
+                if (isV2) usingStrings(classStrings, StringMatchType.Equals) else usingStrings(classStrings)
+            }
+            if (!isV2) return@declaredClass
+            selector.classHasMethodsAll.forEach { signature ->
+                addMethod {
+                    returnType(signature.returnType, StringMatchType.Equals)
+                    paramTypes(signature.parameterTypes)
+                }
+            }
+            selector.classHasFieldsAll.forEach { signature ->
+                addField {
+                    type(signature.type, StringMatchType.Equals)
+                    modifierMaskOf(signature.modifiersAll)?.let { modifiers(it) }
+                }
+            }
+        }
+    }
+
+    private fun matchesPostFilters(
+        methodData: MethodData,
+        selector: MicroHookSelector,
+        isV2: Boolean,
+    ): Boolean {
+        val modifiers = methodData.modifiers
+        if ((modifiers and Modifier.ABSTRACT) != 0) return false
+
+        val matchesModifiers = selector.methodModifiersAll.all { required ->
+            val flag = MODIFIER_FLAGS[required] ?: return@all !isV2
+            (modifiers and flag) != 0
+        }
+        if (!matchesModifiers) return false
+
+        if (isV2) return true
+
+        return selector.methodParameterTypes.isEmpty() ||
+            methodData.paramTypes.size == selector.methodParameterTypes.size
+    }
+
+    private fun modifierMaskOf(names: List<String>): Int? {
+        if (names.isEmpty()) return null
+        var mask = 0
+        names.forEach { name -> mask = mask or (MODIFIER_FLAGS[name] ?: return null) }
+        return mask
+    }
+
     fun resolveResourceGetString(): Method? = runCatching {
         Resources::class.java.getMethod("getString", Int::class.javaPrimitiveType)
     }.onFailure { error ->
         XposedLogger.logE("NeedleSelectorResolver: failed to resolve Resources#getString(int)", error)
     }.getOrNull()
 
-    private fun returnTypeFor(name: String): Class<*> = PRIMITIVE_RETURN_TYPES[name] ?: Any::class.java
+    private fun legacyReturnTypeFor(name: String): Class<*> = PRIMITIVE_RETURN_TYPES[name] ?: Any::class.java
 }

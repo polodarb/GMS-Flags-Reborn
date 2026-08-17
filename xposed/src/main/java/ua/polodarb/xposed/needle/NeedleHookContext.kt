@@ -5,6 +5,7 @@ import android.content.res.Resources
 import android.os.Build
 import de.robv.android.xposed.XC_MethodHook
 import ua.polodarb.xposed.info.needle.ConstantValueType
+import ua.polodarb.xposed.info.needle.NeedleBooleans
 import ua.polodarb.xposed.info.needle.NeedleEvaluationContext
 import ua.polodarb.xposed.store.RuntimeFlagOverrideStore
 
@@ -26,7 +27,7 @@ internal class NeedleHookContext(
         )
         val override = match.override ?: return null
         return when (valueType) {
-            ConstantValueType.BOOL -> override.value.toBoolean()
+            ConstantValueType.BOOL -> NeedleBooleans.parse(override.value)
             ConstantValueType.INT -> override.value.toIntOrNull()
             ConstantValueType.LONG -> override.value.toLongOrNull()
             ConstantValueType.FLOAT -> override.value.toFloatOrNull()

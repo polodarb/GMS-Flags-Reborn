@@ -9,6 +9,11 @@ enum class RecommendationApplicationStatus {
     PartiallyApplied,
     NotApplied,
     Unavailable,
+    ClientUpdateRequired,
+}
+
+fun interface HookEngineSupport {
+    operator fun invoke(hook: RecommendationVariantHook): Boolean
 }
 
 fun resolveRecommendationApplicationStatus(
@@ -47,8 +52,13 @@ fun resolveRecommendationApplicationStatus(
 fun resolveHookApplicationStatus(
     expectedHooks: List<RecommendationVariantHook>,
     appliedHooks: Set<AppliedHookRef>,
+    unsupportedRequiredRecipeIds: Set<Long> = emptySet(),
 ): RecommendationApplicationStatus {
     if (expectedHooks.isEmpty()) return RecommendationApplicationStatus.Unavailable
+
+    if (expectedHooks.any { it.required && it.recipeId in unsupportedRequiredRecipeIds }) {
+        return RecommendationApplicationStatus.ClientUpdateRequired
+    }
 
     val appliedByRecipeId = appliedHooks.associateBy { it.recipeId }
     val matchedCount = expectedHooks.count { expected ->
@@ -67,6 +77,8 @@ fun combineRecommendationApplicationStatuses(
     statuses: List<RecommendationApplicationStatus>,
 ): RecommendationApplicationStatus = when {
     statuses.isEmpty() -> RecommendationApplicationStatus.Unavailable
+    statuses.any { it == RecommendationApplicationStatus.ClientUpdateRequired } ->
+        RecommendationApplicationStatus.ClientUpdateRequired
     statuses.all { it == RecommendationApplicationStatus.Applied } ->
         RecommendationApplicationStatus.Applied
     statuses.all { it == RecommendationApplicationStatus.NotApplied } ->

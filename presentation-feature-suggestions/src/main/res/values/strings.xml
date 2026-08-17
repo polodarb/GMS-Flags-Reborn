@@ -147,6 +147,9 @@
     <string name="suggestions_details_patch_trust_unavailable_desc">This build has no verification key, so the signature couldn’t be checked on this device. The patch still applies, but it wasn’t verified here.</string>
     <string name="suggestions_details_patch_trust_failed">Signature mismatch</string>
     <string name="suggestions_details_patch_trust_failed_desc">This patch’s signature does NOT match this app’s built-in key. It may have been tampered with, or the app’s key is out of date. It will not be applied — please contact support.</string>
+    <string name="suggestions_details_patch_trust_update_required">Update required</string>
+    <string name="suggestions_details_patch_trust_update_required_desc">This patch needs a newer version of GMS Flags than you have. It won’t be applied until you update. Grab the latest release to enable it.</string>
+    <string name="suggestions_details_patch_trust_update_button">Download update</string>
 
     <!-- Failed-verification card (shown inline in place of the normal patch card). -->
     <string name="suggestions_details_patch_failed_title">This patch can’t be trusted</string>
@@ -186,13 +189,17 @@
     <string name="suggestions_details_hook_instructions_kind_boolean">this patch can adjust its true/false result.</string>
     <string name="suggestions_details_hook_instructions_kind_numeric">this patch can adjust its numeric result.</string>
     <string name="suggestions_details_hook_instructions_kind_argument">this patch can replace one of its inputs.</string>
+    <string name="suggestions_details_hook_instructions_kind_argument_null">this patch clears one of its inputs.</string>
     <string name="suggestions_details_hook_instructions_kind_string">this patch can replace the text it returns.</string>
+    <string name="suggestions_details_hook_instructions_kind_image_overlay">this patch draws an image over a view.</string>
     <string name="suggestions_details_hook_instructions_applies_when">Applies if ANY rule below matches:</string>
     <string name="suggestions_details_hook_instructions_only_when">Only runs when this also matches:</string>
     <string name="suggestions_details_hook_instructions_sets_to">Sets it to: %1$s</string>
     <string name="suggestions_details_hook_instructions_rule">Rule %1$d</string>
     <string name="suggestions_details_hook_instructions_where_title">Where it hooks</string>
     <string name="suggestions_details_hook_instructions_where_resource">A fixed, built-in hook on Android’s own resource lookup — it doesn’t search this app’s code at all.</string>
+    <string name="suggestions_details_hook_instructions_where_view">Draws over the view %1$s, found by its resource id.</string>
+    <string name="suggestions_details_hook_instructions_overlay_undecodable">Image could not be decoded</string>
     <string name="suggestions_details_hook_instructions_returns">Returns: %1$s</string>
     <string name="suggestions_details_hook_instructions_params_none">Takes no parameters</string>
     <string name="suggestions_details_hook_instructions_params">Parameters: %1$s</string>

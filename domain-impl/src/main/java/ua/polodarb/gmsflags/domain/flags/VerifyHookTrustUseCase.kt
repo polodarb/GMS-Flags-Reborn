@@ -3,6 +3,7 @@ package ua.polodarb.gmsflags.domain.flags
 import ua.polodarb.gmsflags.domain.server.content.HookTrustStatus
 import ua.polodarb.gmsflags.domain.server.content.RecommendationVariantHook
 import ua.polodarb.gmsflags.domain.server.content.VerifyHookTrust
+import ua.polodarb.xposed.info.needle.NeedleClientSupport
 import ua.polodarb.xposed.info.needle.NeedleSignature
 import java.util.Base64
 
@@ -21,12 +22,16 @@ class VerifyHookTrustUseCase(
             ?: return HookTrustStatus.CANNOT_VERIFY_IN_THIS_BUILD
         return runCatching {
             val payload = Base64.getDecoder().decode(envelope.payloadBase64)
-            val verified = NeedleSignature.verify(
+            val verifiedSchemaVersion = NeedleSignature.verifiedSchemaVersion(
                 payload = payload,
                 signatureBase64 = envelope.signatureBase64,
                 publicKeyBase64 = trustedKey,
             )
-            if (verified) HookTrustStatus.VERIFIED else HookTrustStatus.VERIFICATION_FAILED
+            when {
+                verifiedSchemaVersion != null -> HookTrustStatus.VERIFIED
+                NeedleClientSupport.requiresNewerEngine(envelope.payloadBase64) -> HookTrustStatus.APP_UPDATE_REQUIRED
+                else -> HookTrustStatus.VERIFICATION_FAILED
+            }
         }.getOrDefault(HookTrustStatus.VERIFICATION_FAILED)
     }
 }

@@ -27,6 +27,7 @@ import ua.polodarb.gmsflags.domain.server.content.GetRecommendationExperience
 import ua.polodarb.gmsflags.domain.server.content.HookTrustStatus
 import ua.polodarb.gmsflags.domain.server.content.RecommendationApplicationStatus
 import ua.polodarb.gmsflags.domain.server.content.RecommendationVariantHook
+import ua.polodarb.gmsflags.domain.server.content.HookEngineSupport
 import ua.polodarb.gmsflags.domain.server.content.VerifyHookTrust
 import ua.polodarb.gmsflags.domain.server.content.combineRecommendationApplicationStatuses
 import ua.polodarb.gmsflags.domain.server.content.resolveHookApplicationStatus
@@ -61,6 +62,7 @@ internal class RecommendationDetailsViewModel(
     private val getApplicationScopeStatus: GetApplicationXposedScopeStatus,
     private val verifyHookTrust: VerifyHookTrust,
     private val decodeHookRecipe: DecodeHookRecipe,
+    private val hookEngineSupport: HookEngineSupport,
     private val isOfficialAppBuild: IsOfficialAppBuild,
     private val collectReportDiagnostics: CollectReportDiagnostics,
     private val submitProblemReport: SubmitProblemReport,
@@ -511,7 +513,11 @@ internal class RecommendationDetailsViewModel(
                     .getOrNull()
                     ?.hooks
                     .orEmpty()
-                statuses += resolveHookApplicationStatus(expectedHooks, appliedHooks)
+                val unsupportedRequiredRecipeIds = expectedHooks
+                    .filter { it.required && !hookEngineSupport(it) }
+                    .map { it.recipeId }
+                    .toSet()
+                statuses += resolveHookApplicationStatus(expectedHooks, appliedHooks, unsupportedRequiredRecipeIds)
             }
             val status = if (unavailable) {
                 RecommendationApplicationUiStatus.Unavailable
@@ -531,6 +537,7 @@ private fun RecommendationApplicationStatus.toUiStatus() = when (this) {
         RecommendationApplicationUiStatus.PartiallyApplied
     RecommendationApplicationStatus.NotApplied -> RecommendationApplicationUiStatus.NotApplied
     RecommendationApplicationStatus.Unavailable -> RecommendationApplicationUiStatus.Unavailable
+    RecommendationApplicationStatus.ClientUpdateRequired -> RecommendationApplicationUiStatus.Unavailable
 }
 
 private val AppliedRecommendationSetup.entryCount: Int

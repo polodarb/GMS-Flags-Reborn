@@ -20,6 +20,7 @@ import ua.polodarb.xposed.info.needle.Condition
 import ua.polodarb.xposed.info.needle.EffectKind
 import ua.polodarb.xposed.info.needle.MicroHookEffect
 import ua.polodarb.xposed.info.needle.MicroHookSelector
+import ua.polodarb.xposed.info.needle.NeedleImageOverlay
 import ua.polodarb.xposed.info.needle.NeedleJson
 import ua.polodarb.xposed.info.needle.NeedleRecipePayload
 import ua.polodarb.xposed.info.needle.SelectorKind
@@ -58,6 +59,7 @@ private fun MicroHookSelector.toDomain(): HookSelectorDetails = HookSelectorDeta
     kind = when (type) {
         SelectorKind.DEX_METHOD -> HookSelectorKind.DEX_METHOD
         SelectorKind.ANDROID_RESOURCE_STRING -> HookSelectorKind.ANDROID_RESOURCE_STRING
+        SelectorKind.VIEW_RESOURCE_ID -> HookSelectorKind.VIEW_RESOURCE_ID
     },
     classUsingStringsAll = classUsingStringsAll,
     classUsingStringsAny = classUsingStringsAny,
@@ -66,6 +68,8 @@ private fun MicroHookSelector.toDomain(): HookSelectorDetails = HookSelectorDeta
     methodModifiersAll = methodModifiersAll,
     methodUsingStringsAll = methodUsingStringsAll,
     methodUsingStringsAny = methodUsingStringsAny,
+    viewResourceName = viewResourceName,
+    viewResourcePackage = viewResourcePackage,
 )
 
 private fun MicroHookEffect.toDomain(): HookEffectDetails = HookEffectDetails(
@@ -77,13 +81,28 @@ private fun MicroHookEffect.toDomain(): HookEffectDetails = HookEffectDetails(
         EffectKind.BOOLEAN_RESULT -> HookEffectKind.BOOLEAN_RESULT
         EffectKind.NUMERIC_RESULT -> HookEffectKind.NUMERIC_RESULT
         EffectKind.ARGUMENT_REPLACE -> HookEffectKind.ARGUMENT_REPLACE
+        EffectKind.ARGUMENT_NULL -> HookEffectKind.ARGUMENT_NULL
         EffectKind.STRING_RESULT -> HookEffectKind.STRING_RESULT
+        EffectKind.ADD_IMAGE_OVERLAY -> HookEffectKind.ADD_IMAGE_OVERLAY
     },
     argumentIndex = argumentIndex,
     expression = when (kind) {
         EffectKind.BOOLEAN_RESULT -> HookEffectExpression.Conditional(
             NeedleJson.decodeFromJsonElement(BooleanExpression.serializer(), expression).toDomain()
         )
+        EffectKind.ARGUMENT_NULL -> HookEffectExpression.None
+        EffectKind.ADD_IMAGE_OVERLAY -> runCatching {
+            val overlay = NeedleJson.decodeFromJsonElement(NeedleImageOverlay.serializer(), expression)
+            HookEffectExpression.ImageOverlay(
+                imageBase64 = overlay.imageBase64,
+                gravity = overlay.gravity.name,
+                widthDp = overlay.widthDp,
+                heightDp = overlay.heightDp,
+                offsetXDp = overlay.offsetXDp,
+                offsetYDp = overlay.offsetYDp,
+                alpha = overlay.alpha,
+            )
+        }.getOrDefault(HookEffectExpression.None)
         else -> HookEffectExpression.ValueOnly(
             NeedleJson.decodeFromJsonElement(ValueExpression.serializer(), expression).value.toDomain()
         )

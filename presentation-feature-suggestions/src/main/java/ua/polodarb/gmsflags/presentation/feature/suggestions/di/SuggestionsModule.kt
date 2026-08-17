@@ -28,6 +28,7 @@ val presentationFeatureSuggestionsModule = module {
             getApplicationScopeStatus = get(),
             verifyHookTrust = get(),
             decodeHookRecipe = get(),
+            hookEngineSupport = get(),
             isOfficialAppBuild = get(),
             collectReportDiagnostics = get(),
             submitProblemReport = get(),

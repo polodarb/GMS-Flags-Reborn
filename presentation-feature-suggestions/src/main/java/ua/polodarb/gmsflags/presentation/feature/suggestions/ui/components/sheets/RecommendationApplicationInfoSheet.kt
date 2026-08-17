@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -55,36 +57,48 @@ internal fun RecommendationApplicationInfoSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(
-                    start = GmsSpacing.ExtraLarge,
-                    end = GmsSpacing.ExtraLarge,
-                    bottom = GmsSpacing.Small,
-                ),
-            verticalArrangement = Arrangement.spacedBy(GmsSpacing.Large),
+                .navigationBarsPadding(),
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(GmsSpacing.Small)) {
-                Text(
-                    text = stringResource(R.string.suggestions_application_status_sheet_title),
-                    style = MaterialTheme.typography.titleLarge,
-                )
-                Text(
-                    text = stringResource(
-                        R.string.suggestions_application_status_sheet_description,
-                    ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-            }
-            Column(verticalArrangement = Arrangement.spacedBy(GmsSpacing.Small)) {
-                ApplicationStatuses.forEach { status ->
-                    ApplicationStatusRow(
-                        status = status,
-                        selected = status == currentStatus,
+            Column(
+                modifier = Modifier
+                    .weight(1f, fill = false)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = GmsSpacing.ExtraLarge),
+                verticalArrangement = Arrangement.spacedBy(GmsSpacing.Large),
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(GmsSpacing.Small)) {
+                    Text(
+                        text = stringResource(R.string.suggestions_application_status_sheet_title),
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                    Text(
+                        text = stringResource(
+                            R.string.suggestions_application_status_sheet_description,
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium,
                     )
                 }
+                Column(verticalArrangement = Arrangement.spacedBy(GmsSpacing.Small)) {
+                    ApplicationStatuses.forEach { status ->
+                        ApplicationStatusRow(
+                            status = status,
+                            selected = status == currentStatus,
+                        )
+                    }
+                }
             }
-            Button(onClick = hideSheet, modifier = Modifier.fillMaxWidth()) {
+            Button(
+                onClick = hideSheet,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = GmsSpacing.ExtraLarge,
+                        end = GmsSpacing.ExtraLarge,
+                        top = GmsSpacing.Large,
+                        bottom = GmsSpacing.Small,
+                    ),
+            ) {
                 Text(stringResource(R.string.suggestions_support_sheet_close))
             }
         }

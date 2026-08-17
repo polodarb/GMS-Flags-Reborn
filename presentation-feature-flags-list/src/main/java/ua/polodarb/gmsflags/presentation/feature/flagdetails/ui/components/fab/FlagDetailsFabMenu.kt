@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Segment
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButtonMenu
 import androidx.compose.material3.FloatingActionButtonMenuItem
@@ -41,7 +42,7 @@ import ua.polodarb.gmsflags.presentation.feature.flagdetails.R
 import ua.polodarb.gmsflags.presentation.feature.flagdetails.mvi.FlagDetailsEvent
 import ua.polodarb.gmsflags.presentation.feature.flagdetails.ui.model.flagDetailsMenuSections
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun FlagDetailsFabMenu(
     enabled: Boolean,

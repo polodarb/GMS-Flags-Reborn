@@ -12,11 +12,14 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -24,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -60,49 +64,67 @@ internal fun RecommendationHookTrustSheet(
 
 @Composable
 private fun HookTrustSheetContent(currentStatus: HookTrustStatus, onClose: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .navigationBarsPadding()
-            .padding(
-                start = GmsSpacing.ExtraLarge,
-                end = GmsSpacing.ExtraLarge,
-                bottom = GmsSpacing.Small,
-            ),
-        verticalArrangement = Arrangement.spacedBy(GmsSpacing.Large),
-    ) {
-        Column(verticalArrangement = Arrangement.spacedBy(GmsSpacing.Small)) {
-            Text(
-                text = stringResource(R.string.suggestions_details_patch_trust_sheet_title),
-                style = MaterialTheme.typography.titleLarge,
-            )
-            Text(
-                text = stringResource(R.string.suggestions_details_patch_trust_sheet_description),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodyMedium,
-            )
-        }
-        Column(verticalArrangement = Arrangement.spacedBy(GmsSpacing.Small)) {
-            HookTrustStates.forEach { status ->
-                HookTrustStatusRow(status = status, selected = status == currentStatus)
-            }
-        }
-        if (currentStatus == HookTrustStatus.APP_UPDATE_REQUIRED) {
-            val uriHandler = LocalUriHandler.current
-            Button(
-                onClick = { uriHandler.openUri(GMS_FLAGS_RELEASES_URL) },
-                modifier = Modifier.fillMaxWidth(),
+    Scaffold(
+        modifier = Modifier.fillMaxWidth(),
+        containerColor = Color.Transparent,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        bottomBar = {
+            Column(
+                modifier = Modifier
+                    .navigationBarsPadding()
+                    .padding(
+                        start = GmsSpacing.ExtraLarge,
+                        end = GmsSpacing.ExtraLarge,
+                        top = GmsSpacing.Large,
+                        bottom = GmsSpacing.Small,
+                    ),
+                verticalArrangement = Arrangement.spacedBy(GmsSpacing.Large),
             ) {
-                Text(stringResource(R.string.suggestions_details_patch_trust_update_button))
+                if (currentStatus == HookTrustStatus.APP_UPDATE_REQUIRED) {
+                    val uriHandler = LocalUriHandler.current
+                    Button(
+                        onClick = { uriHandler.openUri(GMS_FLAGS_RELEASES_URL) },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(stringResource(R.string.suggestions_details_patch_trust_update_button))
+                    }
+                }
+                Button(onClick = onClose, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.suggestions_support_sheet_close))
+                }
             }
-        }
-        Button(onClick = onClose, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.suggestions_support_sheet_close))
+        },
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .verticalScroll(rememberScrollState(), overscrollEffect = null)
+                .padding(horizontal = GmsSpacing.ExtraLarge),
+            verticalArrangement = Arrangement.spacedBy(GmsSpacing.Large),
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(GmsSpacing.Small)) {
+                Text(
+                    text = stringResource(R.string.suggestions_details_patch_trust_sheet_title),
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                Text(
+                    text = stringResource(
+                        R.string.suggestions_details_patch_trust_sheet_description,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(GmsSpacing.Small)) {
+                HookTrustStates.forEach { status ->
+                    HookTrustStatusRow(status = status, selected = status == currentStatus)
+                }
+            }
         }
     }
 }
 
-@Preview(name = "Trust sheet · update required", showBackground = true, widthDp = 400)
+@Preview(name = "Trust sheet · update required", showBackground = true, widthDp = 400, heightDp = 720)
 @Composable
 private fun HookTrustSheetUpdateRequiredPreview() {
     GMSFlags20Theme(dynamicColor = false) {
@@ -112,7 +134,7 @@ private fun HookTrustSheetUpdateRequiredPreview() {
     }
 }
 
-@Preview(name = "Trust sheet · verified", showBackground = true, widthDp = 400)
+@Preview(name = "Trust sheet · verified", showBackground = true, widthDp = 400, heightDp = 720)
 @Composable
 private fun HookTrustSheetVerifiedPreview() {
     GMSFlags20Theme(dynamicColor = false) {

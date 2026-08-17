@@ -62,7 +62,7 @@ internal fun RecommendationApplicationInfoSheet(
             Column(
                 modifier = Modifier
                     .weight(1f, fill = false)
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(rememberScrollState(), overscrollEffect = null)
                     .padding(horizontal = GmsSpacing.ExtraLarge),
                 verticalArrangement = Arrangement.spacedBy(GmsSpacing.Large),
             ) {

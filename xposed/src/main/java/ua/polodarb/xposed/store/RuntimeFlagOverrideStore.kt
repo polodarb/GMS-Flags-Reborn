@@ -10,33 +10,25 @@ internal class RuntimeFlagOverrideStore(
     private val dbFile: File
 ) {
 
-    private var cachedModifiedAt = Long.MIN_VALUE
-    private var cachedOverrides = emptyMap<Key, Override>()
+    @Volatile
+    private var snapshot = Snapshot(Long.MIN_VALUE, emptyMap())
 
-    fun find(packageName: String, flagName: String): Override? {
-        refreshIfNeeded()
-        return cachedOverrides[Key(packageName, flagName)]
-    }
+    fun find(packageName: String, flagName: String): Override? =
+        overrides()[Key(packageName, flagName)]
 
-    fun hasOverrides(): Boolean {
-        refreshIfNeeded()
-        return cachedOverrides.isNotEmpty()
-    }
+    fun hasOverrides(): Boolean = overrides().isNotEmpty()
 
-    fun overrideCount(): Int {
-        refreshIfNeeded()
-        return cachedOverrides.size
-    }
+    fun overrideCount(): Int = overrides().size
 
     fun findBestMatch(
         identityPackageName: String,
         contextPackageName: String,
         flagName: String,
     ): Match {
-        refreshIfNeeded()
+        val overrides = overrides()
 
         phenotypePackageCandidates(identityPackageName, contextPackageName).forEach { candidate ->
-            cachedOverrides[Key(candidate.packageName, flagName)]?.let {
+            overrides[Key(candidate.packageName, flagName)]?.let {
                 return Match(it, candidate.source)
             }
         }
@@ -48,11 +40,11 @@ internal class RuntimeFlagOverrideStore(
         identityPackageName: String,
         contextPackageName: String,
     ): Map<String, Match> {
-        refreshIfNeeded()
+        val overrides = overrides()
         val matches = linkedMapOf<String, Match>()
 
         phenotypePackageCandidates(identityPackageName, contextPackageName).forEach { candidate ->
-            cachedOverrides.forEach { (key, override) ->
+            overrides.forEach { (key, override) ->
                 if (key.packageName == candidate.packageName) {
                     matches.putIfAbsent(
                         key.flagName,
@@ -66,8 +58,8 @@ internal class RuntimeFlagOverrideStore(
     }
 
     fun describeForLog(): String {
-        refreshIfNeeded()
-        val packages = cachedOverrides.keys
+        val overrides = overrides()
+        val packages = overrides.keys
             .groupingBy(Key::packageName)
             .eachCount()
             .entries
@@ -76,20 +68,21 @@ internal class RuntimeFlagOverrideStore(
             .joinToString(prefix = "[", postfix = "]") { (packageName, count) ->
                 "$packageName($count)"
             }
-        return "path=${dbFile.path}, exists=${dbFile.isFile}, count=${cachedOverrides.size}, " +
+        return "path=${dbFile.path}, exists=${dbFile.isFile}, count=${overrides.size}, " +
             "packages=$packages"
     }
 
-    private fun refreshIfNeeded() {
+    private fun overrides(): Map<Key, Override> {
         val modifiedAt = dbFile.takeIf { it.isFile }?.lastModified() ?: Long.MIN_VALUE
-        if (modifiedAt == cachedModifiedAt) return
+        val current = snapshot
+        if (modifiedAt == current.modifiedAt) return current.overrides
 
-        cachedModifiedAt = modifiedAt
-        cachedOverrides = if (modifiedAt == Long.MIN_VALUE) {
-            emptyMap()
-        } else {
-            readOverrides()
-        }
+        val refreshed = Snapshot(
+            modifiedAt = modifiedAt,
+            overrides = if (modifiedAt == Long.MIN_VALUE) emptyMap() else readOverrides(),
+        )
+        snapshot = refreshed
+        return refreshed.overrides
     }
 
     private fun readOverrides(): Map<Key, Override> {
@@ -140,6 +133,11 @@ internal class RuntimeFlagOverrideStore(
     private data class Key(
         val packageName: String,
         val flagName: String,
+    )
+
+    private data class Snapshot(
+        val modifiedAt: Long,
+        val overrides: Map<Key, Override>,
     )
 
     private companion object {

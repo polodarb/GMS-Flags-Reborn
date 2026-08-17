@@ -18,6 +18,7 @@ class XposedTargetsTest {
                 "com.google.android.apps.translate",
                 "com.google.android.keep",
                 "com.google.android.apps.messaging",
+                "com.google.android.apps.maps",
                 "com.google.android.deskclock",
                 "com.google.android.apps.tasks",
                 "com.google.android.contacts",
@@ -35,6 +36,9 @@ class XposedTargetsTest {
                 "com.google.android.apps.healthdata",
                 "com.google.android.apps.pixel.nowplaying",
                 "com.google.android.apps.pixel.customizationbundle",
+                "com.google.android.aicore",
+                "com.google.android.apps.adm",
+                "com.google.android.apps.bard",
                 "com.google.android.as",
                 "com.google.android.apps.diagnosticstool",
                 "com.google.android.apps.tachyon",
@@ -44,6 +48,16 @@ class XposedTargetsTest {
                 "com.google.android.apps.walletnfcrel",
                 "com.google.android.apps.nbu.files",
                 "com.google.android.GoogleCamera",
+                "com.google.android.apps.pixel.creativeassistant",
+                "com.google.android.apps.pixel.agent",
+                "com.google.android.apps.docs",
+                "com.google.android.apps.labs.language.tailwind",
+                "com.google.android.apps.pixel.aurelius",
+                "com.google.android.apps.labs.whisk",
+                "com.google.android.apps.giant",
+                "com.google.android.apps.kids.familylink",
+                "com.google.android.youtube",
+                "com.google.android.apps.youtube.music",
             ),
             XposedTargets.supportedApplicationPackageNames(),
         )
@@ -86,6 +100,49 @@ class XposedTargetsTest {
                 "com.google.android.apps.translate",
                 "com.google.android.apps.translate:background",
             )
+        )
+    }
+
+    @Test
+    fun `hooks only the main process of a Mendel application`() {
+        assertTrue(
+            XposedTargets.isSupportedProcess(
+                "com.google.android.youtube",
+                "com.google.android.youtube",
+            )
+        )
+        assertFalse(
+            XposedTargets.isSupportedProcess(
+                "com.google.android.youtube",
+                "com.google.android.youtube:player",
+            )
+        )
+    }
+
+    @Test
+    fun `routes Mendel applications to their own override identity`() {
+        assertEquals(
+            setOf(
+                "com.google.android.youtube",
+                "com.google.android.apps.youtube.music",
+            ),
+            XposedTargets.mendelApplicationPackageNames(),
+        )
+        assertTrue(XposedTargets.isMendelApplication(XposedTargets.YOUTUBE_PACKAGE_NAME))
+        assertFalse(XposedTargets.isMendelApplication(XposedTargets.MAPS_PACKAGE_NAME))
+        assertEquals(
+            "mendel#com.google.android.youtube",
+            XposedTargets.preferredFlagPackageName(XposedTargets.YOUTUBE_PACKAGE_NAME),
+        )
+        assertEquals(
+            "mendel#com.google.android.apps.youtube.music",
+            XposedTargets.preferredFlagPackageName(XposedTargets.YOUTUBE_MUSIC_PACKAGE_NAME),
+        )
+        assertEquals(
+            XposedTargets.YOUTUBE_PACKAGE_NAME,
+            XposedTargets.runtimeTargetPackageForFlagPackage(
+                XposedTargets.YOUTUBE_FLAGS_PACKAGE_NAME,
+            ),
         )
     }
 

@@ -3,7 +3,9 @@ package ua.polodarb.gmsflags.presentation.feature.flagdetails.ui.components.bott
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.wrapContentSize
@@ -119,11 +121,19 @@ private fun BottomBarTransformMenuPopup(
     )
     val drawingMargin = GmsSpacing.ExtraLarge
     val drawingMarginPx = with(density) { drawingMargin.roundToPx() }
-    val popupPositionProvider = remember(drawingMarginPx, alignment) {
-        BottomBarPopupPositionProvider(drawingMarginPx, alignment)
+    val imeHeightPx = WindowInsets.ime.getBottom(density)
+    val imeReservePx = if (imeHeightPx > 0) {
+        imeHeightPx + with(density) { GmsSpacing.Large.roundToPx() }
+    } else {
+        0
     }
+    val imeReserve = with(density) { imeReservePx.toDp() }
+    val popupPositionProvider = remember(drawingMarginPx, alignment, imeReservePx) {
+        BottomBarPopupPositionProvider(drawingMarginPx, alignment, imeReservePx)
+    }
+    val fittingHeight = (expandedHeight - imeReserve).coerceAtLeast(collapsedHeight)
     val animatedWidth = lerp(collapsedWidth, expandedWidth, progress)
-    val animatedHeight = lerp(collapsedHeight, expandedHeight, progress)
+    val animatedHeight = lerp(collapsedHeight, fittingHeight, progress)
     val animatedCorner = lerp(
         collapsedHeight / 2,
         GmsSpacing.ExtraLarge,
@@ -148,7 +158,7 @@ private fun BottomBarTransformMenuPopup(
         Box(
             modifier = Modifier.requiredSize(
                 width = expandedWidth + drawingMargin * 2,
-                height = expandedHeight + drawingMargin * 2,
+                height = fittingHeight + drawingMargin * 2,
             ),
         ) {
             Box(
@@ -171,7 +181,7 @@ private fun BottomBarTransformMenuPopup(
                     if (progress > CONTENT_REVEAL_DELAY) {
                         FixedTransformMenuContent(
                             contentWidth = expandedWidth,
-                            contentHeight = expandedHeight,
+                            contentHeight = fittingHeight,
                             alignment = alignment,
                             modifier = Modifier
                                 .fillMaxSize()
@@ -219,6 +229,7 @@ private fun FixedTransformMenuContent(
 private class BottomBarPopupPositionProvider(
     private val drawingMarginPx: Int,
     private val alignment: BottomBarTransformMenuAlignment,
+    private val imeReservePx: Int,
 ) : PopupPositionProvider {
     override fun calculatePosition(
         anchorBounds: IntRect,
@@ -232,7 +243,8 @@ private class BottomBarPopupPositionProvider(
                 anchorBounds.right - popupContentSize.width + drawingMarginPx
         }
         val desiredY = anchorBounds.bottom - popupContentSize.height + drawingMarginPx
-        return IntOffset(x = desiredX, y = desiredY)
+        val highestY = windowSize.height - imeReservePx - popupContentSize.height + drawingMarginPx
+        return IntOffset(x = desiredX, y = minOf(desiredY, highestY))
     }
 }
 

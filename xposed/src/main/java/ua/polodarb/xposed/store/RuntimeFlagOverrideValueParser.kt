@@ -5,7 +5,9 @@ internal object RuntimeFlagOverrideValueParser {
     fun parse(
         original: Any?,
         override: RuntimeFlagOverrideStore.Override,
+        declaredType: Class<*>? = null,
     ): Any? {
+        if (declaredType != null && !matchesDeclaredType(declaredType, override.flagType)) return null
         if (!isCompatible(original, override)) return null
 
         val value = override.value
@@ -19,6 +21,18 @@ internal object RuntimeFlagOverrideValueParser {
             else -> parseByStoredType(override)
         }
     }
+
+    private fun matchesDeclaredType(declaredType: Class<*>, flagType: Int): Boolean =
+        when (flagType) {
+            TYPE_BOOLEAN -> declaredType.isOneOf(Boolean::class)
+            TYPE_INTEGER -> declaredType.isOneOf(Long::class) || declaredType.isOneOf(Int::class)
+            TYPE_FLOAT -> declaredType.isOneOf(Double::class) || declaredType.isOneOf(Float::class)
+            TYPE_STRING -> declaredType == String::class.java
+            else -> false
+        }
+
+    private fun Class<*>.isOneOf(type: kotlin.reflect.KClass<*>): Boolean =
+        this == type.javaPrimitiveType || this == type.javaObjectType
 
     private fun isCompatible(
         original: Any?,

@@ -2,12 +2,6 @@
     <string name="apps_settings">Налаштування</string>
     <string name="apps_settings_unavailable">Налаштування поки недоступні</string>
     <string name="apps_empty">Підтримувані застосунки не знайдено</string>
-    <string name="apps_dialog_choose_package">Оберіть пакет</string>
-    <string name="packages_search_advice">Пошук по пакетах</string>
-    <string name="close">Закрити</string>
-    <string name="primary">Основні</string>
-    <string name="secondary">Інші</string>
-    <string name="clear_search">Очистити пошук</string>
     <string name="apps_scope_missing_badge">Не у scope</string>
     <string name="apps_unsupported_badge">Не підтримується</string>
     <string name="apps_pairip_badge">Несумісно</string>

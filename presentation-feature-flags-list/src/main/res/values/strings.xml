@@ -49,6 +49,8 @@
     <string name="flag_actions_collapsed">Collapsed</string>
     <string name="flag_details_package">Package: %1$s</string>
     <string name="flag_details_choose_package">Choose package</string>
+    <string name="flag_details_search_packages">Search packages</string>
+    <string name="flag_details_packages_empty">No matching packages</string>
     <string name="flag_details_current_package">Current package</string>
     <string name="flag_details_primary_package">Primary</string>
     <string name="flag_action_add">Add flag</string>

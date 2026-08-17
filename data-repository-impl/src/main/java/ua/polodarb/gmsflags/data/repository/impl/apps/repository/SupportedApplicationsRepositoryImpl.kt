@@ -38,12 +38,16 @@ internal class SupportedApplicationsRepositoryImpl(
                 )
                 .mapValues { (_, packages) -> packages.distinct().sorted() }
 
+            val mendelPackages = xposedTargetRegistry.mendelApplicationPackageNames()
+                .filter { it in supportedPackages }
+
             val installedApplications = installedApplicationReader.readInstalledApplications(
-                flagPackageNamesByApplication.keys,
+                flagPackageNamesByApplication.keys + mendelPackages,
             )
 
             val applications = installedApplications.values.map { metadata ->
-                val discoveredPackageNames = flagPackageNamesByApplication.getValue(metadata.packageName)
+                val discoveredPackageNames =
+                    flagPackageNamesByApplication[metadata.packageName].orEmpty()
                 val preferredFlagPackageName = xposedTargetRegistry
                     .preferredFlagPackageName(metadata.packageName)
                 val knownFlagPackageNames = xposedTargetRegistry

@@ -18,6 +18,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import ua.polodarb.gmsflags.navigation.entry.bottomBarFlowEntry
+import ua.polodarb.xposed.info.XposedTargets
 import ua.polodarb.gmsflags.presentation.core.navigation.AppNavConfig
 import ua.polodarb.gmsflags.presentation.core.navigation.RootDestination
 import ua.polodarb.gmsflags.presentation.core.navigation.fullScreenEnterTransition
@@ -93,7 +94,8 @@ fun RootNavDisplay(
                         rootBackStack.add(RootDestination.OverridesStorage)
                     },
                     onExperimentalApplicationSelected = { packageName, applicationName ->
-                        val experimentalIdentity = "experimental#$packageName"
+                        val experimentalIdentity =
+                            XposedTargets.mendelFlagPackageName(packageName)
                         rootBackStack.add(
                             RootDestination.FlagDetails(
                                 androidPackageName = packageName,

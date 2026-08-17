@@ -188,6 +188,47 @@ class SupportedApplicationsRepositoryImplTest {
         assertEquals("photos.app", application.mainFlagPackage?.packageName)
     }
 
+    @Test
+    fun `lists Mendel applications that the phenotype registry never binds`() = runBlocking {
+        val installedReader = InstalledApplicationReader { requestedPackages ->
+            assertEquals(setOf("mendel.app"), requestedPackages)
+            requestedPackages.associateWith { packageName ->
+                InstalledApplicationMetadata(
+                    packageName = packageName,
+                    name = packageName,
+                    versionName = null,
+                    versionCode = 1,
+                    lastUpdateTime = 0,
+                )
+            }
+        }
+
+        val applications = SupportedApplicationsRepositoryImpl(
+            packageReader = PhenotypePackageReader { Result.success(emptyList()) },
+            installedApplicationReader = installedReader,
+            xposedTargetRegistry = object : XposedTargetRegistry {
+                override fun supportedApplicationPackageNames() = setOf("mendel.app")
+                override fun preferredFlagPackageName(androidPackageName: String) =
+                    "mendel#$androidPackageName"
+                override fun mendelApplicationPackageNames() = setOf("mendel.app")
+            },
+            xposedScopeDataSource = scopeDataSource("mendel.app"),
+            modulePackageName = "module.app",
+            userId = 0,
+        ).getApplications().getOrThrow()
+
+        val application = applications.single()
+        assertEquals(
+            listOf("mendel#mendel.app"),
+            application.flagPackages.map { it.packageName },
+        )
+        assertEquals(
+            FlagPackageCategory.Primary,
+            application.flagPackages.single().category,
+        )
+        assertEquals("mendel#mendel.app", application.mainFlagPackage?.packageName)
+    }
+
     private fun scopeDataSource(vararg packageNames: String) = XposedScopeDataSource { _, _ ->
         Result.success(
             XposedScopeSnapshot(

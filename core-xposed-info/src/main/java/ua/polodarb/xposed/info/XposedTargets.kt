@@ -93,6 +93,10 @@ object XposedTargets : XposedTargetRegistry {
     const val WHISK_FLAGS_PACKAGE_NAME = "labs_whisk#$WHISK_PACKAGE_NAME"
     const val GIANT_FLAGS_PACKAGE_NAME = GIANT_PACKAGE_NAME
     const val FAMILY_LINK_FLAGS_PACKAGE_NAME = "com.google.kids.familylink.flutter#$FAMILY_LINK_PACKAGE_NAME"
+    const val MENDEL_FLAG_PACKAGE_PREFIX = "mendel#"
+    const val YOUTUBE_FLAGS_PACKAGE_NAME = "$MENDEL_FLAG_PACKAGE_PREFIX$YOUTUBE_PACKAGE_NAME"
+    const val YOUTUBE_MUSIC_FLAGS_PACKAGE_NAME =
+        "$MENDEL_FLAG_PACKAGE_PREFIX$YOUTUBE_MUSIC_PACKAGE_NAME"
     const val AICORE_FLAGS_PACKAGE_NAME = "com.google.android.platform.aicore"
     const val FIND_HUB_FLAGS_PACKAGE_NAME = "com.google.android.apps.fmd#$FIND_HUB_PACKAGE_NAME"
     const val BARD_FLAGS_PACKAGE_NAME = "${BARD_PACKAGE_NAME}.device#$BARD_PACKAGE_NAME"
@@ -144,6 +148,13 @@ object XposedTargets : XposedTargetRegistry {
         WHISK_PACKAGE_NAME,
         GIANT_PACKAGE_NAME,
         FAMILY_LINK_PACKAGE_NAME,
+        YOUTUBE_PACKAGE_NAME,
+        YOUTUBE_MUSIC_PACKAGE_NAME,
+    )
+
+    private val mendelApplications = setOf(
+        YOUTUBE_PACKAGE_NAME,
+        YOUTUBE_MUSIC_PACKAGE_NAME,
     )
 
     private val runtimeTargetOverrides = mapOf(
@@ -154,6 +165,8 @@ object XposedTargets : XposedTargetRegistry {
     )
 
     override fun supportedApplicationPackageNames(): Set<String> = supportedApplications
+
+    override fun mendelApplicationPackageNames(): Set<String> = mendelApplications
 
     override fun preferredFlagPackageName(androidPackageName: String): String? = when (
         androidPackageName
@@ -204,6 +217,8 @@ object XposedTargets : XposedTargetRegistry {
         WHISK_PACKAGE_NAME -> WHISK_FLAGS_PACKAGE_NAME
         GIANT_PACKAGE_NAME -> GIANT_FLAGS_PACKAGE_NAME
         FAMILY_LINK_PACKAGE_NAME -> FAMILY_LINK_FLAGS_PACKAGE_NAME
+        YOUTUBE_PACKAGE_NAME -> YOUTUBE_FLAGS_PACKAGE_NAME
+        YOUTUBE_MUSIC_PACKAGE_NAME -> YOUTUBE_MUSIC_FLAGS_PACKAGE_NAME
         else -> null
     }
 
@@ -217,9 +232,17 @@ object XposedTargets : XposedTargetRegistry {
 
     fun isSupportedApplication(packageName: String): Boolean = packageName in supportedApplications
 
+    fun isMendelApplication(packageName: String): Boolean = packageName in mendelApplications
+
+    fun mendelFlagPackageName(androidPackageName: String): String =
+        "$MENDEL_FLAG_PACKAGE_PREFIX$androidPackageName"
+
     fun isSupportedProcess(packageName: String, processName: String?): Boolean {
         if (!isSupportedApplication(packageName)) return false
-        return packageName != VENDING_PACKAGE_NAME || processName == VENDING_PACKAGE_NAME
+        if (packageName == VENDING_PACKAGE_NAME || packageName in mendelApplications) {
+            return processName == packageName
+        }
+        return true
     }
 
     fun runtimeTargetPackageForFlagPackage(flagPackageName: String): String {

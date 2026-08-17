@@ -13,7 +13,7 @@ import java.io.File
 import ua.polodarb.xposed.diagnostics.SqliteHookDiagnostics
 import ua.polodarb.xposed.info.XposedConstants
 import ua.polodarb.xposed.info.BuildConfig as XposedInfoBuildConfig
-import ua.polodarb.xposed.experimental.ExperimentalRuntimeHookInstaller
+import ua.polodarb.xposed.hook.strategy.mendel.MendelRuntimeHookInstaller
 import ua.polodarb.xposed.needle.NeedleEngine
 
 @Suppress("unused")
@@ -42,10 +42,8 @@ class GmsFlagsXposedEntry : IXposedHookLoadPackage, IXposedHookZygoteInit {
             trustedPublicKeyBase64 = XposedInfoBuildConfig.NEEDLE_TRUSTED_PUBLIC_KEY_BASE64,
         )
 
-        if (ExperimentalRuntimeHookInstaller.supports(
-                lpparam.packageName,
-                lpparam.processName,
-            )
+        val mendelDiagnostics = if (
+            MendelRuntimeHookInstaller.supports(lpparam.packageName, lpparam.processName)
         ) {
             val targetRuntimeDirectory = File(
                 lpparam.appInfo.dataDir,
@@ -53,33 +51,35 @@ class GmsFlagsXposedEntry : IXposedHookLoadPackage, IXposedHookZygoteInit {
             )
             XposedLogger.initFileLogging(targetRuntimeDirectory, lpparam)
             XposedLogger.logI(
-                "Installing experimental runtime hook before Application and ContentProvider startup"
+                "Installing Mendel runtime hook before Application and ContentProvider startup"
             )
-            ExperimentalRuntimeHookInstaller.install(
+            MendelRuntimeHookInstaller.install(
                 runtimeDirectory = targetRuntimeDirectory,
                 lpparam = lpparam,
                 classLoader = lpparam.classLoader,
                 moduleApkPath = moduleApkPath,
             )
-            return
+        } else {
+            null
         }
 
         applicationLifecycleHook.install(lpparam) { context, classLoader ->
             val targetRuntimeDirectory = runtimeDirectory.resolve(context)
-            XposedLogger.initFileLogging(targetRuntimeDirectory, lpparam)
+            if (XposedLogger.logFilePath == null) {
+                XposedLogger.initFileLogging(targetRuntimeDirectory, lpparam)
+            }
             XposedLogger.logI("Context received, installing runtime flag override hook")
 
-            val versionCode = runCatching {
-                context.packageManager.getPackageInfo(context.packageName, 0).longVersionCode
-            }.getOrDefault(0L)
-            val diagnostics = SqliteHookDiagnostics(
+            val diagnostics = mendelDiagnostics ?: SqliteHookDiagnostics(
                 databaseFile = File(
                     targetRuntimeDirectory,
                     XposedConstants.HOOK_DIAGNOSTICS_DB_FILE_NAME,
                 ),
                 packageName = lpparam.packageName,
                 processName = lpparam.processName,
-                versionCode = versionCode,
+                versionCode = runCatching {
+                    context.packageManager.getPackageInfo(context.packageName, 0).longVersionCode
+                }.getOrDefault(0L),
             )
 
             runCatching {
@@ -121,8 +121,7 @@ class GmsFlagsXposedEntry : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     private fun XC_LoadPackage.LoadPackageParam.isSupportedTarget(): Boolean =
         packageName != BuildConfig.MAIN_APPLICATION_ID &&
-            (XposedTargets.isSupportedProcess(packageName, processName) ||
-                ExperimentalRuntimeHookInstaller.supports(packageName, processName))
+            XposedTargets.isSupportedProcess(packageName, processName)
 
     private companion object {
         @Volatile

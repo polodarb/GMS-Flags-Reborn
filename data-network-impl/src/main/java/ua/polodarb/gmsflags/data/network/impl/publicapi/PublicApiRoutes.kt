@@ -8,4 +8,6 @@ internal object PublicApiRoutes {
     const val HOOK_COMPATIBILITY = "hook-compatibility"
     const val FAQ = "faq"
     const val REPORTS = "reports"
+    const val COMMUNITY = "community"
 }
+

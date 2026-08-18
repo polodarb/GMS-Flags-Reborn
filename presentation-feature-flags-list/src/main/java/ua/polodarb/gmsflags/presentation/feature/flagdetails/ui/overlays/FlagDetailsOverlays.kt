@@ -9,6 +9,8 @@ import ua.polodarb.gmsflags.presentation.feature.flagdetails.ui.dialogs.Operatio
 import ua.polodarb.gmsflags.presentation.feature.flagdetails.ui.dialogs.ReportFlagsDialog
 import ua.polodarb.gmsflags.presentation.feature.flagdetails.ui.sheets.FlagEditorSheet
 
+import ua.polodarb.gmsflags.presentation.feature.community.ui.components.CommunitySubmitDialog
+
 @Composable
 internal fun FlagDetailsOverlays(
     dialog: FlagDetailsDialog?,
@@ -24,6 +26,10 @@ internal fun FlagDetailsOverlays(
     onDeleteAll: () -> Unit,
     onExportNameChanged: (String) -> Unit,
     onExport: () -> Unit,
+    onShareToCommunity: () -> Unit = {},
+    onAddCommunityFlag: (String, String, String) -> Unit = { _, _, _ -> },
+    onRemoveCommunityFlag: (Int) -> Unit = {},
+    onSubmitCommunityPackage: (String, String, String) -> Unit = { _, _, _ -> },
     onReportDescriptionChanged: (String) -> Unit,
     onReport: () -> Unit,
 ) {
@@ -47,6 +53,15 @@ internal fun FlagDetailsOverlays(
             onFileNameChanged = onExportNameChanged,
             onDismiss = onDismiss,
             onConfirm = onExport,
+            onShareToCommunity = onShareToCommunity,
+        )
+        is FlagDetailsDialog.ShareToCommunity -> CommunitySubmitDialog(
+            initialPackageName = dialog.packageName,
+            initialFlags = dialog.flags,
+            onDismiss = onDismiss,
+            onAddFlag = onAddCommunityFlag,
+            onRemoveFlag = onRemoveCommunityFlag,
+            onSubmit = onSubmitCommunityPackage,
         )
         is FlagDetailsDialog.Report -> ReportFlagsDialog(
             description = dialog.description,
@@ -56,6 +71,7 @@ internal fun FlagDetailsOverlays(
         )
         null -> Unit
     }
+
 
     if (operationInProgress) OperationDialog(showBulkNotice = bulkOperationInProgress)
 }

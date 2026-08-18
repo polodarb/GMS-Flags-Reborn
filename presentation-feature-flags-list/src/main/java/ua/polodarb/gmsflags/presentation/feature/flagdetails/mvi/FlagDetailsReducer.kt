@@ -108,14 +108,63 @@ internal object FlagDetailsReducer {
         }
         is FlagDetailsEvent.ExportFileNameChanged -> state.updateExportDialog(event.value)
             .asReduction()
+        FlagDetailsEvent.ShareToCommunityClicked -> {
+            val selected = state.selectedFlagValues()
+            val initialFlags = if (selected.isNotEmpty()) {
+                selected.map { flag ->
+                    ua.polodarb.gmsflags.domain.community.CommunityFlagItem(
+                        flagName = flag.name,
+                        valueType = flag.type.name.lowercase(),
+                        value = flag.value,
+                    )
+                }
+            } else {
+                emptyList()
+            }
+            state.copy(
+                dialog = FlagDetailsDialog.ShareToCommunity(
+                    packageName = state.phenotypePackageName,
+                    flags = initialFlags,
+                )
+            ).asReduction()
+        }
+        is FlagDetailsEvent.AddCommunityFlag -> {
+            val currentDialog = state.dialog as? FlagDetailsDialog.ShareToCommunity
+            if (currentDialog != null) {
+                val newFlag = ua.polodarb.gmsflags.domain.community.CommunityFlagItem(
+                    flagName = event.flagName,
+                    valueType = event.valueType,
+                    value = event.value,
+                )
+                state.copy(
+                    dialog = currentDialog.copy(flags = currentDialog.flags + newFlag)
+                ).asReduction()
+            } else {
+                state.asReduction()
+            }
+        }
+        is FlagDetailsEvent.RemoveCommunityFlag -> {
+            val currentDialog = state.dialog as? FlagDetailsDialog.ShareToCommunity
+            if (currentDialog != null && event.index in currentDialog.flags.indices) {
+                val updatedFlags = currentDialog.flags.toMutableList().apply { removeAt(event.index) }
+                state.copy(
+                    dialog = currentDialog.copy(flags = updatedFlags)
+                ).asReduction()
+            } else {
+                state.asReduction()
+            }
+        }
+
         FlagDetailsEvent.ReportClicked -> state.copy(
             dialog = FlagDetailsDialog.Report(description = "")
         ).asReduction()
         is FlagDetailsEvent.ReportDescriptionChanged -> state.updateReportDialog(event.value)
             .asReduction()
+        is FlagDetailsEvent.SubmitCommunityPackage -> state.copy(dialog = null).asReduction()
         FlagDetailsEvent.DialogDismissed -> state.copy(dialog = null).asReduction()
 
         FlagDetailsEvent.Retry,
+
         is FlagDetailsEvent.PackageSelected,
         is FlagDetailsEvent.BooleanChanged,
         is FlagDetailsEvent.BooleanOverrideCleared,

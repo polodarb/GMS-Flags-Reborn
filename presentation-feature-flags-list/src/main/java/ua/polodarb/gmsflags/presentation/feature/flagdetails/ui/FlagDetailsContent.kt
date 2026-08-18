@@ -160,9 +160,20 @@ internal fun FlagDetailsContent(
         onDeleteAll = { onEvent(FlagDetailsEvent.DeleteAllOverridesConfirmed) },
         onExportNameChanged = { onEvent(FlagDetailsEvent.ExportFileNameChanged(it)) },
         onExport = { onEvent(FlagDetailsEvent.ExportConfirmed) },
+        onShareToCommunity = { onEvent(FlagDetailsEvent.ShareToCommunityClicked) },
+        onAddCommunityFlag = { name, type, value ->
+            onEvent(FlagDetailsEvent.AddCommunityFlag(name, type, value))
+        },
+        onRemoveCommunityFlag = { index ->
+            onEvent(FlagDetailsEvent.RemoveCommunityFlag(index))
+        },
+        onSubmitCommunityPackage = { title, desc, pkg ->
+            onEvent(FlagDetailsEvent.SubmitCommunityPackage(title, desc, pkg))
+        },
         onReportDescriptionChanged = { onEvent(FlagDetailsEvent.ReportDescriptionChanged(it)) },
         onReport = { onEvent(FlagDetailsEvent.ReportConfirmed) },
     )
+
     if (state.scopeHelpVisible) {
         GmsXposedScopeHelpSheet(
             applicationName = state.applicationName,

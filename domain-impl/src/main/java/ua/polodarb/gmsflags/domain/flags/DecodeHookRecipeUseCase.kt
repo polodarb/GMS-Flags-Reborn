@@ -84,6 +84,7 @@ private fun MicroHookEffect.toDomain(): HookEffectDetails = HookEffectDetails(
         EffectKind.ARGUMENT_NULL -> HookEffectKind.ARGUMENT_NULL
         EffectKind.STRING_RESULT -> HookEffectKind.STRING_RESULT
         EffectKind.ADD_IMAGE_OVERLAY -> HookEffectKind.ADD_IMAGE_OVERLAY
+        EffectKind.HIDE_VIEW -> HookEffectKind.HIDE_VIEW
     },
     argumentIndex = argumentIndex,
     expression = when (kind) {
@@ -103,6 +104,7 @@ private fun MicroHookEffect.toDomain(): HookEffectDetails = HookEffectDetails(
                 alpha = overlay.alpha,
             )
         }.getOrDefault(HookEffectExpression.None)
+        EffectKind.HIDE_VIEW -> HookEffectExpression.None
         else -> HookEffectExpression.ValueOnly(
             NeedleJson.decodeFromJsonElement(ValueExpression.serializer(), expression).value.toDomain()
         )

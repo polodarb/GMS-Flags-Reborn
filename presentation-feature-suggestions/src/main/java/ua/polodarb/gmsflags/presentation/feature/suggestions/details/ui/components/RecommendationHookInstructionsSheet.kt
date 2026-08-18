@@ -217,6 +217,7 @@ private fun effectSummary(effect: HookEffectDetails): String {
             HookEffectKind.ARGUMENT_NULL -> R.string.suggestions_details_hook_instructions_kind_argument_null
             HookEffectKind.STRING_RESULT -> R.string.suggestions_details_hook_instructions_kind_string
             HookEffectKind.ADD_IMAGE_OVERLAY -> R.string.suggestions_details_hook_instructions_kind_image_overlay
+            HookEffectKind.HIDE_VIEW -> R.string.suggestions_details_hook_instructions_kind_hide_view
         }
     )
     return "$point, $kind"

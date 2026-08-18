@@ -192,6 +192,7 @@
     <string name="suggestions_details_hook_instructions_kind_argument_null">this patch clears one of its inputs.</string>
     <string name="suggestions_details_hook_instructions_kind_string">this patch can replace the text it returns.</string>
     <string name="suggestions_details_hook_instructions_kind_image_overlay">this patch draws an image over a view.</string>
+    <string name="suggestions_details_hook_instructions_kind_hide_view">this patch hides labels on a view.</string>
     <string name="suggestions_details_hook_instructions_applies_when">Applies if ANY rule below matches:</string>
     <string name="suggestions_details_hook_instructions_only_when">Only runs when this also matches:</string>
     <string name="suggestions_details_hook_instructions_sets_to">Sets it to: %1$s</string>

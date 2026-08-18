@@ -3,11 +3,12 @@ package ua.polodarb.gmsflags.domain.server.content
 import ua.polodarb.gmsflags.data.repository.server.PublicContentRepository
 import ua.polodarb.gmsflags.data.repository.apps.repository.SupportedApplicationsRepository
 import ua.polodarb.gmsflags.data.repository.flags.FlagDetailsRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
+import kotlinx.coroutines.withContext
 
 class GetHomeContentUseCase(
     private val repository: PublicContentRepository,
@@ -63,7 +64,7 @@ class GetRecommendationFeedUseCase(
             .getOrDefault(emptyList())
             .associateBy { it.androidPackageName }
         val semaphore = Semaphore(MAX_CONCURRENT_DETAILS_REQUESTS)
-        coroutineScope {
+        withContext(Dispatchers.Default) {
             summaries.map { summary ->
                 async {
                     val details = semaphore.withPermit {

@@ -2,7 +2,9 @@
     <string name="app_name">GMS Flags 2.0</string>
     <string name="navigation_suggestions">Suggestions</string>
     <string name="navigation_apps">Apps</string>
+    <string name="navigation_community">Community</string>
     <string name="navigation_gms_insight">GMS Insight</string>
+
     <string name="external_import_opening_title">Opening flags file</string>
     <string name="external_import_opening_subtitle">Please wait while GMS Flags prepares the import</string>
 </resources>

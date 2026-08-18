@@ -79,3 +79,5 @@ Thumbs.db
 /inactive/
 /tools/
 .codex-analysis
+gra*
+private.pem

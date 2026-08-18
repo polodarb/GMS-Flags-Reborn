@@ -37,7 +37,9 @@ import ua.polodarb.gmsflags.presentation.feature.apps.navigation.appsScreenEntry
 import ua.polodarb.gmsflags.presentation.feature.apps.experimental.navigation.experimentalAppsScreenEntry
 import ua.polodarb.gmsflags.presentation.feature.insight.navigation.insightScreenEntry
 import ua.polodarb.gmsflags.presentation.feature.suggestions.navigation.suggestionsScreenEntry
+import ua.polodarb.gmsflags.presentation.feature.community.navigation.communityScreenEntry
 import ua.polodarb.gmsflags.presentation.core.ui.layout.GmsTopLevelHeaderHost
+
 import ua.polodarb.gmsflags.presentation.core.ui.layout.GmsTopLevelHeaderState
 import ua.polodarb.gmsflags.presentation.core.ui.layout.LocalGmsTopLevelHeaderState
 import ua.polodarb.gmsflags.presentation.core.ui.layout.LocalGmsTopLevelNotice
@@ -73,6 +75,7 @@ internal fun BottomBarNavDisplay(
                 onApplicationSelected = onApplicationSelected,
                 onHookStatusSelected = onSettingsSelected,
             )
+            communityScreenEntry(onSettingsSelected = onSettingsSelected)
             insightScreenEntry(onSettingsSelected = onSettingsSelected)
             experimentalAppsScreenEntry(
                 onApplicationSelected = onExperimentalApplicationSelected,

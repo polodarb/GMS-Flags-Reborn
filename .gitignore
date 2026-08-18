@@ -78,3 +78,4 @@ Thumbs.db
 # build variant, never meant to reach an exported public snapshot of this repo.
 /inactive/
 /tools/
+.codex-analysis

@@ -15,22 +15,34 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import de.robv.android.xposed.XC_MethodHook
+import ua.polodarb.xposed.info.needle.HideViewTarget
+import ua.polodarb.xposed.info.needle.NeedleHideView
 import ua.polodarb.xposed.info.needle.NeedleImageOverlay
 import ua.polodarb.xposed.info.needle.NeedleImageOverlayGeometry
 import ua.polodarb.xposed.info.needle.NeedleOverlayTint
 import ua.polodarb.xposed.info.needle.OverlayTintKind
 import ua.polodarb.xposed.logging.XposedLogger
+import java.util.WeakHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 
-private const val MAX_TINT_VIEWS_SCANNED = 64
+private const val MAX_DESCENDANTS_SCANNED = 64
+
+/** One thing a recipe does to a resolved [android.view.View] each time it draws - draw an overlay,
+ * hide descendants, etc. Keyed into the dispatcher by the anchor view's resource id. */
+internal interface ResolvedViewEffect {
+    val recipeId: String
+    val resourceName: String
+    val resourcePackage: String
+    fun applyOn(canvas: Canvas, view: View, systemContext: Context?)
+}
 
 internal class ResolvedImageOverlay(
-    val recipeId: String,
-    val resourceName: String,
-    val resourcePackage: String,
+    override val recipeId: String,
+    override val resourceName: String,
+    override val resourcePackage: String,
     private val bitmap: Bitmap,
     private val overlay: NeedleImageOverlay,
-) {
+) : ResolvedViewEffect {
     private val disabled = AtomicBoolean(false)
     private var tintApplied = false
     private var appliedTintColor: Int? = null
@@ -39,7 +51,7 @@ internal class ResolvedImageOverlay(
     }
     private val dest = RectF()
 
-    fun drawOn(canvas: Canvas, view: View, systemContext: Context?) {
+    override fun applyOn(canvas: Canvas, view: View, systemContext: Context?) {
         if (disabled.get()) return
         try {
             if (overlay.tint.isNotEmpty()) {
@@ -96,7 +108,7 @@ internal class ResolvedImageOverlay(
         val queue = ArrayDeque<View>()
         for (i in 0 until root.childCount) queue.add(root.getChildAt(i))
         var scanned = 0
-        while (queue.isNotEmpty() && scanned < MAX_TINT_VIEWS_SCANNED) {
+        while (queue.isNotEmpty() && scanned < MAX_DESCENDANTS_SCANNED) {
             val next = queue.removeFirst()
             scanned++
             if (next.visibility != View.VISIBLE) continue
@@ -123,12 +135,87 @@ internal class ResolvedImageOverlay(
     }
 }
 
-internal class NeedleImageOverlayDispatcher(
-    private val overlays: List<ResolvedImageOverlay>,
+/** Sets matching visible descendants of the anchor view to [View.INVISIBLE] while live, caching each
+ * one's original visibility so a disabled recipe restores it. Re-checked every draw so a descendant
+ * re-shown on view reuse (e.g. a language switch) is hidden again. */
+internal class ResolvedHideView(
+    override val recipeId: String,
+    override val resourceName: String,
+    override val resourcePackage: String,
+    private val hideView: NeedleHideView,
+) : ResolvedViewEffect {
+    private val disabled = AtomicBoolean(false)
+    private val hidden = WeakHashMap<View, Int>()
+    private var targetIds: IntArray? = null
+    private var idsResolved = false
+
+    override fun applyOn(canvas: Canvas, view: View, systemContext: Context?) {
+        if (disabled.get()) return
+        try {
+            when (hideView.target) {
+                HideViewTarget.TEXT_LABELS ->
+                    hideMatching(view) { it is TextView && !it.text.isNullOrEmpty() }
+                HideViewTarget.RESOURCE_IDS -> {
+                    val ids = resolvedIds(view)
+                    if (ids.isEmpty()) return
+                    hideMatching(view) { it.id != View.NO_ID && ids.contains(it.id) }
+                }
+            }
+        } catch (t: Throwable) {
+            disabled.set(true)
+            restore()
+            XposedLogger.logE("Needle: hide-view '$recipeId' failed; disabling it until the process restarts", t)
+        }
+    }
+
+    private fun resolvedIds(view: View): IntArray {
+        if (!idsResolved) {
+            idsResolved = true
+            val resources = view.resources
+            val ids = hideView.resourceNames.mapNotNull { entry ->
+                val pkg = entry.packageName?.takeIf { it.isNotBlank() } ?: view.context.packageName
+                runCatching { resources.getIdentifier(entry.name, "id", pkg) }.getOrDefault(0).takeIf { it != 0 }
+            }
+            if (ids.isEmpty()) {
+                XposedLogger.logW(
+                    "Needle: hide-view '$recipeId' resolved no view ids from ${hideView.resourceNames.map { it.name }}",
+                )
+            }
+            targetIds = ids.toIntArray()
+        }
+        return targetIds ?: IntArray(0)
+    }
+
+    private inline fun hideMatching(root: View, crossinline match: (View) -> Boolean) {
+        if (root !is ViewGroup) return
+        val queue = ArrayDeque<View>()
+        for (i in 0 until root.childCount) queue.add(root.getChildAt(i))
+        var scanned = 0
+        while (queue.isNotEmpty() && scanned < MAX_DESCENDANTS_SCANNED) {
+            val next = queue.removeFirst()
+            scanned++
+            if (next.visibility != View.VISIBLE) continue
+            if (match(next)) {
+                hidden[next] = next.visibility
+                next.visibility = View.INVISIBLE
+                continue
+            }
+            if (next is ViewGroup) for (i in 0 until next.childCount) queue.add(next.getChildAt(i))
+        }
+    }
+
+    private fun restore() {
+        for ((view, visibility) in hidden) runCatching { view.visibility = visibility }
+        hidden.clear()
+    }
+}
+
+internal class NeedleViewEffectDispatcher(
+    private val effects: List<ResolvedViewEffect>,
     private val systemContext: Context?,
 ) : XC_MethodHook() {
 
-    private val overlaysByViewId = SparseArray<MutableList<ResolvedImageOverlay>>()
+    private val effectsByViewId = SparseArray<MutableList<ResolvedViewEffect>>()
     private val resolved = AtomicBoolean(false)
 
     override fun afterHookedMethod(param: MethodHookParam) {
@@ -136,29 +223,29 @@ internal class NeedleImageOverlayDispatcher(
         if (resolved.compareAndSet(false, true)) resolveIds(view.resources)
         val id = view.id
         if (id == View.NO_ID) return
-        val bucket = overlaysByViewId.get(id) ?: return
+        val bucket = effectsByViewId.get(id) ?: return
         val canvas = param.args.getOrNull(0) as? Canvas ?: return
-        for (index in bucket.indices) bucket[index].drawOn(canvas, view, systemContext)
+        for (index in bucket.indices) bucket[index].applyOn(canvas, view, systemContext)
     }
 
     private fun resolveIds(resources: Resources) {
-        overlays.forEach { overlay ->
+        effects.forEach { effect ->
             val id = runCatching {
-                resources.getIdentifier(overlay.resourceName, "id", overlay.resourcePackage)
+                resources.getIdentifier(effect.resourceName, "id", effect.resourcePackage)
             }.getOrDefault(0)
             if (id == 0) {
                 XposedLogger.logW(
-                    "Needle: overlay '${overlay.recipeId}' resource ${overlay.resourcePackage}:id/" +
-                        "${overlay.resourceName} not found in the loaded app, skipping",
+                    "Needle: recipe '${effect.recipeId}' resource ${effect.resourcePackage}:id/" +
+                        "${effect.resourceName} not found in the loaded app, skipping",
                 )
                 return@forEach
             }
-            val bucket = overlaysByViewId.get(id)
-                ?: mutableListOf<ResolvedImageOverlay>().also { overlaysByViewId.put(id, it) }
-            bucket.add(overlay)
+            val bucket = effectsByViewId.get(id)
+                ?: mutableListOf<ResolvedViewEffect>().also { effectsByViewId.put(id, it) }
+            bucket.add(effect)
         }
-        for (index in 0 until overlaysByViewId.size()) {
-            overlaysByViewId.valueAt(index).sortBy { it.recipeId }
+        for (index in 0 until effectsByViewId.size()) {
+            effectsByViewId.valueAt(index).sortBy { it.recipeId }
         }
     }
 }

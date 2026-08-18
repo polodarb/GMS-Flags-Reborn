@@ -40,6 +40,38 @@ data class NeedleImageOverlay(
     val alpha: Float = 1f,
     /** Optional recolour chain; empty means the image is drawn as-is. */
     val tint: List<OverlayTintSource> = emptyList(),
+    /** Convenience shortcut for the common "draw an icon and blank the view's own text" case: when
+     * true the engine also runs a [NeedleHideView] with [HideViewTarget.TEXT_LABELS] on the same view.
+     * Equivalent to publishing a separate HIDE_VIEW recipe; requires the same
+     * [NeedleCapabilities.VIEW_HIDE_DESCENDANT] capability. */
+    @SerialName("hide_descendant_text_labels") val hideDescendantTextLabels: Boolean = false,
+)
+
+/** What a [NeedleHideView] effect targets, relative to the resolved [SelectorKind.VIEW_RESOURCE_ID]
+ * anchor view whose draw is hooked. */
+enum class HideViewTarget {
+    /** Every visible descendant TextView with non-empty text (no view id needed - robust to renames). */
+    TEXT_LABELS,
+
+    /** Only descendants whose view id matches one of [NeedleHideView.resourceNames]. */
+    RESOURCE_IDS,
+}
+
+@Serializable
+data class HideViewResource(
+    val name: String,
+    /** Resolved against this package; defaults to the anchor view's own package when null. */
+    @SerialName("package") val packageName: String? = null,
+)
+
+/** The [EffectKind.HIDE_VIEW] expression: sets matching visible descendants of the anchor view to
+ * [android.view.View.INVISIBLE] while the recipe is live (restored if it disables), re-checked each
+ * draw so a view re-shown on reuse is hidden again. To hide a whole view, anchor on its parent and
+ * name it in [resourceNames]. Requires [NeedleCapabilities.VIEW_HIDE_DESCENDANT]. */
+@Serializable
+data class NeedleHideView(
+    val target: HideViewTarget = HideViewTarget.TEXT_LABELS,
+    @SerialName("resource_names") val resourceNames: List<HideViewResource> = emptyList(),
 )
 
 object NeedleOverlayTint {

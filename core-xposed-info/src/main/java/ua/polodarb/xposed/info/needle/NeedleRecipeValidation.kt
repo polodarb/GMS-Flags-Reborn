@@ -87,26 +87,14 @@ object NeedleRecipeValidation {
         return when (payload.selector.type) {
             SelectorKind.ANDROID_RESOURCE_STRING -> validateResourceStringRecipe(payload)
             SelectorKind.DEX_METHOD -> validateV2DexMethodRecipe(payload)
-            SelectorKind.VIEW_RESOURCE_ID -> validateV2ImageOverlayRecipe(payload)
+            SelectorKind.VIEW_RESOURCE_ID -> validateViewResourceRecipe(payload)
         }
     }
 
-    private fun validateV2ImageOverlayRecipe(payload: NeedleRecipePayload): NeedleRecipeValidationResult {
+    private fun validateViewResourceRecipe(payload: NeedleRecipePayload): NeedleRecipeValidationResult {
         val selector = payload.selector
         val effect = payload.effect
 
-        if (NeedleCapabilities.VIEW_IMAGE_OVERLAY !in payload.requiredCapabilities) {
-            return NeedleRecipeValidationResult.Invalid(
-                "VIEW_RESOURCE_ID recipes must declare required_capability ${NeedleCapabilities.VIEW_IMAGE_OVERLAY}, " +
-                    "so an engine that cannot draw overlays reports app-update-required instead of a silent no-op",
-            )
-        }
-        if (payload.minimumEngineVersion < NeedleCapabilities.IMAGE_OVERLAY_ENGINE_VERSION) {
-            return NeedleRecipeValidationResult.Invalid(
-                "VIEW_RESOURCE_ID recipes must declare minimum_engine_version >= " +
-                    "${NeedleCapabilities.IMAGE_OVERLAY_ENGINE_VERSION}, got ${payload.minimumEngineVersion}",
-            )
-        }
         if (selectorCarriesMethodShape(selector)) {
             return NeedleRecipeValidationResult.Invalid(
                 "a VIEW_RESOURCE_ID selector must carry only view_resource_name/view_resource_package, not dex/method fields",
@@ -122,22 +110,41 @@ object NeedleRecipeValidation {
                     "'$ANDROID_RESOURCE_PACKAGE', got '$pkg'",
             )
         }
-
-        if (effect.kind != EffectKind.ADD_IMAGE_OVERLAY) {
-            return NeedleRecipeValidationResult.Invalid(
-                "selector type VIEW_RESOURCE_ID only supports effect kind ADD_IMAGE_OVERLAY, got ${effect.kind}",
-            )
-        }
         if (effect.hookPoint != HookPoint.AFTER) {
             return NeedleRecipeValidationResult.Invalid(
-                "ADD_IMAGE_OVERLAY requires hook_point AFTER; the overlay is drawn once the view has painted itself",
+                "a VIEW_RESOURCE_ID effect requires hook_point AFTER; it acts once the view has painted itself",
             )
         }
         if (effect.argumentIndex != null) {
-            return NeedleRecipeValidationResult.Invalid("ADD_IMAGE_OVERLAY does not use argument_index")
+            return NeedleRecipeValidationResult.Invalid("a VIEW_RESOURCE_ID effect does not use argument_index")
         }
         if (effect.`when` != null) {
-            return NeedleRecipeValidationResult.Invalid("ADD_IMAGE_OVERLAY does not support a `when` gate")
+            return NeedleRecipeValidationResult.Invalid("a VIEW_RESOURCE_ID effect does not support a `when` gate")
+        }
+        return when (effect.kind) {
+            EffectKind.ADD_IMAGE_OVERLAY -> validateImageOverlay(payload, effect)
+            EffectKind.HIDE_VIEW -> validateHideView(payload, effect)
+            else -> NeedleRecipeValidationResult.Invalid(
+                "selector type VIEW_RESOURCE_ID only supports ADD_IMAGE_OVERLAY or HIDE_VIEW, got ${effect.kind}",
+            )
+        }
+    }
+
+    private fun validateImageOverlay(
+        payload: NeedleRecipePayload,
+        effect: MicroHookEffect,
+    ): NeedleRecipeValidationResult {
+        if (NeedleCapabilities.VIEW_IMAGE_OVERLAY !in payload.requiredCapabilities) {
+            return NeedleRecipeValidationResult.Invalid(
+                "ADD_IMAGE_OVERLAY must declare required_capability ${NeedleCapabilities.VIEW_IMAGE_OVERLAY}, " +
+                    "so an engine that cannot draw overlays reports app-update-required instead of a silent no-op",
+            )
+        }
+        if (payload.minimumEngineVersion < NeedleCapabilities.IMAGE_OVERLAY_ENGINE_VERSION) {
+            return NeedleRecipeValidationResult.Invalid(
+                "ADD_IMAGE_OVERLAY must declare minimum_engine_version >= " +
+                    "${NeedleCapabilities.IMAGE_OVERLAY_ENGINE_VERSION}, got ${payload.minimumEngineVersion}",
+            )
         }
         val overlay = runCatching {
             NeedleJson.decodeFromJsonElement(NeedleImageOverlay.serializer(), effect.expression)
@@ -145,7 +152,56 @@ object NeedleRecipeValidation {
             ?: return NeedleRecipeValidationResult.Invalid("ADD_IMAGE_OVERLAY expression is not a valid image overlay")
         val imageResult = validateOverlayImage(overlay)
         if (imageResult is NeedleRecipeValidationResult.Invalid) return imageResult
-        return validateOverlayTint(payload, overlay)
+        val tintResult = validateOverlayTint(payload, overlay)
+        if (tintResult is NeedleRecipeValidationResult.Invalid) return tintResult
+        if (overlay.hideDescendantTextLabels) {
+            if (NeedleCapabilities.VIEW_HIDE_DESCENDANT !in payload.requiredCapabilities) {
+                return NeedleRecipeValidationResult.Invalid(
+                    "an overlay with hide_descendant_text_labels must declare required_capability " +
+                        "${NeedleCapabilities.VIEW_HIDE_DESCENDANT}",
+                )
+            }
+            if (payload.minimumEngineVersion < NeedleCapabilities.HIDE_VIEW_ENGINE_VERSION) {
+                return NeedleRecipeValidationResult.Invalid(
+                    "hide_descendant_text_labels requires minimum_engine_version >= " +
+                        "${NeedleCapabilities.HIDE_VIEW_ENGINE_VERSION}, got ${payload.minimumEngineVersion}",
+                )
+            }
+        }
+        return NeedleRecipeValidationResult.Valid
+    }
+
+    private fun validateHideView(
+        payload: NeedleRecipePayload,
+        effect: MicroHookEffect,
+    ): NeedleRecipeValidationResult {
+        if (NeedleCapabilities.VIEW_HIDE_DESCENDANT !in payload.requiredCapabilities) {
+            return NeedleRecipeValidationResult.Invalid(
+                "HIDE_VIEW must declare required_capability ${NeedleCapabilities.VIEW_HIDE_DESCENDANT}, so an engine " +
+                    "that cannot hide views reports app-update-required instead of a silent no-op",
+            )
+        }
+        if (payload.minimumEngineVersion < NeedleCapabilities.HIDE_VIEW_ENGINE_VERSION) {
+            return NeedleRecipeValidationResult.Invalid(
+                "HIDE_VIEW requires minimum_engine_version >= " +
+                    "${NeedleCapabilities.HIDE_VIEW_ENGINE_VERSION}, got ${payload.minimumEngineVersion}",
+            )
+        }
+        val hide = runCatching {
+            NeedleJson.decodeFromJsonElement(NeedleHideView.serializer(), effect.expression)
+        }.getOrNull()
+            ?: return NeedleRecipeValidationResult.Invalid("HIDE_VIEW expression is not a valid hide-view spec")
+        if (hide.target == HideViewTarget.RESOURCE_IDS) {
+            if (hide.resourceNames.isEmpty()) {
+                return NeedleRecipeValidationResult.Invalid(
+                    "HIDE_VIEW with target RESOURCE_IDS requires at least one resource_names entry",
+                )
+            }
+            hide.resourceNames.firstOrNull { it.name.isBlank() }?.let {
+                return NeedleRecipeValidationResult.Invalid("HIDE_VIEW resource_names entries must have a non-blank name")
+            }
+        }
+        return NeedleRecipeValidationResult.Valid
     }
 
     private fun validateOverlayTint(
@@ -312,6 +368,10 @@ object NeedleRecipeValidation {
 
         EffectKind.ADD_IMAGE_OVERLAY -> NeedleRecipeValidationResult.Invalid(
             "effect kind ADD_IMAGE_OVERLAY is only supported with selector type VIEW_RESOURCE_ID",
+        )
+
+        EffectKind.HIDE_VIEW -> NeedleRecipeValidationResult.Invalid(
+            "effect kind HIDE_VIEW is only supported with selector type VIEW_RESOURCE_ID",
         )
     }
 

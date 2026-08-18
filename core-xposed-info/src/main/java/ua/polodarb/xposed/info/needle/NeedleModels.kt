@@ -18,7 +18,7 @@ object NeedleProtocol {
     const val SIGNATURE_ALGORITHM = "ECDSA_P256_SHA256"
     const val DOMAIN_SEPARATOR = "GMSFLAGS_NEEDLE_RECIPE_V1 "
     const val DOMAIN_SEPARATOR_V2 = "GMSFLAGS_NEEDLE_RECIPE_V2 "
-    const val ENGINE_VERSION = 5
+    const val ENGINE_VERSION = 6
 
     val SUPPORTED_SCHEMA_VERSIONS: Set<Int> = setOf(1, 2)
 
@@ -42,10 +42,12 @@ object NeedleCapabilities {
     const val STRUCTURAL_SELECTORS = "STRUCTURAL_SELECTORS"
     const val VIEW_IMAGE_OVERLAY = "VIEW_IMAGE_OVERLAY"
     const val VIEW_IMAGE_TINT = "VIEW_IMAGE_TINT"
+    const val VIEW_HIDE_DESCENDANT = "VIEW_HIDE_DESCENDANT"
 
     const val IMAGE_OVERLAY_ENGINE_VERSION = 3
     const val IMAGE_TINT_ENGINE_VERSION = 4
     const val IMAGE_TINT_NIGHT_MODE_ENGINE_VERSION = 5
+    const val HIDE_VIEW_ENGINE_VERSION = 6
 
     val SUPPORTED: Set<String> = setOf(
         REFERENCE_TYPES,
@@ -54,6 +56,7 @@ object NeedleCapabilities {
         STRUCTURAL_SELECTORS,
         VIEW_IMAGE_OVERLAY,
         VIEW_IMAGE_TINT,
+        VIEW_HIDE_DESCENDANT,
     )
 }
 
@@ -152,7 +155,7 @@ enum class HookPoint { BEFORE, AFTER }
 /** [STRING_RESULT] is only ever valid paired with [SelectorKind.ANDROID_RESOURCE_STRING] (enforced
  * by NeedleRecipeValidation) - its resolved method is guaranteed to return String, unlike a
  * DEX_METHOD selector's return type, which is never statically guaranteed. */
-enum class EffectKind { BOOLEAN_RESULT, NUMERIC_RESULT, ARGUMENT_REPLACE, ARGUMENT_NULL, STRING_RESULT, ADD_IMAGE_OVERLAY }
+enum class EffectKind { BOOLEAN_RESULT, NUMERIC_RESULT, ARGUMENT_REPLACE, ARGUMENT_NULL, STRING_RESULT, ADD_IMAGE_OVERLAY, HIDE_VIEW }
 
 object NeedleBooleans {
     fun parse(value: String?): Boolean = when (value?.trim()?.lowercase()) {

@@ -10,8 +10,10 @@ import org.luckypray.dexkit.DexKitBridge
 import ua.polodarb.xposed.info.XposedConstants
 import ua.polodarb.xposed.info.needle.BooleanExpression
 import ua.polodarb.xposed.info.needle.EffectKind
+import ua.polodarb.xposed.info.needle.HideViewTarget
 import ua.polodarb.xposed.info.needle.HookPoint
 import ua.polodarb.xposed.info.needle.NeedleEffectTypeCheck
+import ua.polodarb.xposed.info.needle.NeedleHideView
 import ua.polodarb.xposed.info.needle.NeedleImageOverlay
 import ua.polodarb.xposed.info.needle.NeedleImageOverlayLimits
 import ua.polodarb.xposed.info.needle.NeedleEffectTypeRules
@@ -63,7 +65,7 @@ internal object NeedleEngine {
         }
         if (payloads.isEmpty()) return
 
-        val viewOverlayPayloads = payloads.filter { it.selector.type == SelectorKind.VIEW_RESOURCE_ID }
+        val viewEffectPayloads = payloads.filter { it.selector.type == SelectorKind.VIEW_RESOURCE_ID }
         val resourceStringPayloads = payloads.filter { it.selector.type == SelectorKind.ANDROID_RESOURCE_STRING }
         val dexMethodPayloads = payloads.filter { it.selector.type == SelectorKind.DEX_METHOD }
 
@@ -82,8 +84,8 @@ internal object NeedleEngine {
             if (resourceStringPayloads.isNotEmpty()) {
                 installResourceStringDispatcher(resourceStringPayloads, lpparam.packageName, overrideStore)
             }
-            if (viewOverlayPayloads.isNotEmpty()) {
-                installImageOverlayDispatcher(viewOverlayPayloads, classLoader, appContext)
+            if (viewEffectPayloads.isNotEmpty()) {
+                installViewEffectDispatcher(viewEffectPayloads, classLoader, appContext)
             }
         }.onFailure { error ->
             XposedLogger.logE("NeedleEngine: failed for ${lpparam.packageName}", error)
@@ -288,6 +290,10 @@ internal object NeedleEngine {
             EffectKind.ADD_IMAGE_OVERLAY -> NeedleEffectTypeCheck.Rejected(
                 "ADD_IMAGE_OVERLAY is not valid for a DEX_METHOD recipe",
             )
+
+            EffectKind.HIDE_VIEW -> NeedleEffectTypeCheck.Rejected(
+                "HIDE_VIEW is not valid for a DEX_METHOD recipe",
+            )
         }
     }
 
@@ -301,42 +307,86 @@ internal object NeedleEngine {
         XposedLogger.logI("Needle: installed resource-string dispatcher for ${payloads.size} recipe(s) in $packageName")
     }
 
-    private fun installImageOverlayDispatcher(
+    private fun installViewEffectDispatcher(
         payloads: List<NeedleRecipePayload>,
         classLoader: ClassLoader,
         systemContext: Context?,
     ) {
-        val resolved = payloads.mapNotNull { payload ->
-            val overlay = runCatching {
-                NeedleJson.decodeFromJsonElement(NeedleImageOverlay.serializer(), payload.effect.expression)
-            }.getOrNull()
-            if (overlay == null) {
-                XposedLogger.logW("Needle: recipe '${payload.codename}' has an invalid image overlay expression, skipping")
-                return@mapNotNull null
-            }
-            val bytes = runCatching { Base64.getDecoder().decode(overlay.imageBase64) }.getOrNull()
-            if (bytes == null) {
-                XposedLogger.logW("Needle: recipe '${payload.codename}' image_base64 is not valid base64, skipping")
-                return@mapNotNull null
-            }
-            when (val result = NeedleImageOverlayDecoder.decode(bytes)) {
-                is NeedleImageOverlayDecoder.Result.Success -> ResolvedImageOverlay(
-                    recipeId = payload.recipeId,
-                    resourceName = payload.selector.viewResourceName,
-                    resourcePackage = payload.selector.viewResourcePackage,
-                    bitmap = result.bitmap,
-                    overlay = overlay,
-                )
-                is NeedleImageOverlayDecoder.Result.Failure -> {
-                    XposedLogger.logW("Needle: recipe '${payload.codename}' image rejected: ${result.reason}")
-                    null
+        val resolved: List<ResolvedViewEffect> = payloads.flatMap { payload ->
+            when (payload.effect.kind) {
+                EffectKind.ADD_IMAGE_OVERLAY -> resolveImageOverlay(payload)
+                EffectKind.HIDE_VIEW -> listOfNotNull(resolveHideView(payload))
+                else -> {
+                    XposedLogger.logW(
+                        "Needle: recipe '${payload.codename}' has an unsupported VIEW_RESOURCE_ID effect " +
+                            "${payload.effect.kind}, skipping",
+                    )
+                    emptyList()
                 }
             }
         }
         if (resolved.isEmpty()) return
-        val dispatcher = NeedleImageOverlayDispatcher(resolved, systemContext)
+        val dispatcher = NeedleViewEffectDispatcher(resolved, systemContext)
         XposedHelpers.findAndHookMethod("android.view.View", classLoader, "draw", Canvas::class.java, dispatcher)
-        XposedLogger.logI("Needle: installed image-overlay dispatcher for ${resolved.size} recipe(s)")
+        XposedLogger.logI("Needle: installed view-effect dispatcher for ${resolved.size} recipe(s)")
+    }
+
+    private fun resolveImageOverlay(payload: NeedleRecipePayload): List<ResolvedViewEffect> {
+        val overlay = runCatching {
+            NeedleJson.decodeFromJsonElement(NeedleImageOverlay.serializer(), payload.effect.expression)
+        }.getOrNull()
+        if (overlay == null) {
+            XposedLogger.logW("Needle: recipe '${payload.codename}' has an invalid image overlay expression, skipping")
+            return emptyList()
+        }
+        val bytes = runCatching { Base64.getDecoder().decode(overlay.imageBase64) }.getOrNull()
+        if (bytes == null) {
+            XposedLogger.logW("Needle: recipe '${payload.codename}' image_base64 is not valid base64, skipping")
+            return emptyList()
+        }
+        val bitmap = when (val result = NeedleImageOverlayDecoder.decode(bytes)) {
+            is NeedleImageOverlayDecoder.Result.Success -> result.bitmap
+            is NeedleImageOverlayDecoder.Result.Failure -> {
+                XposedLogger.logW("Needle: recipe '${payload.codename}' image rejected: ${result.reason}")
+                return emptyList()
+            }
+        }
+        val effects = mutableListOf<ResolvedViewEffect>(
+            ResolvedImageOverlay(
+                recipeId = payload.recipeId,
+                resourceName = payload.selector.viewResourceName,
+                resourcePackage = payload.selector.viewResourcePackage,
+                bitmap = bitmap,
+                overlay = overlay,
+            ),
+        )
+        if (overlay.hideDescendantTextLabels) {
+            effects.add(
+                ResolvedHideView(
+                    recipeId = payload.recipeId,
+                    resourceName = payload.selector.viewResourceName,
+                    resourcePackage = payload.selector.viewResourcePackage,
+                    hideView = NeedleHideView(target = HideViewTarget.TEXT_LABELS),
+                ),
+            )
+        }
+        return effects
+    }
+
+    private fun resolveHideView(payload: NeedleRecipePayload): ResolvedHideView? {
+        val hide = runCatching {
+            NeedleJson.decodeFromJsonElement(NeedleHideView.serializer(), payload.effect.expression)
+        }.getOrNull()
+        if (hide == null) {
+            XposedLogger.logW("Needle: recipe '${payload.codename}' has an invalid hide-view expression, skipping")
+            return null
+        }
+        return ResolvedHideView(
+            recipeId = payload.recipeId,
+            resourceName = payload.selector.viewResourceName,
+            resourcePackage = payload.selector.viewResourcePackage,
+            hideView = hide,
+        )
     }
 
     private fun applyEffect(
@@ -385,6 +435,8 @@ internal object NeedleEngine {
                 EffectKind.STRING_RESULT -> {
                 }
                 EffectKind.ADD_IMAGE_OVERLAY -> {
+                }
+                EffectKind.HIDE_VIEW -> {
                 }
             }
         }.onFailure { error ->

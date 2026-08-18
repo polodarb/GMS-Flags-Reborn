@@ -27,12 +27,16 @@ internal class GmsFlagsFileParser {
         repeat(nodes.length) { index ->
             val element = nodes.item(index) as? Element ?: return@repeat
             val type = element.getAttribute(TYPE_ATTRIBUTE).toFlagType()
-            if (type == null) {
+            val name = element.getAttribute(NAME_ATTRIBUTE).trim()
+            val value = if (type != null && element.hasAttribute(VALUE_ATTRIBUTE)) {
+                element.getAttribute(VALUE_ATTRIBUTE).normalized(type)
+            } else {
+                null
+            }
+            if (type == null || name.isEmpty() || value == null) {
                 skippedFlags += 1
                 return@repeat
             }
-            val name = element.requiredAttribute(NAME_ATTRIBUTE)
-            val value = element.valueAttribute().normalized(type, name)
             val packageName = element.getAttribute(PACKAGE_ATTRIBUTE).trim().ifEmpty { null }
             flags[type to name] = ImportedFlag(name, type, value, packageName)
         }
@@ -54,11 +58,6 @@ internal class GmsFlagsFileParser {
         .trim()
         .also { require(it.isNotEmpty()) { "Missing $name attribute" } }
 
-    private fun Element.valueAttribute(): String {
-        require(hasAttribute(VALUE_ATTRIBUTE)) { "Missing $VALUE_ATTRIBUTE attribute" }
-        return getAttribute(VALUE_ATTRIBUTE)
-    }
-
     private fun String.toFlagType(): FlagType? = when (trim().lowercase()) {
         "boolean", "bool" -> FlagType.Boolean
         "integer", "int" -> FlagType.Integer
@@ -67,21 +66,15 @@ internal class GmsFlagsFileParser {
         else -> null
     }
 
-    private fun String.normalized(type: FlagType, flagName: String): String = when (type) {
+    private fun String.normalized(type: FlagType): String? = when (type) {
         FlagType.Boolean -> when {
             equals("true", ignoreCase = true) || this == "1" -> "1"
             equals("false", ignoreCase = true) || this == "0" -> "0"
-            else -> error("Invalid boolean value for $flagName")
+            else -> null
         }
-        FlagType.Integer -> trim().also {
-            require(it.toLongOrNull() != null) { "Invalid integer value for $flagName" }
-        }
-        FlagType.Float -> trim().also {
-            require(it.toDoubleOrNull() != null) { "Invalid float value for $flagName" }
-        }
-        FlagType.String -> also {
-            require(length <= MAX_STRING_VALUE_CHARS) { "String value is too large" }
-        }
+        FlagType.Integer -> trim().takeIf { it.toLongOrNull() != null }
+        FlagType.Float -> trim().takeIf { it.toDoubleOrNull() != null }
+        FlagType.String -> takeIf { length <= MAX_STRING_VALUE_CHARS }
     }
 
     private companion object {

@@ -58,6 +58,32 @@ class GmsFlagsFileParserTest {
     }
 
     @Test
+    fun `skips empty or invalid numeric values but keeps empty strings`() {
+        val result = parser.parse(
+            """
+            <package name="com.google.test">
+                <flags>
+                    <flag name="45820951" type="integer" value="" />
+                    <flag name="bad_int" type="integer" value="abc" />
+                    <flag name="bad_float" type="float" value="" />
+                    <flag name="ok_int" type="integer" value="7" />
+                    <flag name="empty_string" type="string" value="" />
+                </flags>
+            </package>
+            """.trimIndent()
+        )
+
+        assertEquals(
+            listOf(
+                Triple("ok_int", FlagType.Integer, "7"),
+                Triple("empty_string", FlagType.String, ""),
+            ),
+            result.flags.map { Triple(it.name, it.type, it.value) },
+        )
+        assertEquals(3, result.skippedFlags)
+    }
+
+    @Test
     fun `rejects document type declarations`() {
         assertThrows(IllegalArgumentException::class.java) {
             parser.parse(

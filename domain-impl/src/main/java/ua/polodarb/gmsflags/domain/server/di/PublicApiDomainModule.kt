@@ -36,6 +36,9 @@ val publicApiDomainModule = module {
             repository = get(),
             supportedApplicationsRepository = get(),
             flagDetailsRepository = get(),
+            verifyHookTrust = get(),
+            hookEngineSupport = get(),
+            appliedSetupStore = get(),
         )
     }
     factory<GetRecommendationDetails> { GetRecommendationDetailsUseCase(repository = get()) }

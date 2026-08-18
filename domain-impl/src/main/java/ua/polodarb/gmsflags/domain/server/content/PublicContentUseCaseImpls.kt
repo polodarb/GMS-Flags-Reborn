@@ -51,6 +51,9 @@ class GetRecommendationFeedUseCase(
     private val repository: PublicContentRepository,
     private val supportedApplicationsRepository: SupportedApplicationsRepository,
     private val flagDetailsRepository: FlagDetailsRepository,
+    private val verifyHookTrust: VerifyHookTrust,
+    private val hookEngineSupport: HookEngineSupport,
+    private val appliedSetupStore: AppliedRecommendationSetupStore,
 ) : GetRecommendationFeed {
     override suspend fun invoke(): Result<List<ServerRecommendationFeedItem>> = runCatching {
         val summaries = repository.getRecommendations().getOrThrow()
@@ -104,27 +107,44 @@ class GetRecommendationFeedUseCase(
                                     valueTransform = { it.second },
                                 )
                                 .orEmpty()
-                            if (installed == null || target == null || expectedByPackage.isEmpty()) {
+                            val expectedHooks = variant?.hooks.orEmpty()
+                                .filter { verifyHookTrust(it) == HookTrustStatus.VERIFIED }
+                            if (installed == null || target == null ||
+                                (expectedByPackage.isEmpty() && expectedHooks.isEmpty())
+                            ) {
                                 RecommendationApplicationStatus.Unavailable
                             } else {
-                                combineRecommendationApplicationStatuses(
-                                    expectedByPackage.map { (packageName, expected) ->
-                                        flagDetailsRepository.getFlags(
-                                            installed.androidPackageName,
-                                            packageName,
-                                        ).fold(
-                                            onSuccess = { flags ->
-                                                resolveRecommendationApplicationStatus(
-                                                    expected,
-                                                    flags,
-                                                )
-                                            },
-                                            onFailure = {
-                                                RecommendationApplicationStatus.Unavailable
-                                            },
+                                val flagStatuses = expectedByPackage.map { (packageName, expected) ->
+                                    flagDetailsRepository.getFlags(
+                                        installed.androidPackageName,
+                                        packageName,
+                                    ).fold(
+                                        onSuccess = { flags ->
+                                            resolveRecommendationApplicationStatus(expected, flags)
+                                        },
+                                        onFailure = { RecommendationApplicationStatus.Unavailable },
+                                    )
+                                }
+                                val hookStatuses = if (expectedHooks.isEmpty()) {
+                                    emptyList()
+                                } else {
+                                    val appliedHooks = appliedSetupStore.read(summary.id)
+                                        .getOrNull()
+                                        ?.hooks
+                                        .orEmpty()
+                                    val unsupportedRequiredRecipeIds = expectedHooks
+                                        .filter { it.required && !hookEngineSupport(it) }
+                                        .map { it.recipeId }
+                                        .toSet()
+                                    listOf(
+                                        resolveHookApplicationStatus(
+                                            expectedHooks,
+                                            appliedHooks,
+                                            unsupportedRequiredRecipeIds,
                                         )
-                                    }
-                                )
+                                    )
+                                }
+                                combineRecommendationApplicationStatuses(flagStatuses + hookStatuses)
                             }
                         } ?: RecommendationApplicationStatus.Unavailable,
                     )

@@ -82,6 +82,9 @@ class GetRecommendationFeedUseCaseTest {
                     phenotypePackageName: String,
                 ) = Result.success(Unit)
             },
+            verifyHookTrust = { HookTrustStatus.NOT_SIGNED },
+            hookEngineSupport = { true },
+            appliedSetupStore = FakeAppliedSetupStore(),
         )
 
         val item = useCase().getOrThrow().single()
@@ -93,7 +96,57 @@ class GetRecommendationFeedUseCaseTest {
         assertEquals(RecommendationApplicationStatus.Applied, item.applicationStatus)
     }
 
-    private class FakePublicContentRepository : PublicContentRepository {
+    @Test
+    fun `hook-only variant reports Applied when its hook is applied`() = runBlocking {
+        val envelope = SignedNeedleEnvelope(
+            mediaType = "application/vnd.gmsflags.needle-recipe+json;v=2",
+            payloadBase64 = "cGF5bG9hZA==",
+            payloadSha256 = "abc123",
+            signatureAlgorithm = "ECDSA_P256_SHA256",
+            signatureBase64 = "c2ln",
+        )
+        val hook = RecommendationVariantHook(recipeId = 42, required = true, envelope = envelope)
+        val useCase = GetRecommendationFeedUseCase(
+            repository = FakePublicContentRepository(
+                variants = listOf(
+                    RecommendationFlagVariant(
+                        id = 1,
+                        label = null,
+                        versionConstraint = VersionConstraint(
+                            type = VersionConstraintType.Unbounded,
+                            minimumVersionCode = null,
+                            maximumVersionCode = null,
+                        ),
+                        flags = emptyList(),
+                        hooks = listOf(hook),
+                    )
+                )
+            ),
+            supportedApplicationsRepository = InstalledApps,
+            flagDetailsRepository = UnusedFlagDetailsRepository,
+            verifyHookTrust = { HookTrustStatus.VERIFIED },
+            hookEngineSupport = { true },
+            appliedSetupStore = FakeAppliedSetupStore(
+                AppliedRecommendationSetup(
+                    recommendationId = 8,
+                    androidPackageName = ANDROID_PACKAGE,
+                    flagNamesByPackage = emptyMap(),
+                    hooks = setOf(
+                        AppliedHookRef(recipeId = 42, payloadSha256 = "abc123", required = true)
+                    ),
+                )
+            ),
+        )
+
+        assertEquals(
+            RecommendationApplicationStatus.Applied,
+            useCase().getOrThrow().single().applicationStatus,
+        )
+    }
+
+    private class FakePublicContentRepository(
+        private val variants: List<RecommendationFlagVariant> = DEFAULT_VARIANTS,
+    ) : PublicContentRepository {
         private val summary = ServerRecommendationSummary(
             id = 8,
             status = RecommendationStatus.Published,
@@ -118,24 +171,7 @@ class GetRecommendationFeedUseCaseTest {
                 screenshots = emptyList(),
                 externalLink = null,
                 source = null,
-                variants = listOf(
-                    RecommendationFlagVariant(
-                        id = 1,
-                        label = null,
-                        versionConstraint = VersionConstraint(
-                            type = VersionConstraintType.Unbounded,
-                            minimumVersionCode = null,
-                            maximumVersionCode = null,
-                        ),
-                        flags = listOf(
-                            recommendedFlag("primary_flag", packageName = null),
-                            recommendedFlag(
-                                "direct_boot_flag",
-                                packageName = DIRECT_BOOT_FLAG_PACKAGE,
-                            ),
-                        ),
-                    )
-                ),
+                variants = variants,
             )
         )
 
@@ -153,6 +189,60 @@ class GetRecommendationFeedUseCaseTest {
         ) = Result.success(emptyList<ServerRecommendationSummary>())
     }
 
+    private object InstalledApps : SupportedApplicationsRepository {
+        override suspend fun getApplications() = Result.success(
+            listOf(
+                SupportedApplication(
+                    androidPackageName = ANDROID_PACKAGE,
+                    flagPackages = listOf(
+                        FlagPackage(PRIMARY_FLAG_PACKAGE, FlagPackageCategory.Primary)
+                    ),
+                    name = "Phone",
+                    versionName = "1.0",
+                    versionCode = 100,
+                    lastUpdateTime = 0,
+                )
+            )
+        )
+    }
+
+    private object UnusedFlagDetailsRepository : FlagDetailsRepository {
+        override suspend fun getFlags(androidPackageName: String, phenotypePackageName: String) =
+            Result.success(emptyList<PhenotypeFlag>())
+
+        override suspend fun applyOverrides(
+            androidPackageName: String,
+            phenotypePackageName: String,
+            overrides: List<FlagOverride>,
+        ) = Result.success(Unit)
+
+        override suspend fun deleteOverride(
+            androidPackageName: String,
+            phenotypePackageName: String,
+            flagName: String,
+        ) = Result.success(Unit)
+
+        override suspend fun deleteOverrides(
+            androidPackageName: String,
+            phenotypePackageName: String,
+            flagNames: List<String>,
+        ) = Result.success(Unit)
+
+        override suspend fun deletePackageOverrides(
+            androidPackageName: String,
+            phenotypePackageName: String,
+        ) = Result.success(Unit)
+    }
+
+    private class FakeAppliedSetupStore(
+        private val setup: AppliedRecommendationSetup? = null,
+    ) : AppliedRecommendationSetupStore {
+        override suspend fun read(recommendationId: Long) = Result.success(setup)
+        override suspend fun write(setup: AppliedRecommendationSetup) = Result.success(Unit)
+        override suspend fun clear(recommendationId: Long) = Result.success(Unit)
+        override suspend fun clearAll() = Result.success(Unit)
+    }
+
     private companion object {
         const val ANDROID_PACKAGE = "com.google.android.dialer"
         const val PRIMARY_FLAG_PACKAGE = "com.google.android.dialer"
@@ -167,6 +257,22 @@ class GetRecommendationFeedUseCaseTest {
             dangerLevel = DangerLevel.None,
             badges = emptyList(),
             packageName = packageName,
+        )
+
+        val DEFAULT_VARIANTS = listOf(
+            RecommendationFlagVariant(
+                id = 1,
+                label = null,
+                versionConstraint = VersionConstraint(
+                    type = VersionConstraintType.Unbounded,
+                    minimumVersionCode = null,
+                    maximumVersionCode = null,
+                ),
+                flags = listOf(
+                    recommendedFlag("primary_flag", packageName = null),
+                    recommendedFlag("direct_boot_flag", packageName = DIRECT_BOOT_FLAG_PACKAGE),
+                ),
+            )
         )
     }
 }

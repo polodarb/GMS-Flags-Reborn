@@ -43,9 +43,12 @@ class AppNavConfigTest {
         RootDestination.ExternalImportFlags(documentUri = "content://example/flags"),
         RootDestination.HookStatus,
         RootDestination.HookStatusDetails(androidPackageName = "com.example.app"),
+        RootDestination.CommunityDetails(communityId = 1L),
         BottomBarDestination.Suggestions,
         BottomBarDestination.Apps,
+        BottomBarDestination.Community,
         BottomBarDestination.GmsInsight,
         BottomBarDestination.Experimental,
     )
+
 }

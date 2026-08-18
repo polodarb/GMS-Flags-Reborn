@@ -60,6 +60,11 @@ sealed interface RootDestination : ScreenDestination {
         val recommendationId: Long,
     ) : RootDestination
 
+    @Serializable
+    data class CommunityDetails(
+        val communityId: Long,
+    ) : RootDestination
+
 }
 
 @Stable
@@ -71,8 +76,12 @@ sealed interface BottomBarDestination : ScreenDestination {
     data object Apps : BottomBarDestination
 
     @Serializable
+    data object Community : BottomBarDestination
+
+    @Serializable
     data object GmsInsight : BottomBarDestination
 
     @Serializable
     data object Experimental : BottomBarDestination
 }
+

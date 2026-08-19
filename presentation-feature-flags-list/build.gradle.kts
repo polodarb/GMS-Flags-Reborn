@@ -19,6 +19,9 @@ dependencies {
     implementation(project(":presentation-core"))
     implementation(project(":presentation-core-ui"))
     implementation(project(":presentation-core-navigation"))
+    implementation(project(":presentation-feature-community"))
+
+
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.material3)

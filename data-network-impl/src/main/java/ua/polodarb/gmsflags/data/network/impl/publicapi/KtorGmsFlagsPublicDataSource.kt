@@ -150,6 +150,49 @@ internal class KtorGmsFlagsPublicDataSource(
             },
         )
 
+    override suspend fun getCommunityPackages(query: String?): List<ua.polodarb.gmsflags.data.network.publicapi.model.CommunityPackageNetModel> =
+        runCatching {
+            httpClient.safeApiCall<List<ua.polodarb.gmsflags.data.network.publicapi.model.CommunityPackageNetModel>> {
+                get {
+                    url {
+                        appendPathSegments(PublicApiRoutes.COMMUNITY)
+                        query?.takeIf(String::isNotBlank)?.let { parameter("q", it) }
+                    }
+                }
+            }
+        }.getOrElse { emptyList() }
+
+    override suspend fun getCommunityPackage(id: Long): ua.polodarb.gmsflags.data.network.publicapi.model.CommunityPackageNetModel =
+        httpClient.safeApiCall {
+            get {
+                url {
+                    appendPathSegments(PublicApiRoutes.COMMUNITY, id.toString())
+                }
+            }
+        }
+
+    override suspend fun submitCommunityPackage(request: ua.polodarb.gmsflags.data.network.publicapi.model.CommunitySubmitRequestNetModel): Boolean =
+        runCatching {
+            httpClient.safeApiCall<HttpStatusCode> {
+                post {
+                    url { appendPathSegments(PublicApiRoutes.COMMUNITY) }
+                    setBody(request)
+                }
+            }.let { it == HttpStatusCode.OK || it == HttpStatusCode.Created }
+        }.getOrDefault(false)
+
+    override suspend fun reportCommunityPackage(request: ua.polodarb.gmsflags.data.network.publicapi.model.CommunityReportRequestNetModel): Boolean =
+        runCatching {
+            httpClient.safeApiCall<HttpStatusCode> {
+                post {
+                    url { appendPathSegments(PublicApiRoutes.COMMUNITY, "report") }
+                    setBody(request)
+                }
+            }.let { it == HttpStatusCode.OK || it == HttpStatusCode.Created }
+        }.getOrDefault(false)
+
+
+
     private fun resolveMedia(model: RecommendationSummaryNetModel) = model.copy(
         logoUrl = environment.resolvePublicUrl(model.logoUrl),
     )

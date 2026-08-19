@@ -7,6 +7,7 @@ import androidx.compose.material.icons.outlined.Insights
 import androidx.compose.material.icons.outlined.TipsAndUpdates
 import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.AutoAwesome
+import androidx.compose.material.icons.rounded.Groups
 import androidx.compose.material.icons.rounded.TipsAndUpdates
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
@@ -36,9 +37,15 @@ internal object BottomBarNavigation {
             icon = Icons.Rounded.Apps,
         ),
         BottomBarNavigationItem(
+            destination = BottomBarDestination.Community,
+            labelRes = R.string.navigation_community,
+            icon = Icons.Rounded.Groups,
+        ),
+        BottomBarNavigationItem(
             destination = BottomBarDestination.GmsInsight,
             labelRes = R.string.navigation_gms_insight,
             icon = IcLogo,
         ),
     ) + experimentalBottomBarNavigationItems()
 }
+

@@ -11,12 +11,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import ua.polodarb.gmsflags.presentation.feature.flagdetails.R
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.OutlinedButton
+import ua.polodarb.gmsflags.presentation.core.ui.adaptive.GmsSpacing
+
 @Composable
 internal fun ExportFlagsDialog(
     fileName: String,
     onFileNameChanged: (String) -> Unit,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
+    onShareToCommunity: (() -> Unit)? = null,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -35,7 +41,16 @@ internal fun ExportFlagsDialog(
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
         },
         confirmButton = {
-            Button(onClick = onConfirm) { Text(stringResource(R.string.action_share)) }
+            Row(horizontalArrangement = Arrangement.spacedBy(GmsSpacing.Small)) {
+                if (onShareToCommunity != null) {
+                    OutlinedButton(onClick = onShareToCommunity) {
+                        Text(stringResource(R.string.selection_share_community))
+                    }
+                }
+
+                Button(onClick = onConfirm) { Text(stringResource(R.string.action_share)) }
+            }
         },
     )
 }
+

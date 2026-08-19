@@ -43,9 +43,14 @@ sealed interface FlagDetailsEvent : ViewEvent {
     data object ExportClicked : FlagDetailsEvent
     data class ExportFileNameChanged(val value: String) : FlagDetailsEvent
     data object ExportConfirmed : FlagDetailsEvent
+    data object ShareToCommunityClicked : FlagDetailsEvent
+    data class AddCommunityFlag(val flagName: String, val valueType: String, val value: String) : FlagDetailsEvent
+    data class RemoveCommunityFlag(val index: Int) : FlagDetailsEvent
+    data class SubmitCommunityPackage(val title: String, val description: String, val packageName: String) : FlagDetailsEvent
     data object ReportClicked : FlagDetailsEvent
     data class ReportDescriptionChanged(val value: String) : FlagDetailsEvent
     data object ReportConfirmed : FlagDetailsEvent
+
     data object DialogDismissed : FlagDetailsEvent
     data object ScopeRefresh : FlagDetailsEvent
     data object ScopeHelpClicked : FlagDetailsEvent

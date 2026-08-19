@@ -42,8 +42,10 @@ they're ever installed.
   one-tap apply/undo and an honest "does this actually work on your install" status check
 - **Signed micro-hooks** (Needle) for the handful of features that need more than a flag flip —
   every hook is verified against an ECDSA P-256 signature before it's ever installed
+- **Community collection** — browse, search, share, and one-tap install flag packages contributed by other users
 - **Import/export** flag sets as `.gmsflags` files, including per-flag package overrides for
   multi-package apps
+
 - **Hook status dashboard** — see at a glance which supported apps the Xposed module is actually
   attached to, and why one isn't
 - Privacy-conscious analytics: opt-in, no PII collection — boolean/int/float flag values are

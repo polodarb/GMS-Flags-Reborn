@@ -84,7 +84,9 @@ dependencies {
     implementation(project(":presentation-core"))
     implementation(project(":presentation-core-navigation"))
     implementation(project(":presentation-feature-suggestions"))
+    implementation(project(":presentation-feature-community"))
     implementation(project(":presentation-feature-apps"))
+
     implementation(project(":presentation-feature-flags-list"))
     implementation(project(":presentation-feature-insight"))
     implementation(project(":presentation-feature-hook-status"))

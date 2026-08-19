@@ -18,9 +18,12 @@ object AppNavConfig {
             subclass(RootDestination.OverridesStorage::class, RootDestination.OverridesStorage.serializer())
             subclass(RootDestination.HookStatusDetails::class, RootDestination.HookStatusDetails.serializer())
             subclass(RootDestination.RecommendationDetails::class, RootDestination.RecommendationDetails.serializer())
+            subclass(RootDestination.CommunityDetails::class, RootDestination.CommunityDetails.serializer())
             subclass(BottomBarDestination.Suggestions::class, BottomBarDestination.Suggestions.serializer())
             subclass(BottomBarDestination.Apps::class, BottomBarDestination.Apps.serializer())
+            subclass(BottomBarDestination.Community::class, BottomBarDestination.Community.serializer())
             subclass(BottomBarDestination.GmsInsight::class, BottomBarDestination.GmsInsight.serializer())
+
             subclass(BottomBarDestination.Experimental::class, BottomBarDestination.Experimental.serializer())
         }
     }

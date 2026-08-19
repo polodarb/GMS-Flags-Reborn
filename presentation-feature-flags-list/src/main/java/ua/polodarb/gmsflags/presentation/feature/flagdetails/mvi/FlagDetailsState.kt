@@ -21,8 +21,13 @@ sealed interface FlagDetailsDialog {
 
     data object DeleteAllOverrides : FlagDetailsDialog
     data class Export(val fileName: String) : FlagDetailsDialog
+    data class ShareToCommunity(
+        val packageName: String,
+        val flags: List<ua.polodarb.gmsflags.domain.community.CommunityFlagItem>,
+    ) : FlagDetailsDialog
     data class Report(val description: String) : FlagDetailsDialog
 }
+
 
 data class SelectedFlag(val type: FlagType, val name: String)
 

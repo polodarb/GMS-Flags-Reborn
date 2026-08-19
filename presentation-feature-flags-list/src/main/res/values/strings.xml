@@ -104,6 +104,8 @@
     <string name="selection_select_all">Select all</string>
     <string name="selection_report">Report selected flags</string>
     <string name="selection_share">Share selected flags</string>
+    <string name="selection_share_community">Share to Community</string>
+
 
     <string name="add_multiple_title">Add multiple flags</string>
     <string name="add_multiple_enter_flags">Enter flags</string>
@@ -170,4 +172,7 @@
     <string name="report_email_subject">Problem report</string>
     <string name="report_email_body">Package: %1$s\n\nDescription:\n%2$s\n\nFlags:\n%3$s</string>
     <string name="default_export_file_name">flags</string>
+    <string name="operation_success">Operation completed successfully</string>
+    <string name="operation_failure">Operation failed</string>
 </resources>
+

@@ -55,6 +55,9 @@ import ua.polodarb.gmsflags.presentation.feature.flagdetails.mvi.withoutOverride
 import ua.polodarb.gmsflags.presentation.feature.flagdetails.share.FlagShareContentFactory
 import ua.polodarb.gmsflags.presentation.feature.flagdetails.R
 import androidx.annotation.StringRes
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import ua.polodarb.gmsflags.domain.community.SubmitCommunityPackageUseCase
 
 class FlagDetailsViewModel(
     private val androidPackageName: String,
@@ -75,7 +78,8 @@ class FlagDetailsViewModel(
     private val analytics: AnalyticsTracker,
     private val performanceTracer: PerformanceTracer,
     private val backgroundDispatcher: CoroutineDispatcher = Dispatchers.Default,
-) : BaseViewModel<FlagDetailsEvent, FlagDetailsState, FlagDetailsEffect>() {
+) : BaseViewModel<FlagDetailsEvent, FlagDetailsState, FlagDetailsEffect>(), KoinComponent {
+    private val submitCommunityPackageUseCase: SubmitCommunityPackageUseCase by inject()
     private val mutations = FlagMutationCoordinator()
     private var overrideWrites = createOverrideWriteQueue(initialPhenotypePackageName)
     private var loadJob: Job? = null
@@ -166,10 +170,32 @@ class FlagDetailsViewModel(
             FlagDetailsEvent.EditorSaved -> saveEditor()
             FlagDetailsEvent.EditorReset -> resetEditor()
             FlagDetailsEvent.ExportConfirmed -> exportFlags()
+            is FlagDetailsEvent.SubmitCommunityPackage -> submitCommunityPackage(event)
             FlagDetailsEvent.ReportConfirmed -> reportFlags()
             else -> reduce(event)
         }
     }
+
+    private fun submitCommunityPackage(event: FlagDetailsEvent.SubmitCommunityPackage) {
+        val currentDialog = viewState.value.dialog as? FlagDetailsDialog.ShareToCommunity ?: return
+        viewModelScope.launch {
+            val success = submitCommunityPackageUseCase(
+                title = event.title,
+                description = event.description,
+                packageName = event.packageName,
+                flags = currentDialog.flags,
+            )
+            reduce(FlagDetailsEvent.DialogDismissed)
+            setEffect {
+                FlagDetailsEffect.ShowMessage(
+                    messageRes = if (success) R.string.operation_success else R.string.operation_failure,
+                    type = if (success) UiMessageType.Success else UiMessageType.Error,
+                )
+            }
+        }
+    }
+
+
 
     private fun loadRemoteContent() {
         if (remoteContentJob?.isActive == true) return

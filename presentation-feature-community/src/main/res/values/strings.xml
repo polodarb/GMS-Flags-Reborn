@@ -1,0 +1,46 @@
+<resources>
+    <string name="community_title">Community</string>
+    <string name="community_search_placeholder">Search flags, titles, or descriptions…</string>
+    <string name="community_empty_title">No community flags found</string>
+    <string name="community_empty_description">Be the first to share a flag package with the community!</string>
+    <string name="community_share_action">Share to Community</string>
+    <string name="community_flags_installed">Flags installed successfully</string>
+    <string name="community_flags_install_failed">Failed to install flags</string>
+
+    <string name="community_details_title">Community Package</string>
+    <string name="community_details_by_author">By %s</string>
+    <string name="community_details_add_to_device">Add to Device</string>
+    <string name="community_details_report">Report</string>
+    <string name="community_report_success">Report submitted</string>
+
+    <plurals name="community_card_flags_count">
+        <item quantity="one">%d flag</item>
+        <item quantity="other">%d flags</item>
+    </plurals>
+
+    <plurals name="community_details_flags_count">
+        <item quantity="one">Flags (%d)</item>
+        <item quantity="other">Flags (%d)</item>
+    </plurals>
+
+    <string name="community_disclaimer_title">Community Disclaimer</string>
+    <string name="community_disclaimer_message">These flags are community-managed and not approved by the developers. Use at your own discretion.</string>
+    <string name="community_disclaimer_confirm">I Understand</string>
+
+    <string name="community_submit_title">Share to Community</string>
+    <string name="community_submit_field_title">Title</string>
+    <string name="community_submit_field_description">Short Description</string>
+    <string name="community_submit_field_package_name">Package Name</string>
+    <string name="community_submit_flag_name">Flag Name</string>
+    <string name="community_submit_flag_value">Flag Value</string>
+    <string name="community_submit_add_flag">Add Flag</string>
+    <string name="community_submit_send">Send</string>
+    <string name="community_submit_confirm_flag">Confirm Flag</string>
+    <string name="community_submit_cancel">Cancel</string>
+    <string name="community_submit_remove_flag">Remove flag</string>
+
+    <plurals name="community_submit_flags_count">
+        <item quantity="one">Package Flags (%d)</item>
+        <item quantity="other">Package Flags (%d)</item>
+    </plurals>
+</resources>

@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.Report
+
 import androidx.compose.material.icons.outlined.SelectAll
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.rounded.MoreVert
@@ -132,6 +134,12 @@ private fun selectionMenuSections(
                 icon = Icons.Outlined.Share,
                 event = FlagDetailsEvent.ExportClicked,
             ),
+            FlagDetailsMenuAction(
+                labelRes = R.string.selection_share_community,
+                icon = Icons.Outlined.Groups,
+                event = FlagDetailsEvent.ShareToCommunityClicked,
+            ),
         ),
     ),
 )
+

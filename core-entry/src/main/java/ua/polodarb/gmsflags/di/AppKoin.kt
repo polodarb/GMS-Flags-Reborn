@@ -34,6 +34,8 @@ import ua.polodarb.gmsflags.presentation.feature.settings.di.presentationFeature
 import ua.polodarb.gmsflags.domain.onboarding.di.onboardingDomainModule
 import ua.polodarb.gmsflags.domain.report.di.reportsDomainModule
 import ua.polodarb.gmsflags.presentation.feature.onboarding.di.presentationFeatureOnboardingModule
+import ua.polodarb.gmsflags.domain.impl.community.di.communityDomainModule
+import ua.polodarb.gmsflags.presentation.feature.community.di.presentationFeatureCommunityModule
 import ua.polodarb.gmsflags.startup.AppStartupViewModel
 import ua.polodarb.xposed.info.BuildConfig as XposedInfoBuildConfig
 
@@ -74,7 +76,9 @@ val appModules = listOf(
     settingsDomainModule,
     onboardingDomainModule,
     reportsDomainModule,
+    communityDomainModule,
     presentationFeatureSuggestionsModule,
+    presentationFeatureCommunityModule,
     presentationFeatureAppsModule,
     presentationFeatureFlagDetailsModule,
     presentationFeatureInsightModule,
@@ -82,3 +86,4 @@ val appModules = listOf(
     presentationFeatureSettingsModule,
     presentationFeatureOnboardingModule,
 )
+

@@ -10,6 +10,10 @@ import ua.polodarb.gmsflags.data.network.publicapi.model.RecommendationSummaryNe
 import ua.polodarb.gmsflags.data.network.publicapi.model.ReportRequestNetModel
 import ua.polodarb.gmsflags.data.network.publicapi.model.ReportResponseNetModel
 
+import ua.polodarb.gmsflags.data.network.publicapi.model.CommunityPackageNetModel
+import ua.polodarb.gmsflags.data.network.publicapi.model.CommunitySubmitRequestNetModel
+import ua.polodarb.gmsflags.data.network.publicapi.model.CommunityReportRequestNetModel
+
 interface GmsFlagsPublicDataSource {
     suspend fun getHome(): List<InfoBlockNetModel>
 
@@ -24,6 +28,14 @@ interface GmsFlagsPublicDataSource {
     suspend fun getRecommendations(): List<RecommendationSummaryNetModel>
 
     suspend fun getRecommendation(id: Long): RecommendationDetailNetModel
+
+    suspend fun getCommunityPackages(query: String? = null): List<CommunityPackageNetModel>
+
+    suspend fun getCommunityPackage(id: Long): CommunityPackageNetModel
+
+    suspend fun submitCommunityPackage(request: CommunitySubmitRequestNetModel): Boolean
+
+    suspend fun reportCommunityPackage(request: CommunityReportRequestNetModel): Boolean
 
     suspend fun resolveFlags(
         packageName: String,
@@ -43,3 +55,4 @@ interface GmsFlagsPublicDataSource {
      */
     suspend fun submitReport(request: ReportRequestNetModel): ReportResponseNetModel?
 }
+

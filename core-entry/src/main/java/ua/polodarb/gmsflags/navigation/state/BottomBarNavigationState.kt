@@ -87,13 +87,16 @@ private val BottomBarDestination.id: String
     get() = when (this) {
         BottomBarDestination.Suggestions -> "suggestions"
         BottomBarDestination.Apps -> "apps"
+        BottomBarDestination.Community -> "community"
         BottomBarDestination.GmsInsight -> "gms_insight"
         BottomBarDestination.Experimental -> "experimental"
     }
 
 private fun String.toBottomBarDestination(): BottomBarDestination = when (this) {
     "apps" -> BottomBarDestination.Apps
+    "community" -> BottomBarDestination.Community
     "gms_insight" -> BottomBarDestination.GmsInsight
     "experimental" -> BottomBarDestination.Experimental
     else -> BottomBarDestination.Suggestions
 }
+

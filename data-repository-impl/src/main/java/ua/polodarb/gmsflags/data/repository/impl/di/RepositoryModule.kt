@@ -147,7 +147,16 @@ val dataRepositoryModule = module {
             appliedSetupStore = get(),
         )
     }
+    single<ua.polodarb.gmsflags.data.repository.community.CommunityRepository> {
+        ua.polodarb.gmsflags.data.repository.impl.community.CommunityRepositoryImpl(
+            dataSource = get(),
+            context = get(),
+        )
+    }
 }
+
+
+
 
 private const val ANDROID_UIDS_PER_USER = 100_000
 private const val ONBOARDING_DATA_STORE = "onboardingDataStore"

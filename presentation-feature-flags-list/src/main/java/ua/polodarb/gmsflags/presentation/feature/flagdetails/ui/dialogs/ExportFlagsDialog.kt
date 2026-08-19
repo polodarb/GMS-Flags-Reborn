@@ -43,8 +43,11 @@ internal fun ExportFlagsDialog(
         confirmButton = {
             Row(horizontalArrangement = Arrangement.spacedBy(GmsSpacing.Small)) {
                 if (onShareToCommunity != null) {
-                    OutlinedButton(onClick = onShareToCommunity) { Text("Share to Community") }
+                    OutlinedButton(onClick = onShareToCommunity) {
+                        Text(stringResource(R.string.selection_share_community))
+                    }
                 }
+
                 Button(onClick = onConfirm) { Text(stringResource(R.string.action_share)) }
             }
         },

@@ -12,9 +12,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.Send
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -32,10 +32,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ua.polodarb.gmsflags.domain.community.CommunityFlagItem
-
 import ua.polodarb.gmsflags.presentation.core.ui.adaptive.GmsSpacing
+import ua.polodarb.gmsflags.presentation.feature.community.R
 
 @Composable
 fun CommunitySubmitDialog(
@@ -56,7 +58,7 @@ fun CommunitySubmitDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Share to Community") },
+        title = { Text(stringResource(R.string.community_submit_title)) },
         text = {
             Column(
                 modifier = Modifier
@@ -66,7 +68,7 @@ fun CommunitySubmitDialog(
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
-                    label = { Text("Title") },
+                    label = { Text(stringResource(R.string.community_submit_field_title)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -74,21 +76,25 @@ fun CommunitySubmitDialog(
                 OutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
-                    label = { Text("Short Description") },
+                    label = { Text(stringResource(R.string.community_submit_field_description)) },
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Spacer(modifier = Modifier.height(GmsSpacing.Small))
                 OutlinedTextField(
                     value = packageName,
                     onValueChange = { packageName = it },
-                    label = { Text("Package Name") },
+                    label = { Text(stringResource(R.string.community_submit_field_package_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
 
                 Spacer(modifier = Modifier.height(GmsSpacing.Medium))
                 Text(
-                    text = "Package Flags (${initialFlags.size})",
+                    text = pluralStringResource(
+                        R.plurals.community_submit_flags_count,
+                        initialFlags.size,
+                        initialFlags.size,
+                    ),
                     style = MaterialTheme.typography.titleSmall,
                 )
 
@@ -111,7 +117,10 @@ fun CommunitySubmitDialog(
                                     Text(text = flag.value, style = MaterialTheme.typography.bodySmall)
                                 }
                                 IconButton(onClick = { onRemoveFlag(index) }) {
-                                    Icon(imageVector = Icons.Rounded.Delete, contentDescription = "Remove")
+                                    Icon(
+                                        imageVector = Icons.Rounded.Delete,
+                                        contentDescription = stringResource(R.string.community_submit_remove_flag),
+                                    )
                                 }
                             }
                         }
@@ -123,7 +132,7 @@ fun CommunitySubmitDialog(
                     OutlinedTextField(
                         value = newFlagName,
                         onValueChange = { newFlagName = it },
-                        label = { Text("Flag Name") },
+                        label = { Text(stringResource(R.string.community_submit_flag_name)) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                     )
@@ -131,13 +140,15 @@ fun CommunitySubmitDialog(
                     OutlinedTextField(
                         value = newFlagValue,
                         onValueChange = { newFlagValue = it },
-                        label = { Text("Flag Value") },
+                        label = { Text(stringResource(R.string.community_submit_flag_value)) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                     )
                     Spacer(modifier = Modifier.height(GmsSpacing.ExtraSmall))
                     Row {
-                        TextButton(onClick = { showAddFlagInput = false }) { Text("Cancel") }
+                        TextButton(onClick = { showAddFlagInput = false }) {
+                            Text(stringResource(R.string.community_submit_cancel))
+                        }
                         Spacer(modifier = Modifier.weight(1f))
                         Button(
                             onClick = {
@@ -149,7 +160,7 @@ fun CommunitySubmitDialog(
                                 }
                             },
                         ) {
-                            Text("Confirm Flag")
+                            Text(stringResource(R.string.community_submit_confirm_flag))
                         }
                     }
                 }
@@ -162,20 +173,22 @@ fun CommunitySubmitDialog(
                 ) {
                     Icon(imageVector = Icons.Rounded.Add, contentDescription = null)
                     Spacer(modifier = Modifier.width(GmsSpacing.ExtraSmall))
-                    Text("Add Flag")
+                    Text(stringResource(R.string.community_submit_add_flag))
                 }
                 Button(
                     onClick = { onSubmit(title, description, packageName) },
                     enabled = title.isNotBlank() && packageName.isNotBlank() && initialFlags.isNotEmpty(),
                 ) {
-                    Icon(imageVector = Icons.Rounded.Send, contentDescription = null)
+                    Icon(imageVector = Icons.AutoMirrored.Rounded.Send, contentDescription = null)
                     Spacer(modifier = Modifier.width(GmsSpacing.ExtraSmall))
-                    Text("Send")
+                    Text(stringResource(R.string.community_submit_send))
                 }
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.community_submit_cancel))
+            }
         },
     )
 }

@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "ua.polodarb.gmsflags.presentation.feature.flagdetails"
+    namespace = "ua.polodarb.gmsflags.presentation.feature.community"
     compileSdk = 37
     defaultConfig { minSdk = 29 }
     buildFeatures { compose = true }
@@ -19,8 +19,6 @@ dependencies {
     implementation(project(":presentation-core"))
     implementation(project(":presentation-core-ui"))
     implementation(project(":presentation-core-navigation"))
-    implementation(project(":presentation-feature-community"))
-
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
@@ -35,6 +33,7 @@ dependencies {
     implementation(libs.koin.android)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.androidx.core.ktx)
+
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.core)
     testImplementation(libs.kotlinx.coroutines.test)

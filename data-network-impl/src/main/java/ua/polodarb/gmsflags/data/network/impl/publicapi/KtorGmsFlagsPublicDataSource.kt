@@ -179,7 +179,7 @@ internal class KtorGmsFlagsPublicDataSource(
                     setBody(request)
                 }
             }.let { it == HttpStatusCode.OK || it == HttpStatusCode.Created }
-        }.getOrDefault(true)
+        }.getOrDefault(false)
 
     override suspend fun reportCommunityPackage(request: ua.polodarb.gmsflags.data.network.publicapi.model.CommunityReportRequestNetModel): Boolean =
         runCatching {
@@ -189,7 +189,8 @@ internal class KtorGmsFlagsPublicDataSource(
                     setBody(request)
                 }
             }.let { it == HttpStatusCode.OK || it == HttpStatusCode.Created }
-        }.getOrDefault(true)
+        }.getOrDefault(false)
+
 
 
     private fun resolveMedia(model: RecommendationSummaryNetModel) = model.copy(

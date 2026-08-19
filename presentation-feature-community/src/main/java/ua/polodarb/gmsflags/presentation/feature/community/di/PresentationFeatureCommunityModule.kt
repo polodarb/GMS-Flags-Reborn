@@ -8,13 +8,17 @@ import ua.polodarb.gmsflags.domain.community.SubmitCommunityPackageUseCase
 import ua.polodarb.gmsflags.domain.flags.ApplyFlagOverrides
 import ua.polodarb.gmsflags.presentation.feature.community.ui.CommunityViewModel
 
+import ua.polodarb.gmsflags.domain.community.ReportCommunityPackageUseCase
+
 val presentationFeatureCommunityModule = module {
     viewModel {
         CommunityViewModel(
             getCommunityPackages = get<GetCommunityPackagesUseCase>(),
             submitCommunityPackage = get<SubmitCommunityPackageUseCase>(),
+            reportCommunityPackage = get<ReportCommunityPackageUseCase>(),
             applyFlagOverrides = get<ApplyFlagOverrides>(),
             getSupportedApplications = get<GetSupportedApplications>(),
         )
     }
 }
+

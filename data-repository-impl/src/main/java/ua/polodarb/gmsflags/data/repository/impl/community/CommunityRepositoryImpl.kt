@@ -54,18 +54,19 @@ internal class CommunityRepositoryImpl(
             flags = netFlags,
         )
         val remoteSuccess = runCatching { dataSource.submitCommunityPackage(request) }.getOrDefault(false)
-
-        val newLocal = CommunityPackage(
-            id = System.currentTimeMillis(),
-            title = title,
-            description = description,
-            packageName = packageName,
-            author = "User",
-            flags = flags,
-            createdAt = System.currentTimeMillis(),
-        )
-        localPackages.value = listOf(newLocal) + localPackages.value
-        return remoteSuccess || true
+        if (remoteSuccess) {
+            val newLocal = CommunityPackage(
+                id = System.currentTimeMillis(),
+                title = title,
+                description = description,
+                packageName = packageName,
+                author = "User",
+                flags = flags,
+                createdAt = System.currentTimeMillis(),
+            )
+            localPackages.value = listOf(newLocal) + localPackages.value
+        }
+        return remoteSuccess
     }
 
     override suspend fun reportPackage(packageId: Long, reason: String, comment: String?): Boolean {
@@ -74,8 +75,9 @@ internal class CommunityRepositoryImpl(
             reason = reason,
             comment = comment,
         )
-        return runCatching { dataSource.reportCommunityPackage(request) }.getOrDefault(true)
+        return runCatching { dataSource.reportCommunityPackage(request) }.getOrDefault(false)
     }
+
 
     override suspend fun isDisclaimerDismissed(): Boolean {
         return prefs.getBoolean(KEY_DISCLAIMER_DISMISSED, false)

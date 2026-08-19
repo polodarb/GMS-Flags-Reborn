@@ -22,9 +22,12 @@ import ua.polodarb.gmsflags.presentation.feature.community.mvi.CommunityEffect
 import ua.polodarb.gmsflags.presentation.feature.community.mvi.CommunityEvent
 import ua.polodarb.gmsflags.presentation.feature.community.mvi.CommunityState
 
+import ua.polodarb.gmsflags.domain.community.ReportCommunityPackageUseCase
+
 class CommunityViewModel(
     private val getCommunityPackages: GetCommunityPackagesUseCase,
     private val submitCommunityPackage: SubmitCommunityPackageUseCase,
+    private val reportCommunityPackage: ReportCommunityPackageUseCase,
     private val applyFlagOverrides: ApplyFlagOverrides,
     private val getSupportedApplications: GetSupportedApplications,
 ) : BaseViewModel<CommunityEvent, CommunityState, CommunityEffect>() {
@@ -78,9 +81,16 @@ class CommunityViewModel(
 
     private fun reportPackage(packageId: Long, reason: String) {
         viewModelScope.launch {
-            setEffect { CommunityEffect.ShowSnackbar("Report submitted") }
+            val success = reportCommunityPackage(packageId, reason, null)
+            if (success) {
+                setEffect { CommunityEffect.ShowSnackbar("Report submitted") }
+            } else {
+                setEffect { CommunityEffect.ShowSnackbar("Failed to submit report") }
+            }
         }
     }
+
+
 
     private fun submitPackage(
         title: String,

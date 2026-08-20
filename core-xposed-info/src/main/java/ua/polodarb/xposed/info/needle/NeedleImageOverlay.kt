@@ -9,6 +9,8 @@ enum class OverlayGravity {
     BOTTOM_LEFT, BOTTOM, BOTTOM_RIGHT,
 }
 
+enum class OverlayAnchor { VIEW, CONTENT }
+
 enum class OverlayImageFormat { PNG, WEBP }
 
 /** How one link in an overlay's tint chain derives a colour. Resolved in list order; the first that
@@ -38,13 +40,10 @@ data class NeedleImageOverlay(
     @SerialName("width_dp") val widthDp: Int,
     @SerialName("height_dp") val heightDp: Int,
     val alpha: Float = 1f,
-    /** Optional recolour chain; empty means the image is drawn as-is. */
     val tint: List<OverlayTintSource> = emptyList(),
-    /** Convenience shortcut for the common "draw an icon and blank the view's own text" case: when
-     * true the engine also runs a [NeedleHideView] with [HideViewTarget.TEXT_LABELS] on the same view.
-     * Equivalent to publishing a separate HIDE_VIEW recipe; requires the same
-     * [NeedleCapabilities.VIEW_HIDE_DESCENDANT] capability. */
-    @SerialName("hide_descendant_text_labels") val hideDescendantTextLabels: Boolean = false,
+    @SerialName("hide_descendant_text_labels")
+    val hideDescendantTextLabels: Boolean = false,
+    val anchor: OverlayAnchor = OverlayAnchor.VIEW,
 )
 
 /** What a [NeedleHideView] effect targets, relative to the resolved [SelectorKind.VIEW_RESOURCE_ID]
@@ -130,10 +129,10 @@ object NeedleImageOverlayLimits {
 
     private fun hasWebpMagic(bytes: ByteArray): Boolean =
         bytes.size >= 12 &&
-            bytes[0] == 'R'.code.toByte() && bytes[1] == 'I'.code.toByte() &&
-            bytes[2] == 'F'.code.toByte() && bytes[3] == 'F'.code.toByte() &&
-            bytes[8] == 'W'.code.toByte() && bytes[9] == 'E'.code.toByte() &&
-            bytes[10] == 'B'.code.toByte() && bytes[11] == 'P'.code.toByte()
+                bytes[0] == 'R'.code.toByte() && bytes[1] == 'I'.code.toByte() &&
+                bytes[2] == 'F'.code.toByte() && bytes[3] == 'F'.code.toByte() &&
+                bytes[8] == 'W'.code.toByte() && bytes[9] == 'E'.code.toByte() &&
+                bytes[10] == 'B'.code.toByte() && bytes[11] == 'P'.code.toByte()
 
     fun isRenderDpInRange(value: Int): Boolean = value in MIN_RENDER_DP..MAX_RENDER_DP
 
@@ -153,22 +152,32 @@ object NeedleImageOverlayGeometry {
         viewHeightPx: Int,
         density: Float,
         overlay: NeedleImageOverlay,
+    ): OverlayRect =
+        destRectInBox(0f, 0f, viewWidthPx.toFloat(), viewHeightPx.toFloat(), density, overlay)
+
+    fun destRectInBox(
+        boxLeftPx: Float,
+        boxTopPx: Float,
+        boxWidthPx: Float,
+        boxHeightPx: Float,
+        density: Float,
+        overlay: NeedleImageOverlay,
     ): OverlayRect {
         val widthPx = overlay.widthDp * density
         val heightPx = overlay.heightDp * density
         val offsetXPx = overlay.offsetXDp * density
         val offsetYPx = overlay.offsetYDp * density
 
-        val left = when (overlay.gravity) {
+        val left = boxLeftPx + when (overlay.gravity) {
             OverlayGravity.TOP_LEFT, OverlayGravity.LEFT, OverlayGravity.BOTTOM_LEFT -> 0f
-            OverlayGravity.TOP, OverlayGravity.CENTER, OverlayGravity.BOTTOM -> (viewWidthPx - widthPx) / 2f
-            OverlayGravity.TOP_RIGHT, OverlayGravity.RIGHT, OverlayGravity.BOTTOM_RIGHT -> viewWidthPx - widthPx
+            OverlayGravity.TOP, OverlayGravity.CENTER, OverlayGravity.BOTTOM -> (boxWidthPx - widthPx) / 2f
+            OverlayGravity.TOP_RIGHT, OverlayGravity.RIGHT, OverlayGravity.BOTTOM_RIGHT -> boxWidthPx - widthPx
         } + offsetXPx
 
-        val top = when (overlay.gravity) {
+        val top = boxTopPx + when (overlay.gravity) {
             OverlayGravity.TOP_LEFT, OverlayGravity.TOP, OverlayGravity.TOP_RIGHT -> 0f
-            OverlayGravity.LEFT, OverlayGravity.CENTER, OverlayGravity.RIGHT -> (viewHeightPx - heightPx) / 2f
-            OverlayGravity.BOTTOM_LEFT, OverlayGravity.BOTTOM, OverlayGravity.BOTTOM_RIGHT -> viewHeightPx - heightPx
+            OverlayGravity.LEFT, OverlayGravity.CENTER, OverlayGravity.RIGHT -> (boxHeightPx - heightPx) / 2f
+            OverlayGravity.BOTTOM_LEFT, OverlayGravity.BOTTOM, OverlayGravity.BOTTOM_RIGHT -> boxHeightPx - heightPx
         } + offsetYPx
 
         return OverlayRect(left, top, left + widthPx, top + heightPx)

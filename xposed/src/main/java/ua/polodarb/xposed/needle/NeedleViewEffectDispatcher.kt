@@ -20,6 +20,7 @@ import ua.polodarb.xposed.info.needle.NeedleHideView
 import ua.polodarb.xposed.info.needle.NeedleImageOverlay
 import ua.polodarb.xposed.info.needle.NeedleImageOverlayGeometry
 import ua.polodarb.xposed.info.needle.NeedleOverlayTint
+import ua.polodarb.xposed.info.needle.OverlayAnchor
 import ua.polodarb.xposed.info.needle.OverlayTintKind
 import ua.polodarb.xposed.logging.XposedLogger
 import java.util.WeakHashMap
@@ -66,7 +67,20 @@ internal class ResolvedImageOverlay(
                 }
             }
             val density = view.resources.displayMetrics.density
-            val rect = NeedleImageOverlayGeometry.destRect(view.width, view.height, density, overlay)
+            val rect = when (overlay.anchor) {
+                OverlayAnchor.VIEW -> NeedleImageOverlayGeometry.destRect(view.width, view.height, density, overlay)
+                OverlayAnchor.CONTENT -> {
+                    val boxLeft = view.paddingLeft.toFloat()
+                    val boxTop = view.paddingTop.toFloat()
+                    val boxWidth = (view.width - view.paddingLeft - view.paddingRight).toFloat()
+                    val boxHeight = (view.height - view.paddingTop - view.paddingBottom).toFloat()
+                    if (boxWidth > 0f && boxHeight > 0f) {
+                        NeedleImageOverlayGeometry.destRectInBox(boxLeft, boxTop, boxWidth, boxHeight, density, overlay)
+                    } else {
+                        NeedleImageOverlayGeometry.destRect(view.width, view.height, density, overlay)
+                    }
+                }
+            }
             dest.set(rect.left, rect.top, rect.right, rect.bottom)
             val checkpoint = canvas.save()
             try {

@@ -52,6 +52,40 @@ class NeedleImageOverlayGeometryTest {
     }
 
     @Test
+    fun `content anchor centers within the padded box`() {
+        // View 400x200 inset by padding [l20,t10,r20,b40] -> content box (20,10,360,150).
+        // icon 24dp @2x = 48px; centered in box: left=20+(360-48)/2=176, top=10+(150-48)/2=61.
+        val rect = NeedleImageOverlayGeometry.destRectInBox(
+            20f, 10f, 360f, 150f, 2f, overlay(OverlayGravity.CENTER),
+        )
+        assertEquals(176f, rect.left, 0.001f)
+        assertEquals(61f, rect.top, 0.001f)
+        assertEquals(224f, rect.right, 0.001f)
+        assertEquals(109f, rect.bottom, 0.001f)
+    }
+
+    @Test
+    fun `content box shorter at the bottom lifts a centered icon above the whole-view center`() {
+        // A bottom-heavier inset (e.g. Gboard's spacebar label strip) makes the content-box center
+        // sit higher than the raw-view center - which is exactly the fix for the off-centre overlay.
+        val full = NeedleImageOverlayGeometry.destRect(400, 200, 2f, overlay(OverlayGravity.CENTER))
+        val content = NeedleImageOverlayGeometry.destRectInBox(
+            0f, 0f, 400f, 160f, 2f, overlay(OverlayGravity.CENTER),
+        )
+        org.junit.Assert.assertTrue(content.top < full.top)
+    }
+
+    @Test
+    fun `whole-view destRect equals a full-view box`() {
+        val direct = NeedleImageOverlayGeometry.destRect(400, 200, 2f, overlay(OverlayGravity.CENTER))
+        val viaBox = NeedleImageOverlayGeometry.destRectInBox(0f, 0f, 400f, 200f, 2f, overlay(OverlayGravity.CENTER))
+        assertEquals(direct.left, viaBox.left, 0.001f)
+        assertEquals(direct.top, viaBox.top, 0.001f)
+        assertEquals(direct.right, viaBox.right, 0.001f)
+        assertEquals(direct.bottom, viaBox.bottom, 0.001f)
+    }
+
+    @Test
     fun `png magic is detected`() {
         val png = byteArrayOf(0x89.toByte(), 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0, 0)
         assertEq(OverlayImageFormat.PNG, NeedleImageOverlayLimits.detectFormat(png))

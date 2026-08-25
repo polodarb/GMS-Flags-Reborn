@@ -16,6 +16,7 @@ object HookDiagnosticContract {
     const val STRATEGY_FINSKY = "finsky"
     const val STRATEGY_INPUT_METHOD_FLAG = "input_method_flag"
     const val STRATEGY_DEVICE_CONFIG_FLAG = "device_config_flag"
+    const val STRATEGY_GOOGLE_CAMERA_CONFIG = "google_camera_config"
     const val STRATEGY_MENDEL = "mendel"
 
     const val STRATEGY_STATE_PENDING = "pending"

@@ -4,9 +4,12 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import ua.polodarb.gmsflags.analytics.AnalyticsEvent
 import ua.polodarb.gmsflags.analytics.AnalyticsTracker
 import ua.polodarb.gmsflags.domain.apps.GetSupportedApplicationsSnapshot
+import ua.polodarb.gmsflags.domain.servermode.ObserveServerMode
 import ua.polodarb.gmsflags.presentation.core.viewmodel.BaseViewModel
 import ua.polodarb.gmsflags.presentation.core.error.ErrorResolver
 import ua.polodarb.gmsflags.presentation.feature.apps.mvi.AppsEffect
@@ -18,13 +21,21 @@ class AppsViewModel(
     private val getApplicationsSnapshot: GetSupportedApplicationsSnapshot,
     private val errorResolver: ErrorResolver,
     private val analytics: AnalyticsTracker,
+    private val observeServerMode: ObserveServerMode,
 ) : BaseViewModel<AppsEvent, AppsState, AppsEffect>() {
     private var loadJob: Job? = null
     private var searchDebounceJob: Job? = null
 
     override fun initialState() = AppsState()
 
-    init { load() }
+    init {
+        observeServerMode()
+            .onEach { mode ->
+                setState { copy(offline = mode.offline, offlineBadge = mode.notice?.badge) }
+            }
+            .launchIn(viewModelScope)
+        load()
+    }
 
     override fun handleEvent(event: AppsEvent) {
         when (event) {

@@ -29,4 +29,5 @@
     <string name="apps_module_scope_sheet_title">LSPosed module is inactive</string>
     <string name="apps_module_scope_sheet_explanation">Activate %1$s in LSPosed before applying flag overrides.</string>
     <string name="apps_module_scope_step_enable">Enable the %1$s module and restart target apps</string>
+    <string name="apps_offline_badge">Offline</string>
 </resources>

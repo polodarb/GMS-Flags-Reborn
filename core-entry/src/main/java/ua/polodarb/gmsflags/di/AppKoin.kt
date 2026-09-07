@@ -30,6 +30,8 @@ import ua.polodarb.gmsflags.presentation.core.error.ErrorResolver
 import ua.polodarb.gmsflags.presentation.core.ui.application.ApplicationIconProvider
 import ua.polodarb.gmsflags.presentation.core.ui.application.CachedApplicationIconProvider
 import ua.polodarb.gmsflags.domain.settings.di.settingsDomainModule
+import ua.polodarb.gmsflags.domain.servermode.di.serverModeDomainModule
+import ua.polodarb.gmsflags.servermode.serverModeModule
 import ua.polodarb.gmsflags.presentation.feature.settings.di.presentationFeatureSettingsModule
 import ua.polodarb.gmsflags.domain.onboarding.di.onboardingDomainModule
 import ua.polodarb.gmsflags.domain.report.di.reportsDomainModule
@@ -63,6 +65,7 @@ val appModules = listOf(
     },
     analyticsModule,
     updateModule,
+    serverModeModule,
     coreRootModule,
     dataNetworkModule,
     phenotypeDataModule,
@@ -72,6 +75,7 @@ val appModules = listOf(
     publicApiDomainModule,
     hookStatusDomainModule,
     settingsDomainModule,
+    serverModeDomainModule,
     onboardingDomainModule,
     reportsDomainModule,
     presentationFeatureSuggestionsModule,

@@ -19,11 +19,16 @@ import ua.polodarb.gmsflags.presentation.core.navigation.BottomBarDestination
 @Stable
 internal class BottomBarNavigationState(
     val startDestination: BottomBarDestination,
+    private val destinations: List<BottomBarDestination>,
     private val selectedDestinationId: MutableState<String>,
     private val backStacks: Map<BottomBarDestination, NavBackStack<NavKey>>,
 ) {
     var selectedDestination: BottomBarDestination
-        get() = selectedDestinationId.value.toBottomBarDestination()
+        get() = resolveSelectedDestination(
+            savedId = selectedDestinationId.value,
+            destinations = destinations,
+            startDestination = startDestination,
+        )
         private set(value) {
             selectedDestinationId.value = value.id
         }
@@ -77,23 +82,26 @@ internal fun rememberBottomBarNavigationState(
     return remember(startDestination, destinations, backStacks) {
         BottomBarNavigationState(
             startDestination = startDestination,
+            destinations = destinations,
             selectedDestinationId = selectedDestinationId,
             backStacks = backStacks,
         )
     }
 }
 
-private val BottomBarDestination.id: String
+internal fun resolveSelectedDestination(
+    savedId: String,
+    destinations: List<BottomBarDestination>,
+    startDestination: BottomBarDestination,
+): BottomBarDestination {
+    val saved = destinations.firstOrNull { it.id == savedId }
+    return saved ?: startDestination
+}
+
+internal val BottomBarDestination.id: String
     get() = when (this) {
         BottomBarDestination.Suggestions -> "suggestions"
         BottomBarDestination.Apps -> "apps"
         BottomBarDestination.GmsInsight -> "gms_insight"
         BottomBarDestination.Experimental -> "experimental"
     }
-
-private fun String.toBottomBarDestination(): BottomBarDestination = when (this) {
-    "apps" -> BottomBarDestination.Apps
-    "gms_insight" -> BottomBarDestination.GmsInsight
-    "experimental" -> BottomBarDestination.Experimental
-    else -> BottomBarDestination.Suggestions
-}

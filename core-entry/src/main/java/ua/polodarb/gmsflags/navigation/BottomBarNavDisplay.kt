@@ -18,13 +18,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
+import org.koin.compose.koinInject
+import ua.polodarb.gmsflags.domain.servermode.ObserveServerMode
 import ua.polodarb.gmsflags.navigation.model.BottomBarNavigation
 import ua.polodarb.gmsflags.navigation.state.rememberBottomBarNavigationState
 import ua.polodarb.gmsflags.navigation.ui.BottomNavigationBar
@@ -56,9 +60,12 @@ internal fun BottomBarNavDisplay(
     onOverridesSelected: () -> Unit,
     onExperimentalApplicationSelected: (String, String) -> Unit,
 ) {
+    val serverMode by koinInject<ObserveServerMode>()().collectAsStateWithLifecycle()
+    val offline = serverMode.offline
+    val items = remember(offline) { BottomBarNavigation.items(offline) }
     val navigationState = rememberBottomBarNavigationState(
-        startDestination = BottomBarDestination.Suggestions,
-        destinations = BottomBarNavigation.items.map { it.destination },
+        startDestination = if (offline) BottomBarDestination.Apps else BottomBarDestination.Suggestions,
+        destinations = items.map { it.destination },
         configuration = AppNavConfig.config,
     )
     val currentDestination = navigationState.selectedDestination
@@ -91,11 +98,13 @@ internal fun BottomBarNavDisplay(
         GmsNavigationType.BottomBar -> Scaffold(
             containerColor = MaterialTheme.colorScheme.surfaceBright,
             bottomBar = {
-                BottomNavigationBar(
-                    items = BottomBarNavigation.items,
-                    selectedDestination = currentDestination,
-                    onDestinationSelected = navigationState::select,
-                )
+                if (items.size > 1) {
+                    BottomNavigationBar(
+                        items = items,
+                        selectedDestination = currentDestination,
+                        onDestinationSelected = navigationState::select,
+                    )
+                }
             },
         ) { contentPadding ->
             Column(
@@ -119,11 +128,13 @@ internal fun BottomBarNavDisplay(
         }
 
         GmsNavigationType.Rail -> Row(modifier = Modifier.fillMaxSize()) {
-            SideNavigationRail(
-                items = BottomBarNavigation.items,
-                selectedDestination = currentDestination,
-                onDestinationSelected = navigationState::select,
-            )
+            if (items.size > 1) {
+                SideNavigationRail(
+                    items = items,
+                    selectedDestination = currentDestination,
+                    onDestinationSelected = navigationState::select,
+                )
+            }
             Column(
                 modifier = Modifier
                     .weight(1f)

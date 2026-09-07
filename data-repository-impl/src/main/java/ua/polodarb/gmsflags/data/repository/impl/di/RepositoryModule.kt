@@ -27,6 +27,9 @@ import ua.polodarb.gmsflags.data.repository.report.datasource.ReportDiagnosticsC
 import ua.polodarb.gmsflags.data.repository.report.repository.ReportsRepository
 import ua.polodarb.gmsflags.data.repository.impl.report.datasource.AndroidReportDiagnosticsCollector
 import ua.polodarb.gmsflags.data.repository.impl.report.repository.ReportsRepositoryImpl
+import ua.polodarb.gmsflags.data.repository.impl.servermode.OfflinePublicContentRepository
+import ua.polodarb.gmsflags.data.repository.impl.servermode.OfflineRemoteConfigurationRepository
+import ua.polodarb.gmsflags.data.repository.impl.servermode.OfflineReportsRepository
 import ua.polodarb.xposed.info.XposedTargetRegistry
 import ua.polodarb.xposed.info.XposedTargets
 import ua.polodarb.gmsflags.data.repository.hookstatus.repository.HookStatusRepository
@@ -108,7 +111,12 @@ val dataRepositoryModule = module {
             targetRestarter = get(),
         )
     }
-    single<PublicContentRepository> { PublicContentRepositoryImpl(dataSource = get()) }
+    single<PublicContentRepository> {
+        OfflinePublicContentRepository(
+            delegate = PublicContentRepositoryImpl(dataSource = get()),
+            serverMode = get(),
+        )
+    }
     single<AppliedRecommendationSetupStore> {
         DataStoreAppliedRecommendationSetupStore(
             dataStore = get(named(APPLIED_RECOMMENDATION_SETUPS_DATA_STORE)),
@@ -123,13 +131,21 @@ val dataRepositoryModule = module {
         AndroidReportDiagnosticsCollector(context = get())
     }
     single<ReportsRepository> {
-        ReportsRepositoryImpl(
-            dataSource = get(),
-            diagnosticsCollector = get(),
-            xposedLogsDataSource = get(),
+        OfflineReportsRepository(
+            delegate = ReportsRepositoryImpl(
+                dataSource = get(),
+                diagnosticsCollector = get(),
+                xposedLogsDataSource = get(),
+            ),
+            serverMode = get(),
         )
     }
-    single<RemoteConfigurationRepository> { RemoteConfigurationRepositoryImpl(dataSource = get()) }
+    single<RemoteConfigurationRepository> {
+        OfflineRemoteConfigurationRepository(
+            delegate = RemoteConfigurationRepositoryImpl(dataSource = get()),
+            serverMode = get(),
+        )
+    }
     single<HookStatusRepository> {
         HookStatusRepositoryImpl(dataSource = get(), targetRestarter = get())
     }

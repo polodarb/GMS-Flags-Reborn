@@ -40,6 +40,7 @@ import ua.polodarb.gmsflags.presentation.feature.settings.overview.components.Ho
 import ua.polodarb.gmsflags.presentation.feature.settings.overview.components.OverridesStorageCard
 import ua.polodarb.gmsflags.presentation.feature.settings.overview.components.SettingsSocialBar
 import ua.polodarb.gmsflags.presentation.feature.settings.overview.components.ServerConnectionCard
+import ua.polodarb.gmsflags.presentation.feature.settings.overview.components.OfflineModeCard
 import ua.polodarb.gmsflags.presentation.feature.settings.overview.components.AnimatedSettingsLogo
 import ua.polodarb.gmsflags.presentation.feature.settings.overview.components.SupportHeaderPill
 import ua.polodarb.gmsflags.presentation.feature.settings.overview.components.FeedbackHeaderPill
@@ -73,9 +74,11 @@ internal fun SettingsContent(
                         horizontalArrangement = Arrangement.spacedBy(GmsSpacing.Small),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        FeedbackHeaderPill(
-                            onClick = { feedbackSheetVisible = true },
-                        )
+                        if (!state.offline) {
+                            FeedbackHeaderPill(
+                                onClick = { feedbackSheetVisible = true },
+                            )
+                        }
                         SupportHeaderPill(
                             onClick = {
                                 onEvent(SettingsEvent.SupportClicked)
@@ -132,10 +135,14 @@ internal fun SettingsContent(
                     )
                 }
                 item {
-                    ServerConnectionCard(
-                        state = state.serverConnection,
-                        resources = resources,
-                    )
+                    if (state.offline) {
+                        OfflineModeCard(notice = state.offlineNotice)
+                    } else {
+                        ServerConnectionCard(
+                            state = state.serverConnection,
+                            resources = resources,
+                        )
+                    }
                 }
                 item {
                     HookStatusCard(
@@ -152,8 +159,10 @@ internal fun SettingsContent(
                         onClick = { onEvent(SettingsEvent.OverridesClicked) },
                     )
                 }
-                item {
-                    FaqCard(onClick = { onEvent(SettingsEvent.FaqClicked) })
+                if (!state.offline) {
+                    item {
+                        FaqCard(onClick = { onEvent(SettingsEvent.FaqClicked) })
+                    }
                 }
                 item {
                     DevelopersSection(

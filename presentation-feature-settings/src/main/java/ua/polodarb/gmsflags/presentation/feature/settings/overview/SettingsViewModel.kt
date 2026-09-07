@@ -8,6 +8,7 @@ import ua.polodarb.gmsflags.domain.settings.ObserveOverrideControl
 import ua.polodarb.gmsflags.domain.settings.RefreshOverrideControl
 import ua.polodarb.gmsflags.domain.hookstatus.GetHookStatus
 import ua.polodarb.gmsflags.domain.server.content.GetHomeContent
+import ua.polodarb.gmsflags.domain.servermode.ObserveServerMode
 import ua.polodarb.gmsflags.presentation.core.viewmodel.BaseViewModel
 import ua.polodarb.gmsflags.presentation.core.error.ErrorResolver
 import ua.polodarb.gmsflags.analytics.AnalyticsEvent
@@ -20,10 +21,14 @@ internal class SettingsViewModel(
     private val getHomeContent: GetHomeContent,
     private val analytics: AnalyticsTracker,
     private val errorResolver: ErrorResolver,
+    private val observeServerMode: ObserveServerMode,
 ) : BaseViewModel<SettingsEvent, SettingsState, SettingsEffect>() {
     override fun initialState() = SettingsState()
 
     init {
+        observeServerMode()
+            .onEach { mode -> setState { copy(offline = mode.offline, offlineNotice = mode.notice) } }
+            .launchIn(viewModelScope)
         observeOverrideControl()
             .onEach { control -> setState { copy(overrideControl = control) } }
             .launchIn(viewModelScope)
@@ -56,21 +61,23 @@ internal class SettingsViewModel(
                 },
             )
         }
-        viewModelScope.launch {
-            getHomeContent().fold(
-                onSuccess = {
-                    setState { copy(serverConnection = ServerConnectionState.Available) }
-                },
-                onFailure = { error ->
-                    setState {
-                        copy(
-                            serverConnection = ServerConnectionState.Unavailable(
-                                errorResolver.resolve(error),
-                            ),
-                        )
-                    }
-                },
-            )
+        if (!observeServerMode().value.offline) {
+            viewModelScope.launch {
+                getHomeContent().fold(
+                    onSuccess = {
+                        setState { copy(serverConnection = ServerConnectionState.Available) }
+                    },
+                    onFailure = { error ->
+                        setState {
+                            copy(
+                                serverConnection = ServerConnectionState.Unavailable(
+                                    errorResolver.resolve(error),
+                                ),
+                            )
+                        }
+                    },
+                )
+            }
         }
     }
 

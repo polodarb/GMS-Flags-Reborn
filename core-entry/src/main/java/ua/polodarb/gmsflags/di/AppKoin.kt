@@ -10,6 +10,7 @@ import ua.polodarb.gmsflags.data.network.impl.di.dataNetworkModule
 import ua.polodarb.gmsflags.data.phenotype.di.phenotypeDataModule
 import ua.polodarb.gmsflags.data.repository.impl.di.dataRepositoryModule
 import ua.polodarb.gmsflags.data.repository.report.datasource.ReportDiagnosticsCollector
+import ua.polodarb.gmsflags.data.repository.servermode.ServerModeRepository
 import ua.polodarb.gmsflags.domain.apps.IsOfficialAppBuild
 import ua.polodarb.gmsflags.domain.apps.IsOfficialAppBuildUseCase
 import ua.polodarb.gmsflags.domain.apps.di.appsDomainModule
@@ -42,7 +43,14 @@ import ua.polodarb.xposed.info.BuildConfig as XposedInfoBuildConfig
 val appModules = listOf(
     module {
         single { ServerEnvironment(BuildConfig.SERVER_BASE_URL) }
-        viewModel { AppStartupViewModel(get(), get()) }
+        viewModel {
+            AppStartupViewModel(
+                observeOnboardingCompletion = get(),
+                requestRootAccess = get(),
+                refreshServerMode = get(),
+                hasCachedServerMode = { get<ServerModeRepository>().hasCachedValue },
+            )
+        }
         single<ErrorResolver> { DefaultErrorResolver() }
         single<ApplicationIconProvider> {
             CachedApplicationIconProvider(

@@ -13,6 +13,7 @@ import ua.polodarb.xposed.hook.strategy.phenotype.PhenotypeRuntimeFlagOverrideSt
 import ua.polodarb.xposed.hook.strategy.vending.FinskyExperimentFlagOverrideStrategy
 import ua.polodarb.xposed.hook.strategy.inputmethod.InputMethodFlagOverrideStrategy
 import ua.polodarb.xposed.hook.strategy.deviceconfig.DeviceConfigFlagOverrideStrategy
+import ua.polodarb.xposed.hook.strategy.googlecamera.GoogleCameraConfigFlagOverrideStrategy
 import ua.polodarb.xposed.logging.XposedLogger
 import ua.polodarb.xposed.store.RuntimeFlagOverrideStore
 import ua.polodarb.xposed.diagnostics.HookDiagnostics
@@ -108,6 +109,18 @@ internal class RuntimeFlagOverrideHook(
             if (lpparam.packageName == XposedTargets.VENDING_PACKAGE_NAME) {
                 add(
                     FinskyExperimentFlagOverrideStrategy(
+                        lpparam = lpparam,
+                        runtimeClassLoader = runtimeClassLoader,
+                        overrideStore = overrideStore,
+                        diagnostics = diagnostics,
+                    )
+                )
+            }
+
+            if (lpparam.packageName == XposedTargets.GOOGLE_CAMERA_PACKAGE_NAME) {
+                add(
+                    GoogleCameraConfigFlagOverrideStrategy(
+                        context = context,
                         lpparam = lpparam,
                         runtimeClassLoader = runtimeClassLoader,
                         overrideStore = overrideStore,

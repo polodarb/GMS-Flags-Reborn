@@ -21,8 +21,9 @@ private const val DEBUG_MINIMUM_FETCH_INTERVAL_SECONDS = 0L
 
 val serverModeModule = module {
     single<RemoteFlagStore> { SharedPreferencesRemoteFlagStore(androidContext()) }
+    single<FirebaseRemoteConfig> { Firebase.remoteConfig.withDebugFetchInterval() }
     single<ServerModeRepository> {
-        val remoteConfig = Firebase.remoteConfig.withDebugFetchInterval()
+        val remoteConfig: FirebaseRemoteConfig = get()
         DefaultServerModeRepository(
             sticky = StickyRemoteValue(
                 key = KEY_OFFLINE_MODE_CACHE,
@@ -34,7 +35,7 @@ val serverModeModule = module {
     }
 }
 
-internal fun FirebaseRemoteConfig.withDebugFetchInterval(): FirebaseRemoteConfig = apply {
+private fun FirebaseRemoteConfig.withDebugFetchInterval(): FirebaseRemoteConfig = apply {
     if (!BuildConfig.DEBUG) return@apply
     setConfigSettingsAsync(
         remoteConfigSettings {

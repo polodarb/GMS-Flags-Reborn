@@ -128,19 +128,25 @@ internal fun BottomBarNavDisplay(
         }
 
         GmsNavigationType.Rail -> Row(modifier = Modifier.fillMaxSize()) {
-            if (items.size > 1) {
+            val railVisible = items.size > 1
+            if (railVisible) {
                 SideNavigationRail(
                     items = items,
                     selectedDestination = currentDestination,
                     onDestinationSelected = navigationState::select,
                 )
             }
+            val contentInsetSides = if (railVisible) {
+                WindowInsetsSides.Vertical
+            } else {
+                WindowInsetsSides.Vertical + WindowInsetsSides.Horizontal
+            }
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxSize()
                     .windowInsetsPadding(
-                        WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical)
+                        WindowInsets.safeDrawing.only(contentInsetSides)
                     ),
             ) {
                 GmsTopLevelHeaderHost(

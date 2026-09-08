@@ -190,4 +190,37 @@ class AppStartupViewModelTest {
 
         assertEquals(AppStartupState.Ready, viewModel.state.value)
     }
+
+    @Test
+    fun `navigation flags refresh in the background on first install`() = runTest(dispatcher) {
+        var refreshes = 0
+        val viewModel = AppStartupViewModel(
+            observeOnboardingCompletion = ObserveOnboardingCompletion { MutableStateFlow(true) },
+            requestRootAccess = RequestRootAccess { Result.success(Unit) },
+            refreshServerMode = RefreshServerMode {},
+            hasCachedServerMode = { false },
+            refreshNavigationFlags = RefreshNavigationFlags { refreshes++ },
+        )
+        advanceUntilIdle()
+
+        assertEquals(1, refreshes)
+        assertEquals(AppStartupState.Ready, viewModel.state.value)
+    }
+
+    @Test
+    fun `navigation flags refresh still runs when the server mode refresh hangs through the whole timeout on first install`() =
+        runTest(dispatcher) {
+            var refreshes = 0
+            val viewModel = AppStartupViewModel(
+                observeOnboardingCompletion = ObserveOnboardingCompletion { MutableStateFlow(true) },
+                requestRootAccess = RequestRootAccess { Result.success(Unit) },
+                refreshServerMode = RefreshServerMode { awaitCancellation() },
+                hasCachedServerMode = { false },
+                refreshNavigationFlags = RefreshNavigationFlags { refreshes++ },
+            )
+            advanceUntilIdle()
+
+            assertEquals(1, refreshes)
+            assertEquals(AppStartupState.Ready, viewModel.state.value)
+        }
 }

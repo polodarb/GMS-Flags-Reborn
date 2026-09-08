@@ -48,7 +48,7 @@ class SettingsViewModelTest {
     fun tearDown() { Dispatchers.resetMain() }
 
     private fun settingsViewModel(
-        offline: Boolean,
+        serverMode: MutableStateFlow<ServerMode>,
         getHomeContent: GetHomeContent = GetHomeContent { Result.success(emptyList()) },
     ): SettingsViewModel = SettingsViewModel(
         observeOverrideControl = ObserveOverrideControl { MutableStateFlow(OverrideControlState()) },
@@ -57,22 +57,14 @@ class SettingsViewModelTest {
         getHomeContent = getHomeContent,
         analytics = NoOpAnalytics,
         errorResolver = NoOpErrorResolver,
-        observeServerMode = ObserveServerMode {
-            MutableStateFlow(
-                if (offline) {
-                    ServerMode(offline = true, notice = OfflineNotice(null, null, "Offline"))
-                } else {
-                    ServerMode.Online
-                },
-            )
-        },
+        observeServerMode = ObserveServerMode { serverMode },
     )
 
     @Test
     fun `offline mode reaches the state and skips the server probe`() = runTest(dispatcher) {
         var homeCalls = 0
         val viewModel = settingsViewModel(
-            offline = true,
+            serverMode = MutableStateFlow(offlineMode),
             getHomeContent = GetHomeContent {
                 homeCalls++
                 Result.success(emptyList())
@@ -83,13 +75,14 @@ class SettingsViewModelTest {
         assertTrue(viewModel.viewState.value.offline)
         assertEquals("Offline", viewModel.viewState.value.offlineNotice?.badge)
         assertEquals(0, homeCalls)
+        assertEquals(ServerConnectionState.Checking, viewModel.viewState.value.serverConnection)
     }
 
     @Test
     fun `online mode still probes the server`() = runTest(dispatcher) {
         var homeCalls = 0
         val viewModel = settingsViewModel(
-            offline = false,
+            serverMode = MutableStateFlow(ServerMode.Online),
             getHomeContent = GetHomeContent {
                 homeCalls++
                 Result.success(emptyList())
@@ -99,5 +92,43 @@ class SettingsViewModelTest {
 
         assertFalse(viewModel.viewState.value.offline)
         assertEquals(1, homeCalls)
+        assertEquals(ServerConnectionState.Available, viewModel.viewState.value.serverConnection)
     }
+
+    @Test
+    fun `an offline to online flip probes the server`() = runTest(dispatcher) {
+        var homeCalls = 0
+        val mode = MutableStateFlow(offlineMode)
+        val viewModel = settingsViewModel(
+            serverMode = mode,
+            getHomeContent = GetHomeContent {
+                homeCalls++
+                Result.success(emptyList())
+            },
+        )
+        advanceUntilIdle()
+        assertEquals(0, homeCalls)
+
+        mode.value = ServerMode.Online
+        advanceUntilIdle()
+
+        assertEquals(1, homeCalls)
+        assertEquals(ServerConnectionState.Available, viewModel.viewState.value.serverConnection)
+    }
+
+    @Test
+    fun `an online to offline flip resets the probe result`() = runTest(dispatcher) {
+        val mode = MutableStateFlow(ServerMode.Online)
+        val viewModel = settingsViewModel(serverMode = mode)
+        advanceUntilIdle()
+        assertEquals(ServerConnectionState.Available, viewModel.viewState.value.serverConnection)
+
+        mode.value = offlineMode
+        advanceUntilIdle()
+
+        assertEquals(ServerConnectionState.Checking, viewModel.viewState.value.serverConnection)
+    }
+
+    private val offlineMode =
+        ServerMode(offline = true, notice = OfflineNotice(null, null, "Offline"))
 }

@@ -1,7 +1,10 @@
 package ua.polodarb.gmsflags.presentation.feature.settings.overview
 
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import ua.polodarb.gmsflags.domain.settings.ObserveOverrideControl
@@ -25,9 +28,14 @@ internal class SettingsViewModel(
 ) : BaseViewModel<SettingsEvent, SettingsState, SettingsEffect>() {
     override fun initialState() = SettingsState()
 
+    private var serverProbe: Job? = null
+
     init {
         observeServerMode()
             .onEach { mode -> setState { copy(offline = mode.offline, offlineNotice = mode.notice) } }
+            .map { it.offline }
+            .distinctUntilChanged()
+            .onEach { offline -> if (offline) cancelServerProbe() else probeServer() }
             .launchIn(viewModelScope)
         observeOverrideControl()
             .onEach { control -> setState { copy(overrideControl = control) } }
@@ -61,23 +69,31 @@ internal class SettingsViewModel(
                 },
             )
         }
-        if (!observeServerMode().value.offline) {
-            viewModelScope.launch {
-                getHomeContent().fold(
-                    onSuccess = {
-                        setState { copy(serverConnection = ServerConnectionState.Available) }
-                    },
-                    onFailure = { error ->
-                        setState {
-                            copy(
-                                serverConnection = ServerConnectionState.Unavailable(
-                                    errorResolver.resolve(error),
-                                ),
-                            )
-                        }
-                    },
-                )
-            }
+    }
+
+    private fun cancelServerProbe() {
+        serverProbe?.cancel()
+        serverProbe = null
+        setState { copy(serverConnection = ServerConnectionState.Checking) }
+    }
+
+    private fun probeServer() {
+        if (serverProbe?.isActive == true) return
+        serverProbe = viewModelScope.launch {
+            getHomeContent().fold(
+                onSuccess = {
+                    setState { copy(serverConnection = ServerConnectionState.Available) }
+                },
+                onFailure = { error ->
+                    setState {
+                        copy(
+                            serverConnection = ServerConnectionState.Unavailable(
+                                errorResolver.resolve(error),
+                            ),
+                        )
+                    }
+                },
+            )
         }
     }
 

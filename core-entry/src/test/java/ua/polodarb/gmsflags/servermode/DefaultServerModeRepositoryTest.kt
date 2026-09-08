@@ -6,6 +6,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import ua.polodarb.gmsflags.domain.servermode.ServerMode
+import java.io.IOException
 
 class DefaultServerModeRepositoryTest {
     @Test
@@ -35,7 +36,9 @@ class DefaultServerModeRepositoryTest {
         val store = FakeStore(cached = null)
         val repository = DefaultServerModeRepository(
             store = store,
-            fetchRawConfig = { """{"enabled":true,"config":{"badge":"Offline"}}""" },
+            fetchRawConfig = {
+                ServerModeFetch.Fetched("""{"enabled":true,"config":{"badge":"Offline"}}""")
+            },
         )
 
         repository.refresh()
@@ -51,13 +54,56 @@ class DefaultServerModeRepositoryTest {
         val store = FakeStore(cached = """{"enabled":true}""")
         val repository = DefaultServerModeRepository(
             store = store,
-            fetchRawConfig = { null },
+            fetchRawConfig = { ServerModeFetch.Failed },
         )
 
         repository.refresh()
 
         assertTrue(repository.mode.value.offline)
         assertEquals(null, store.written)
+    }
+
+    @Test
+    fun `a throwing fetch keeps the cached value`() = runTest {
+        val store = FakeStore(cached = """{"enabled":true}""")
+        val repository = DefaultServerModeRepository(
+            store = store,
+            fetchRawConfig = { throw IOException("no network") },
+        )
+
+        repository.refresh()
+
+        assertTrue(repository.mode.value.offline)
+        assertEquals(null, store.written)
+    }
+
+    @Test
+    fun `a fetched empty payload returns the app to online mode`() = runTest {
+        val store = FakeStore(cached = """{"enabled":true}""")
+        val repository = DefaultServerModeRepository(
+            store = store,
+            fetchRawConfig = { ServerModeFetch.Fetched("") },
+        )
+
+        repository.refresh()
+
+        assertEquals(ServerMode.Online, repository.mode.value)
+        assertEquals("", store.written)
+        assertTrue(repository.hasCachedValue)
+    }
+
+    @Test
+    fun `a fetched empty payload on a first launch marks the value as cached`() = runTest {
+        val store = FakeStore(cached = null)
+        val repository = DefaultServerModeRepository(
+            store = store,
+            fetchRawConfig = { ServerModeFetch.Fetched("") },
+        )
+
+        repository.refresh()
+
+        assertEquals(ServerMode.Online, repository.mode.value)
+        assertTrue(repository.hasCachedValue)
     }
 
     private fun fail(message: String): Nothing = throw AssertionError(message)

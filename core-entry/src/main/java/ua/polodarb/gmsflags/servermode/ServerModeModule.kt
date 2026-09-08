@@ -21,11 +21,12 @@ val serverModeModule = module {
     }
 }
 
-private suspend fun FirebaseRemoteConfig.fetchOfflineModePayload(): String? {
-    suspendCancellableCoroutine { continuation ->
-        fetchAndActivate().addOnCompleteListener {
-            if (continuation.isActive) continuation.resume(Unit)
+private suspend fun FirebaseRemoteConfig.fetchOfflineModePayload(): ServerModeFetch {
+    val fetched = suspendCancellableCoroutine { continuation ->
+        fetchAndActivate().addOnCompleteListener { task ->
+            if (continuation.isActive) continuation.resume(task.isSuccessful)
         }
     }
-    return getString(KEY_OFFLINE_MODE).takeIf { it.isNotBlank() }
+    if (!fetched) return ServerModeFetch.Failed
+    return ServerModeFetch.Fetched(getString(KEY_OFFLINE_MODE).trim())
 }

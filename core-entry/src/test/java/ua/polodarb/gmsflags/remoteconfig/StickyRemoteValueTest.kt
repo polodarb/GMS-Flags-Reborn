@@ -57,26 +57,27 @@ class StickyRemoteValueTest {
     @Test
     fun `a failed fetch keeps the cache`() = runTest {
         val store = FakeStore(cached = "true")
-        var failures = 0
+        val reported = mutableListOf<FetchFailure>()
         val sticky = StickyRemoteValue(
             key = "flag",
             store = store,
             fetch = { RemoteFetch.Failed },
             parse = { it == "true" },
-            onFetchFailure = { failures++ },
+            onFetchFailure = { reported.add(it) },
         )
 
         sticky.refresh()
 
         assertTrue(sticky.value.value)
         assertEquals(null, store.written)
-        assertEquals(1, failures)
+        assertEquals(1, reported.size)
+        assertTrue(reported.single() is FetchFailure.Reported)
     }
 
     @Test
     fun `a throwing fetch keeps the cache`() = runTest {
         val store = FakeStore(cached = "true")
-        val reported = mutableListOf<Throwable?>()
+        val reported = mutableListOf<FetchFailure>()
         val sticky = StickyRemoteValue(
             key = "flag",
             store = store,
@@ -90,7 +91,9 @@ class StickyRemoteValueTest {
         assertTrue(sticky.value.value)
         assertEquals(null, store.written)
         assertEquals(1, reported.size)
-        assertTrue(reported.single() is IOException)
+        val failure = reported.single()
+        assertTrue(failure is FetchFailure.Thrown)
+        assertTrue((failure as FetchFailure.Thrown).error is IOException)
     }
 
     @Test

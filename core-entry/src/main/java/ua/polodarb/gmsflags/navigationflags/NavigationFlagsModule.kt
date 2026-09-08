@@ -5,11 +5,13 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import org.koin.dsl.module
 import ua.polodarb.gmsflags.analytics.CrashReporter
 import ua.polodarb.gmsflags.data.repository.navigation.NavigationFlagsRepository
+import ua.polodarb.gmsflags.remoteconfig.FetchFailure
+import ua.polodarb.gmsflags.remoteconfig.REMOTE_CONFIG_LOG_PREFIX
 import ua.polodarb.gmsflags.remoteconfig.RemoteFetch
 import ua.polodarb.gmsflags.remoteconfig.StickyRemoteValue
 import kotlin.coroutines.resume
 
-private const val KEY_HIDE_GMS_INSIGHT = "android_hide_gms_insight"
+internal const val KEY_HIDE_GMS_INSIGHT = "android_hide_gms_insight"
 private const val KEY_HIDE_GMS_INSIGHT_CACHE = "gms_insight_hidden"
 
 val navigationFlagsModule = module {
@@ -22,9 +24,12 @@ val navigationFlagsModule = module {
                 store = get(),
                 fetch = { remoteConfig.fetchGmsInsightHiddenFlag() },
                 parse = ::parseGmsInsightHidden,
-                onFetchFailure = { error ->
-                    crashReporter.log("Remote config refresh failed for $KEY_HIDE_GMS_INSIGHT")
-                    error?.let(crashReporter::recordException)
+                onFetchFailure = { failure ->
+                    crashReporter.log("$REMOTE_CONFIG_LOG_PREFIX $KEY_HIDE_GMS_INSIGHT fetch failed")
+                    when (failure) {
+                        is FetchFailure.Thrown -> crashReporter.recordException(failure.error)
+                        FetchFailure.Reported -> Unit
+                    }
                 },
             ),
         )

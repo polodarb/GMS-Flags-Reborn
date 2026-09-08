@@ -15,6 +15,9 @@ import ua.polodarb.gmsflags.domain.navigation.RefreshNavigationFlags
 import ua.polodarb.gmsflags.domain.onboarding.ObserveOnboardingCompletion
 import ua.polodarb.gmsflags.domain.onboarding.RequestRootAccess
 import ua.polodarb.gmsflags.domain.servermode.RefreshServerMode
+import ua.polodarb.gmsflags.navigationflags.KEY_HIDE_GMS_INSIGHT
+import ua.polodarb.gmsflags.remoteconfig.REMOTE_CONFIG_LOG_PREFIX
+import ua.polodarb.gmsflags.servermode.KEY_OFFLINE_MODE
 
 internal class AppStartupViewModel(
     observeOnboardingCompletion: ObserveOnboardingCompletion,
@@ -31,13 +34,13 @@ internal class AppStartupViewModel(
     init {
         viewModelScope.launch {
             if (hasCachedServerMode()) {
-                launch { refreshQuietly { refreshServerMode() } }
+                launch { refreshQuietly(KEY_OFFLINE_MODE) { refreshServerMode() } }
             } else {
                 withTimeoutOrNull(SERVER_MODE_REFRESH_TIMEOUT_MILLIS) {
-                    refreshQuietly { refreshServerMode() }
+                    refreshQuietly(KEY_OFFLINE_MODE) { refreshServerMode() }
                 }
             }
-            launch { refreshQuietly { refreshNavigationFlags() } }
+            launch { refreshQuietly(KEY_HIDE_GMS_INSIGHT) { refreshNavigationFlags() } }
             observeOnboardingCompletion()
                 .distinctUntilChanged()
                 .collect { completed ->
@@ -47,13 +50,13 @@ internal class AppStartupViewModel(
         }
     }
 
-    private suspend fun refreshQuietly(refresh: suspend () -> Unit) {
+    private suspend fun refreshQuietly(remoteConfigParameter: String, refresh: suspend () -> Unit) {
         try {
             refresh()
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (error: Exception) {
-            crashReporter.log("Startup refresh swallowed an error")
+            crashReporter.log("$REMOTE_CONFIG_LOG_PREFIX $remoteConfigParameter startup refresh threw")
             crashReporter.recordException(error)
         }
     }

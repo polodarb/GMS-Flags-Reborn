@@ -10,13 +10,15 @@ import org.koin.dsl.module
 import ua.polodarb.gmsflags.BuildConfig
 import ua.polodarb.gmsflags.analytics.CrashReporter
 import ua.polodarb.gmsflags.data.repository.servermode.ServerModeRepository
+import ua.polodarb.gmsflags.remoteconfig.FetchFailure
+import ua.polodarb.gmsflags.remoteconfig.REMOTE_CONFIG_LOG_PREFIX
 import ua.polodarb.gmsflags.remoteconfig.RemoteFetch
 import ua.polodarb.gmsflags.remoteconfig.RemoteFlagStore
 import ua.polodarb.gmsflags.remoteconfig.SharedPreferencesRemoteFlagStore
 import ua.polodarb.gmsflags.remoteconfig.StickyRemoteValue
 import kotlin.coroutines.resume
 
-private const val KEY_OFFLINE_MODE = "android_offline_mode"
+internal const val KEY_OFFLINE_MODE = "android_offline_mode"
 private const val KEY_OFFLINE_MODE_CACHE = "offline_mode_json"
 private const val DEBUG_MINIMUM_FETCH_INTERVAL_SECONDS = 0L
 
@@ -33,13 +35,16 @@ val serverModeModule = module {
                 fetch = { remoteConfig.fetchOfflineModePayload() },
                 parse = { raw ->
                     ServerModeJson.parse(raw) { error ->
-                        crashReporter.log("Unreadable $KEY_OFFLINE_MODE payload")
+                        crashReporter.log("$REMOTE_CONFIG_LOG_PREFIX $KEY_OFFLINE_MODE payload unreadable")
                         crashReporter.recordException(error)
                     }
                 },
-                onFetchFailure = { error ->
-                    crashReporter.log("Remote config refresh failed for $KEY_OFFLINE_MODE")
-                    error?.let(crashReporter::recordException)
+                onFetchFailure = { failure ->
+                    crashReporter.log("$REMOTE_CONFIG_LOG_PREFIX $KEY_OFFLINE_MODE fetch failed")
+                    when (failure) {
+                        is FetchFailure.Thrown -> crashReporter.recordException(failure.error)
+                        FetchFailure.Reported -> Unit
+                    }
                 },
             ),
         )

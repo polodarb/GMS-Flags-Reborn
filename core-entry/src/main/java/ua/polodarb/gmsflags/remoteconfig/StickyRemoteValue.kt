@@ -10,7 +10,7 @@ class StickyRemoteValue<T>(
     private val store: RemoteFlagStore,
     private val fetch: suspend () -> RemoteFetch,
     private val parse: (String?) -> T,
-    private val onFetchFailure: (Throwable?) -> Unit,
+    private val onFetchFailure: (FetchFailure) -> Unit,
 ) {
     private val state = MutableStateFlow(parse(store.read(key)))
 
@@ -25,11 +25,11 @@ class StickyRemoteValue<T>(
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (error: Exception) {
-            onFetchFailure(error)
+            onFetchFailure(FetchFailure.Thrown(error))
             return
         }
         when (outcome) {
-            is RemoteFetch.Failed -> onFetchFailure(null)
+            is RemoteFetch.Failed -> onFetchFailure(FetchFailure.Reported)
             is RemoteFetch.Fetched -> {
                 store.write(key, outcome.raw)
                 state.value = parse(outcome.raw)

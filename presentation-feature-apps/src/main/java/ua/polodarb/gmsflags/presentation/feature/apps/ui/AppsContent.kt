@@ -11,6 +11,7 @@ import ua.polodarb.gmsflags.presentation.feature.apps.mvi.AppsEvent
 import ua.polodarb.gmsflags.presentation.feature.apps.mvi.AppsState
 import ua.polodarb.gmsflags.presentation.feature.apps.ui.components.AppsStateContent
 import ua.polodarb.gmsflags.presentation.feature.apps.ui.components.ModuleScopeWarningCard
+import ua.polodarb.gmsflags.presentation.feature.apps.ui.components.OfflineBadge
 import ua.polodarb.gmsflags.presentation.feature.apps.ui.components.UnsupportedAppSheet
 import ua.polodarb.gmsflags.domain.apps.XposedModuleStatus
 import ua.polodarb.gmsflags.presentation.core.ui.xposed.GmsPairipHelpSheet
@@ -55,6 +56,12 @@ fun AppsContent(
         onSettingsClick = { onEvent(AppsEvent.SettingsClicked) },
         modifier = modifier,
         headerAction = {
+            if (state.offline) {
+                OfflineBadge(
+                    label = state.offlineBadge,
+                    modifier = Modifier.padding(end = GmsSpacing.Small),
+                )
+            }
             GmsSearchHeaderAction(
                 searchVisible = state.searchVisible,
                 onClick = { onEvent(AppsEvent.SearchToggled) },

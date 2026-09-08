@@ -27,6 +27,7 @@ import ua.polodarb.gmsflags.domain.hookstatus.GetPairipIncompatiblePackages
 import ua.polodarb.gmsflags.domain.server.content.GetApplicationRecommendations
 import ua.polodarb.gmsflags.domain.server.content.GetServerApplication
 import ua.polodarb.gmsflags.domain.server.content.ServerRecommendationSummary
+import ua.polodarb.gmsflags.domain.servermode.ObserveServerMode
 import ua.polodarb.gmsflags.presentation.core.viewmodel.BaseViewModel
 import ua.polodarb.gmsflags.presentation.core.error.ErrorResolver
 import ua.polodarb.gmsflags.presentation.core.error.UiError
@@ -74,6 +75,7 @@ class FlagDetailsViewModel(
     private val errorResolver: ErrorResolver,
     private val analytics: AnalyticsTracker,
     private val performanceTracer: PerformanceTracer,
+    private val observeServerMode: ObserveServerMode,
     private val backgroundDispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : BaseViewModel<FlagDetailsEvent, FlagDetailsState, FlagDetailsEffect>() {
     private val mutations = FlagMutationCoordinator()
@@ -172,6 +174,12 @@ class FlagDetailsViewModel(
     }
 
     private fun loadRemoteContent() {
+        if (observeServerMode().value.offline) {
+            remoteContentJob?.cancel()
+            remoteContentJob = null
+            setState { copy(remoteContent = AppRemoteContentState.Unavailable) }
+            return
+        }
         if (remoteContentJob?.isActive == true) return
         remoteContentJob = viewModelScope.launch {
             setState { copy(remoteContent = AppRemoteContentState.Loading) }

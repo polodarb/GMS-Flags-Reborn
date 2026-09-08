@@ -18,6 +18,8 @@ data class AppsState(
     val query: String = "",
     val effectiveQuery: String = "",
     val searchVisible: Boolean = false,
+    val offline: Boolean = false,
+    val offlineBadge: String? = null,
 ) : ViewState
 
 internal fun AppsState.visibleApplications(): List<ApplicationUiModel> {

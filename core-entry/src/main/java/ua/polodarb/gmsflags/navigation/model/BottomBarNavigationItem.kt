@@ -24,21 +24,24 @@ internal data class BottomBarNavigationItem(
 )
 
 internal object BottomBarNavigation {
-    val items = listOf(
-        BottomBarNavigationItem(
-            destination = BottomBarDestination.Suggestions,
-            labelRes = R.string.navigation_suggestions,
-            icon = Icons.Rounded.AutoAwesome,
-        ),
-        BottomBarNavigationItem(
+    fun items(offline: Boolean, gmsInsightHidden: Boolean): List<BottomBarNavigationItem> {
+        val apps = BottomBarNavigationItem(
             destination = BottomBarDestination.Apps,
             labelRes = R.string.navigation_apps,
             icon = Icons.Rounded.Apps,
-        ),
-        BottomBarNavigationItem(
+        )
+        if (offline) return listOf(apps)
+        val suggestions = BottomBarNavigationItem(
+            destination = BottomBarDestination.Suggestions,
+            labelRes = R.string.navigation_suggestions,
+            icon = Icons.Rounded.AutoAwesome,
+        )
+        val insight = BottomBarNavigationItem(
             destination = BottomBarDestination.GmsInsight,
             labelRes = R.string.navigation_gms_insight,
             icon = IcLogo,
-        ),
-    ) + experimentalBottomBarNavigationItems()
+        )
+        val core = if (gmsInsightHidden) listOf(suggestions, apps) else listOf(suggestions, apps, insight)
+        return core + experimentalBottomBarNavigationItems()
+    }
 }

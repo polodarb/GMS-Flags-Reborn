@@ -9,7 +9,7 @@ import ua.polodarb.gmsflags.presentation.feature.settings.overview.SettingsViewM
 import ua.polodarb.gmsflags.presentation.feature.settings.ui.OverrideNoticeViewModel
 
 val presentationFeatureSettingsModule = module {
-    viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get()) }
+    viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { OverridesViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
     viewModel { OverrideNoticeViewModel(get()) }
     viewModel { FaqViewModel(get(), get()) }

@@ -27,4 +27,5 @@
     <string name="apps_module_scope_step_enable">Увімкніть модуль %1$s і перезапустіть цільові застосунки</string>
     <string name="apps_search_placeholder">Пошук застосунків і пакетів</string>
     <string name="apps_search_empty">Відповідних застосунків не знайдено</string>
+    <string name="apps_offline_badge">Офлайн</string>
 </resources>

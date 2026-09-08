@@ -10,6 +10,7 @@ val presentationFeatureAppsModule = module {
             getApplicationsSnapshot = get(),
             errorResolver = get(),
             analytics = get(),
+            observeServerMode = get(),
         )
     }
 }

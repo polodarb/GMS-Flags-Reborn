@@ -63,6 +63,8 @@
     <string name="settings_server_available">Available</string>
     <string name="settings_server_available_description">Suggestions and hook configuration are reachable</string>
     <string name="settings_server_unavailable">Unavailable</string>
+    <string name="settings_offline_mode_title">Offline mode</string>
+    <string name="settings_offline_mode_subtitle">The GMS Flags server is off. Apps, flags and overrides keep working locally.</string>
     <string name="settings_brand_name">GMS Flags</string>
     <string name="settings_brand_generation">2</string>
     <string name="settings_diagnostics_section">Privacy</string>

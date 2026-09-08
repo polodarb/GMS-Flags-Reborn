@@ -3,6 +3,7 @@ package ua.polodarb.gmsflags.navigation.state
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -19,11 +20,16 @@ import ua.polodarb.gmsflags.presentation.core.navigation.BottomBarDestination
 @Stable
 internal class BottomBarNavigationState(
     val startDestination: BottomBarDestination,
+    private val destinations: List<BottomBarDestination>,
     private val selectedDestinationId: MutableState<String>,
     private val backStacks: Map<BottomBarDestination, NavBackStack<NavKey>>,
 ) {
     var selectedDestination: BottomBarDestination
-        get() = selectedDestinationId.value.toBottomBarDestination()
+        get() = resolveSelectedDestination(
+            savedId = selectedDestinationId.value,
+            destinations = destinations,
+            startDestination = startDestination,
+        )
         private set(value) {
             selectedDestinationId.value = value.id
         }
@@ -40,15 +46,17 @@ internal class BottomBarNavigationState(
     fun decoratedEntries(
         entryProvider: (NavKey) -> NavEntry<NavKey>,
     ): List<NavEntry<NavKey>> {
-        val entriesByDestination = backStacks.mapValues { (_, backStack) ->
-            rememberDecoratedNavEntries(
-                backStack = backStack,
-                entryDecorators = listOf(
-                    rememberSaveableStateHolderNavEntryDecorator(),
-                    rememberViewModelStoreNavEntryDecorator(),
-                ),
-                entryProvider = entryProvider,
-            )
+        val entriesByDestination = backStacks.mapValues { (destination, backStack) ->
+            key(destination) {
+                rememberDecoratedNavEntries(
+                    backStack = backStack,
+                    entryDecorators = listOf(
+                        rememberSaveableStateHolderNavEntryDecorator(),
+                        rememberViewModelStoreNavEntryDecorator(),
+                    ),
+                    entryProvider = entryProvider,
+                )
+            }
         }
         val visibleDestinations = if (selectedDestination == startDestination) {
             listOf(startDestination)
@@ -69,31 +77,36 @@ internal fun rememberBottomBarNavigationState(
         mutableStateOf(startDestination.id)
     }
     val backStacks = destinations.associateWith { destination ->
-        rememberNavBackStack(
-            configuration = configuration,
-            destination,
-        )
+        key(destination) {
+            rememberNavBackStack(
+                configuration = configuration,
+                destination,
+            )
+        }
     }
     return remember(startDestination, destinations, backStacks) {
         BottomBarNavigationState(
             startDestination = startDestination,
+            destinations = destinations,
             selectedDestinationId = selectedDestinationId,
             backStacks = backStacks,
         )
     }
 }
 
-private val BottomBarDestination.id: String
+internal fun resolveSelectedDestination(
+    savedId: String,
+    destinations: List<BottomBarDestination>,
+    startDestination: BottomBarDestination,
+): BottomBarDestination {
+    val saved = destinations.firstOrNull { it.id == savedId }
+    return saved ?: startDestination
+}
+
+internal val BottomBarDestination.id: String
     get() = when (this) {
         BottomBarDestination.Suggestions -> "suggestions"
         BottomBarDestination.Apps -> "apps"
         BottomBarDestination.GmsInsight -> "gms_insight"
         BottomBarDestination.Experimental -> "experimental"
     }
-
-private fun String.toBottomBarDestination(): BottomBarDestination = when (this) {
-    "apps" -> BottomBarDestination.Apps
-    "gms_insight" -> BottomBarDestination.GmsInsight
-    "experimental" -> BottomBarDestination.Experimental
-    else -> BottomBarDestination.Suggestions
-}

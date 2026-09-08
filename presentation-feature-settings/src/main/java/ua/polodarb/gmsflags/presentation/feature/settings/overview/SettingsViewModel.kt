@@ -1,13 +1,17 @@
 package ua.polodarb.gmsflags.presentation.feature.settings.overview
 
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import ua.polodarb.gmsflags.domain.settings.ObserveOverrideControl
 import ua.polodarb.gmsflags.domain.settings.RefreshOverrideControl
 import ua.polodarb.gmsflags.domain.hookstatus.GetHookStatus
 import ua.polodarb.gmsflags.domain.server.content.GetHomeContent
+import ua.polodarb.gmsflags.domain.servermode.ObserveServerMode
 import ua.polodarb.gmsflags.presentation.core.viewmodel.BaseViewModel
 import ua.polodarb.gmsflags.presentation.core.error.ErrorResolver
 import ua.polodarb.gmsflags.analytics.AnalyticsEvent
@@ -20,10 +24,19 @@ internal class SettingsViewModel(
     private val getHomeContent: GetHomeContent,
     private val analytics: AnalyticsTracker,
     private val errorResolver: ErrorResolver,
+    private val observeServerMode: ObserveServerMode,
 ) : BaseViewModel<SettingsEvent, SettingsState, SettingsEffect>() {
     override fun initialState() = SettingsState()
 
+    private var serverProbe: Job? = null
+
     init {
+        observeServerMode()
+            .onEach { mode -> setState { copy(offline = mode.offline, offlineNotice = mode.notice) } }
+            .map { it.offline }
+            .distinctUntilChanged()
+            .onEach { offline -> if (offline) cancelServerProbe() else probeServer() }
+            .launchIn(viewModelScope)
         observeOverrideControl()
             .onEach { control -> setState { copy(overrideControl = control) } }
             .launchIn(viewModelScope)
@@ -56,7 +69,17 @@ internal class SettingsViewModel(
                 },
             )
         }
-        viewModelScope.launch {
+    }
+
+    private fun cancelServerProbe() {
+        serverProbe?.cancel()
+        serverProbe = null
+        setState { copy(serverConnection = ServerConnectionState.Checking) }
+    }
+
+    private fun probeServer() {
+        if (serverProbe?.isActive == true) return
+        serverProbe = viewModelScope.launch {
             getHomeContent().fold(
                 onSuccess = {
                     setState { copy(serverConnection = ServerConnectionState.Available) }

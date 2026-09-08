@@ -2,6 +2,7 @@ package ua.polodarb.gmsflags.presentation.feature.settings.overview
 
 import ua.polodarb.gmsflags.domain.settings.OverrideControlState
 import ua.polodarb.gmsflags.domain.hookstatus.HookStatusOverview
+import ua.polodarb.gmsflags.domain.servermode.OfflineNotice
 import ua.polodarb.gmsflags.presentation.core.mvi.ViewEvent
 import ua.polodarb.gmsflags.presentation.core.mvi.ViewSideEffect
 import ua.polodarb.gmsflags.presentation.core.mvi.ViewState
@@ -14,6 +15,8 @@ data class SettingsState(
     val hookStatusLoading: Boolean = true,
     val hookStatusError: UiError? = null,
     val serverConnection: ServerConnectionState = ServerConnectionState.Checking,
+    val offline: Boolean = false,
+    val offlineNotice: OfflineNotice? = null,
 ) : ViewState
 
 sealed interface ServerConnectionState {

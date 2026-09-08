@@ -1,5 +1,6 @@
 package ua.polodarb.gmsflags.startup
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
@@ -90,6 +91,37 @@ class AppStartupViewModelTest {
         advanceUntilIdle()
 
         assertEquals(AppStartupState.Ready, viewModel.state.value)
+    }
+
+    @Test
+    fun `a failing refresh does not stop startup`() = runTest(dispatcher) {
+        val viewModel = AppStartupViewModel(
+            observeOnboardingCompletion = ObserveOnboardingCompletion { MutableStateFlow(true) },
+            requestRootAccess = RequestRootAccess { Result.success(Unit) },
+            refreshServerMode = RefreshServerMode { throw IllegalStateException("boom") },
+            hasCachedServerMode = { false },
+        )
+        advanceUntilIdle()
+
+        assertEquals(AppStartupState.Ready, viewModel.state.value)
+    }
+
+    @Test
+    fun `a cancelled refresh does not continue startup`() = runTest(dispatcher) {
+        var onboardingReads = 0
+        val viewModel = AppStartupViewModel(
+            observeOnboardingCompletion = ObserveOnboardingCompletion {
+                onboardingReads++
+                MutableStateFlow(true)
+            },
+            requestRootAccess = RequestRootAccess { Result.success(Unit) },
+            refreshServerMode = RefreshServerMode { throw CancellationException("cleared") },
+            hasCachedServerMode = { false },
+        )
+        advanceUntilIdle()
+
+        assertEquals(0, onboardingReads)
+        assertEquals(AppStartupState.Loading, viewModel.state.value)
     }
 
     @Test

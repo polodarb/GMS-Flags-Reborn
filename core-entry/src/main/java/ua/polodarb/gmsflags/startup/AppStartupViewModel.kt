@@ -2,6 +2,7 @@ package ua.polodarb.gmsflags.startup
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,10 +27,10 @@ internal class AppStartupViewModel(
     init {
         viewModelScope.launch {
             if (hasCachedServerMode()) {
-                launch { runCatching { refreshServerMode() } }
+                launch { refreshServerModeQuietly() }
             } else {
                 withTimeoutOrNull(SERVER_MODE_REFRESH_TIMEOUT_MILLIS) {
-                    runCatching { refreshServerMode() }
+                    refreshServerModeQuietly()
                 }
             }
             observeOnboardingCompletion()
@@ -38,6 +39,16 @@ internal class AppStartupViewModel(
                     if (completed) checkRootAccess()
                     else mutableState.value = AppStartupState.Onboarding
                 }
+        }
+    }
+
+    private suspend fun refreshServerModeQuietly() {
+        try {
+            refreshServerMode()
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (error: Exception) {
+            Unit
         }
     }
 

@@ -175,6 +175,8 @@ class FlagDetailsViewModel(
 
     private fun loadRemoteContent() {
         if (observeServerMode().value.offline) {
+            remoteContentJob?.cancel()
+            remoteContentJob = null
             setState { copy(remoteContent = AppRemoteContentState.Unavailable) }
             return
         }

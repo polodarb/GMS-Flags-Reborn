@@ -1,5 +1,6 @@
 package ua.polodarb.gmsflags.presentation.feature.flagdetails.ui
 
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -177,7 +178,7 @@ class FlagDetailsViewModelTest {
         runTest(dispatcher) {
             var serverCalls = 0
             val viewModel = flagDetailsViewModel(
-                offline = true,
+                serverMode = MutableStateFlow(ServerMode(offline = true, notice = null)),
                 getServerApplication = GetServerApplication {
                     serverCalls++
                     Result.failure(AppError.NetworkUnavailable)
@@ -189,22 +190,36 @@ class FlagDetailsViewModelTest {
             assertEquals(0, serverCalls)
         }
 
+    @Test
+    fun `going offline cancels an in-flight remote content load`() = runTest(dispatcher) {
+        val serverResponse = CompletableDeferred<Unit>()
+        val serverMode = MutableStateFlow(ServerMode.Online)
+        val viewModel = flagDetailsViewModel(
+            serverMode = serverMode,
+            getServerApplication = GetServerApplication { packageName ->
+                serverResponse.await()
+                Result.success(serverApplicationDetails(packageName))
+            },
+        )
+        advanceUntilIdle()
+        assertEquals(AppRemoteContentState.Loading, viewModel.viewState.value.remoteContent)
+
+        serverMode.value = ServerMode(offline = true, notice = null)
+        viewModel.setEvent(FlagDetailsEvent.RemoteContentRetry)
+        advanceUntilIdle()
+        assertEquals(AppRemoteContentState.Unavailable, viewModel.viewState.value.remoteContent)
+
+        serverResponse.complete(Unit)
+        advanceUntilIdle()
+
+        assertEquals(AppRemoteContentState.Unavailable, viewModel.viewState.value.remoteContent)
+    }
+
     private fun flagDetailsViewModel(
         observeChanges: ObserveFlagOverrideChanges = ObserveFlagOverrideChanges { emptyFlow() },
-        offline: Boolean = false,
+        serverMode: MutableStateFlow<ServerMode> = MutableStateFlow(ServerMode.Online),
         getServerApplication: GetServerApplication = GetServerApplication { packageName ->
-            Result.success(
-                ServerApplicationDetails(
-                    application = ServerApplication(
-                        id = 1L,
-                        packageName = packageName,
-                        displayName = "Google Play Store",
-                        iconUrl = null,
-                    ),
-                    infoBlocks = emptyList(),
-                    highlightedFlags = emptyList(),
-                )
-            )
+            Result.success(serverApplicationDetails(packageName))
         },
         loader: suspend (String) -> Result<List<PhenotypeFlag>> = { Result.success(emptyList()) },
     ) = FlagDetailsViewModel(
@@ -229,12 +244,19 @@ class FlagDetailsViewModelTest {
         errorResolver = DefaultErrorResolver(),
         analytics = NoOpAnalyticsTracker,
         performanceTracer = NoOpPerformanceTracer,
-        observeServerMode = ObserveServerMode {
-            MutableStateFlow(
-                if (offline) ServerMode(offline = true, notice = null) else ServerMode.Online,
-            )
-        },
+        observeServerMode = ObserveServerMode { serverMode },
         backgroundDispatcher = dispatcher,
+    )
+
+    private fun serverApplicationDetails(packageName: String) = ServerApplicationDetails(
+        application = ServerApplication(
+            id = 1L,
+            packageName = packageName,
+            displayName = "Google Play Store",
+            iconUrl = null,
+        ),
+        infoBlocks = emptyList(),
+        highlightedFlags = emptyList(),
     )
 
     private fun flag(packageName: String) = PhenotypeFlag(

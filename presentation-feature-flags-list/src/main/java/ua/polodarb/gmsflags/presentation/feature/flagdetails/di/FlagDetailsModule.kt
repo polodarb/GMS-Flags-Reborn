@@ -37,6 +37,7 @@ val presentationFeatureFlagDetailsModule = module {
             errorResolver = get(),
             analytics = get(),
             performanceTracer = get(),
+            observeServerMode = get(),
         )
     }
     viewModel { parameters ->

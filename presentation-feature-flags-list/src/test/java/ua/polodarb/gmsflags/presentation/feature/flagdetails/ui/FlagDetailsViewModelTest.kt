@@ -6,6 +6,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.advanceTimeBy
@@ -31,11 +32,15 @@ import ua.polodarb.gmsflags.domain.flags.FlagOverridesChange
 import ua.polodarb.gmsflags.domain.flags.ObserveFlagOverrideChanges
 import ua.polodarb.gmsflags.domain.apps.GetApplicationXposedScopeStatus
 import ua.polodarb.gmsflags.domain.apps.XposedScopeStatus
+import ua.polodarb.gmsflags.domain.error.AppError
 import ua.polodarb.gmsflags.domain.hookstatus.GetPairipIncompatiblePackages
 import ua.polodarb.gmsflags.domain.server.content.GetApplicationRecommendations
 import ua.polodarb.gmsflags.domain.server.content.GetServerApplication
 import ua.polodarb.gmsflags.domain.server.content.ServerApplication
 import ua.polodarb.gmsflags.domain.server.content.ServerApplicationDetails
+import ua.polodarb.gmsflags.domain.servermode.ObserveServerMode
+import ua.polodarb.gmsflags.domain.servermode.ServerMode
+import ua.polodarb.gmsflags.presentation.feature.flagdetails.mvi.AppRemoteContentState
 import ua.polodarb.gmsflags.presentation.feature.flagdetails.mvi.FlagDetailsEvent
 import ua.polodarb.gmsflags.presentation.feature.flagdetails.mvi.FlagDetailsEffect
 import ua.polodarb.gmsflags.presentation.core.error.DefaultErrorResolver
@@ -59,7 +64,7 @@ class FlagDetailsViewModelTest {
     @Test
     fun `selecting package reloads flags in the same state holder`() = runTest(dispatcher) {
         val requestedPackages = mutableListOf<String>()
-        val viewModel = viewModel { packageName ->
+        val viewModel = flagDetailsViewModel { packageName ->
             requestedPackages += packageName
             Result.success(listOf(flag(packageName)))
         }
@@ -77,7 +82,7 @@ class FlagDetailsViewModelTest {
     @Test
     fun `unknown package is ignored`() = runTest(dispatcher) {
         val requestedPackages = mutableListOf<String>()
-        val viewModel = viewModel { packageName ->
+        val viewModel = flagDetailsViewModel { packageName ->
             requestedPackages += packageName
             Result.success(emptyList())
         }
@@ -92,7 +97,7 @@ class FlagDetailsViewModelTest {
 
     @Test
     fun `search is applied after three hundred milliseconds of inactivity`() = runTest(dispatcher) {
-        val viewModel = viewModel { Result.success(emptyList()) }
+        val viewModel = flagDetailsViewModel { Result.success(emptyList()) }
         advanceUntilIdle()
 
         viewModel.setEvent(FlagDetailsEvent.QueryChanged("first"))
@@ -114,7 +119,7 @@ class FlagDetailsViewModelTest {
     @Test
     fun `bulk boolean change emits a long warning`() = runTest(dispatcher) {
         val booleanFlag = flag("bulk_flag")
-        val viewModel = viewModel { Result.success(listOf(booleanFlag)) }
+        val viewModel = flagDetailsViewModel { Result.success(listOf(booleanFlag)) }
         advanceUntilIdle()
         viewModel.setEvent(FlagDetailsEvent.FlagLongClicked(booleanFlag.name))
         runCurrent()
@@ -136,7 +141,7 @@ class FlagDetailsViewModelTest {
     @Test
     fun `applied flags from another screen update the current list`() = runTest(dispatcher) {
         val changes = MutableSharedFlow<FlagOverridesChange>()
-        val viewModel = viewModel(
+        val viewModel = flagDetailsViewModel(
             loader = { Result.success(emptyList()) },
             observeChanges = ObserveFlagOverrideChanges { changes },
         )
@@ -167,9 +172,41 @@ class FlagDetailsViewModelTest {
         )
     }
 
-    private fun viewModel(
+    @Test
+    fun `offline mode reports remote content as unavailable without calling the server`() =
+        runTest(dispatcher) {
+            var serverCalls = 0
+            val viewModel = flagDetailsViewModel(
+                offline = true,
+                getServerApplication = GetServerApplication {
+                    serverCalls++
+                    Result.failure(AppError.NetworkUnavailable)
+                },
+            )
+            advanceUntilIdle()
+
+            assertEquals(AppRemoteContentState.Unavailable, viewModel.viewState.value.remoteContent)
+            assertEquals(0, serverCalls)
+        }
+
+    private fun flagDetailsViewModel(
         observeChanges: ObserveFlagOverrideChanges = ObserveFlagOverrideChanges { emptyFlow() },
-        loader: suspend (String) -> Result<List<PhenotypeFlag>>,
+        offline: Boolean = false,
+        getServerApplication: GetServerApplication = GetServerApplication { packageName ->
+            Result.success(
+                ServerApplicationDetails(
+                    application = ServerApplication(
+                        id = 1L,
+                        packageName = packageName,
+                        displayName = "Google Play Store",
+                        iconUrl = null,
+                    ),
+                    infoBlocks = emptyList(),
+                    highlightedFlags = emptyList(),
+                )
+            )
+        },
+        loader: suspend (String) -> Result<List<PhenotypeFlag>> = { Result.success(emptyList()) },
     ) = FlagDetailsViewModel(
         androidPackageName = "com.android.vending",
         applicationName = "Google Play Store",
@@ -185,26 +222,18 @@ class FlagDetailsViewModelTest {
             Result.success(XposedScopeStatus.Included)
         },
         getPairipIncompatiblePackages = GetPairipIncompatiblePackages { Result.success(emptySet()) },
-        getServerApplication = GetServerApplication { packageName ->
-            Result.success(
-                ServerApplicationDetails(
-                    application = ServerApplication(
-                        id = 1L,
-                        packageName = packageName,
-                        displayName = "Google Play Store",
-                        iconUrl = null,
-                    ),
-                    infoBlocks = emptyList(),
-                    highlightedFlags = emptyList(),
-                )
-            )
-        },
+        getServerApplication = getServerApplication,
         getApplicationRecommendations = GetApplicationRecommendations {
             Result.success(emptyList())
         },
         errorResolver = DefaultErrorResolver(),
         analytics = NoOpAnalyticsTracker,
         performanceTracer = NoOpPerformanceTracer,
+        observeServerMode = ObserveServerMode {
+            MutableStateFlow(
+                if (offline) ServerMode(offline = true, notice = null) else ServerMode.Online,
+            )
+        },
         backgroundDispatcher = dispatcher,
     )
 

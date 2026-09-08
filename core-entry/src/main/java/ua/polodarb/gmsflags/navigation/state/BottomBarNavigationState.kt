@@ -3,6 +3,7 @@ package ua.polodarb.gmsflags.navigation.state
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -45,15 +46,17 @@ internal class BottomBarNavigationState(
     fun decoratedEntries(
         entryProvider: (NavKey) -> NavEntry<NavKey>,
     ): List<NavEntry<NavKey>> {
-        val entriesByDestination = backStacks.mapValues { (_, backStack) ->
-            rememberDecoratedNavEntries(
-                backStack = backStack,
-                entryDecorators = listOf(
-                    rememberSaveableStateHolderNavEntryDecorator(),
-                    rememberViewModelStoreNavEntryDecorator(),
-                ),
-                entryProvider = entryProvider,
-            )
+        val entriesByDestination = backStacks.mapValues { (destination, backStack) ->
+            key(destination) {
+                rememberDecoratedNavEntries(
+                    backStack = backStack,
+                    entryDecorators = listOf(
+                        rememberSaveableStateHolderNavEntryDecorator(),
+                        rememberViewModelStoreNavEntryDecorator(),
+                    ),
+                    entryProvider = entryProvider,
+                )
+            }
         }
         val visibleDestinations = if (selectedDestination == startDestination) {
             listOf(startDestination)
@@ -74,10 +77,12 @@ internal fun rememberBottomBarNavigationState(
         mutableStateOf(startDestination.id)
     }
     val backStacks = destinations.associateWith { destination ->
-        rememberNavBackStack(
-            configuration = configuration,
-            destination,
-        )
+        key(destination) {
+            rememberNavBackStack(
+                configuration = configuration,
+                destination,
+            )
+        }
     }
     return remember(startDestination, destinations, backStacks) {
         BottomBarNavigationState(

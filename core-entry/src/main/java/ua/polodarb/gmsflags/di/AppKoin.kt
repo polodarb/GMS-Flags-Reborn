@@ -14,6 +14,8 @@ import ua.polodarb.gmsflags.data.repository.servermode.ServerModeRepository
 import ua.polodarb.gmsflags.domain.apps.IsOfficialAppBuild
 import ua.polodarb.gmsflags.domain.apps.IsOfficialAppBuildUseCase
 import ua.polodarb.gmsflags.domain.apps.di.appsDomainModule
+import ua.polodarb.gmsflags.domain.navigation.di.navigationFlagsDomainModule
+import ua.polodarb.gmsflags.navigationflags.navigationFlagsModule
 import ua.polodarb.gmsflags.domain.server.di.publicApiDomainModule
 import ua.polodarb.gmsflags.domain.flags.di.flagsDomainModule
 import ua.polodarb.gmsflags.domain.flags.di.NEEDLE_TRUSTED_PUBLIC_KEY_QUALIFIER
@@ -49,6 +51,7 @@ val appModules = listOf(
                 requestRootAccess = get(),
                 refreshServerMode = get(),
                 hasCachedServerMode = { get<ServerModeRepository>().hasCachedValue },
+                refreshNavigationFlags = get(),
             )
         }
         single<ErrorResolver> { DefaultErrorResolver() }
@@ -74,6 +77,7 @@ val appModules = listOf(
     analyticsModule,
     updateModule,
     serverModeModule,
+    navigationFlagsModule,
     coreRootModule,
     dataNetworkModule,
     phenotypeDataModule,
@@ -84,6 +88,7 @@ val appModules = listOf(
     hookStatusDomainModule,
     settingsDomainModule,
     serverModeDomainModule,
+    navigationFlagsDomainModule,
     onboardingDomainModule,
     reportsDomainModule,
     presentationFeatureSuggestionsModule,

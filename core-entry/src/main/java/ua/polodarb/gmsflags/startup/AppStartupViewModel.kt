@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import ua.polodarb.gmsflags.domain.navigation.RefreshNavigationFlags
 import ua.polodarb.gmsflags.domain.onboarding.ObserveOnboardingCompletion
 import ua.polodarb.gmsflags.domain.onboarding.RequestRootAccess
 import ua.polodarb.gmsflags.domain.servermode.RefreshServerMode
@@ -19,6 +20,7 @@ internal class AppStartupViewModel(
     private val requestRootAccess: RequestRootAccess,
     private val refreshServerMode: RefreshServerMode,
     private val hasCachedServerMode: () -> Boolean,
+    private val refreshNavigationFlags: RefreshNavigationFlags,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow<AppStartupState>(AppStartupState.Loading)
     val state: StateFlow<AppStartupState> = mutableState.asStateFlow()
@@ -27,12 +29,13 @@ internal class AppStartupViewModel(
     init {
         viewModelScope.launch {
             if (hasCachedServerMode()) {
-                launch { refreshServerModeQuietly() }
+                launch { refreshQuietly { refreshServerMode() } }
             } else {
                 withTimeoutOrNull(SERVER_MODE_REFRESH_TIMEOUT_MILLIS) {
-                    refreshServerModeQuietly()
+                    refreshQuietly { refreshServerMode() }
                 }
             }
+            launch { refreshQuietly { refreshNavigationFlags() } }
             observeOnboardingCompletion()
                 .distinctUntilChanged()
                 .collect { completed ->
@@ -42,9 +45,9 @@ internal class AppStartupViewModel(
         }
     }
 
-    private suspend fun refreshServerModeQuietly() {
+    private suspend fun refreshQuietly(refresh: suspend () -> Unit) {
         try {
-            refreshServerMode()
+            refresh()
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (error: Exception) {

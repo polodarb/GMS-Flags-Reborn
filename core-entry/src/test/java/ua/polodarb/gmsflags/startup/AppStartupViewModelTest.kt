@@ -14,6 +14,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import ua.polodarb.gmsflags.domain.navigation.RefreshNavigationFlags
 import ua.polodarb.gmsflags.domain.onboarding.ObserveOnboardingCompletion
 import ua.polodarb.gmsflags.domain.onboarding.RequestRootAccess
 import ua.polodarb.gmsflags.domain.servermode.RefreshServerMode
@@ -44,6 +45,7 @@ class AppStartupViewModelTest {
             },
             refreshServerMode = RefreshServerMode {},
             hasCachedServerMode = { true },
+            refreshNavigationFlags = RefreshNavigationFlags {},
         )
         advanceUntilIdle()
 
@@ -58,6 +60,7 @@ class AppStartupViewModelTest {
             requestRootAccess = RequestRootAccess { Result.success(Unit) },
             refreshServerMode = RefreshServerMode {},
             hasCachedServerMode = { true },
+            refreshNavigationFlags = RefreshNavigationFlags {},
         )
         advanceUntilIdle()
 
@@ -73,6 +76,7 @@ class AppStartupViewModelTest {
                 requestRootAccess = RequestRootAccess { Result.success(Unit) },
                 refreshServerMode = RefreshServerMode { refreshes++ },
                 hasCachedServerMode = { false },
+                refreshNavigationFlags = RefreshNavigationFlags {},
             )
             advanceUntilIdle()
 
@@ -87,6 +91,7 @@ class AppStartupViewModelTest {
             requestRootAccess = RequestRootAccess { Result.success(Unit) },
             refreshServerMode = RefreshServerMode { awaitCancellation() },
             hasCachedServerMode = { false },
+            refreshNavigationFlags = RefreshNavigationFlags {},
         )
         advanceUntilIdle()
 
@@ -100,6 +105,7 @@ class AppStartupViewModelTest {
             requestRootAccess = RequestRootAccess { Result.success(Unit) },
             refreshServerMode = RefreshServerMode { throw IllegalStateException("boom") },
             hasCachedServerMode = { false },
+            refreshNavigationFlags = RefreshNavigationFlags {},
         )
         advanceUntilIdle()
 
@@ -117,6 +123,7 @@ class AppStartupViewModelTest {
             requestRootAccess = RequestRootAccess { Result.success(Unit) },
             refreshServerMode = RefreshServerMode { throw CancellationException("cleared") },
             hasCachedServerMode = { false },
+            refreshNavigationFlags = RefreshNavigationFlags {},
         )
         advanceUntilIdle()
 
@@ -132,10 +139,55 @@ class AppStartupViewModelTest {
             requestRootAccess = RequestRootAccess { Result.success(Unit) },
             refreshServerMode = RefreshServerMode { refreshes++ },
             hasCachedServerMode = { true },
+            refreshNavigationFlags = RefreshNavigationFlags {},
         )
         advanceUntilIdle()
 
         assertEquals(1, refreshes)
+        assertEquals(AppStartupState.Ready, viewModel.state.value)
+    }
+
+    @Test
+    fun `navigation flags refresh in the background on every launch`() = runTest(dispatcher) {
+        var refreshes = 0
+        val viewModel = AppStartupViewModel(
+            observeOnboardingCompletion = ObserveOnboardingCompletion { MutableStateFlow(true) },
+            requestRootAccess = RequestRootAccess { Result.success(Unit) },
+            refreshServerMode = RefreshServerMode {},
+            hasCachedServerMode = { true },
+            refreshNavigationFlags = RefreshNavigationFlags { refreshes++ },
+        )
+        advanceUntilIdle()
+
+        assertEquals(1, refreshes)
+        assertEquals(AppStartupState.Ready, viewModel.state.value)
+    }
+
+    @Test
+    fun `a hanging navigation flags refresh cannot block startup`() = runTest(dispatcher) {
+        val viewModel = AppStartupViewModel(
+            observeOnboardingCompletion = ObserveOnboardingCompletion { MutableStateFlow(true) },
+            requestRootAccess = RequestRootAccess { Result.success(Unit) },
+            refreshServerMode = RefreshServerMode {},
+            hasCachedServerMode = { true },
+            refreshNavigationFlags = RefreshNavigationFlags { awaitCancellation() },
+        )
+        advanceUntilIdle()
+
+        assertEquals(AppStartupState.Ready, viewModel.state.value)
+    }
+
+    @Test
+    fun `a failing navigation flags refresh does not stop startup`() = runTest(dispatcher) {
+        val viewModel = AppStartupViewModel(
+            observeOnboardingCompletion = ObserveOnboardingCompletion { MutableStateFlow(true) },
+            requestRootAccess = RequestRootAccess { Result.success(Unit) },
+            refreshServerMode = RefreshServerMode {},
+            hasCachedServerMode = { true },
+            refreshNavigationFlags = RefreshNavigationFlags { throw IllegalStateException("boom") },
+        )
+        advanceUntilIdle()
+
         assertEquals(AppStartupState.Ready, viewModel.state.value)
     }
 }

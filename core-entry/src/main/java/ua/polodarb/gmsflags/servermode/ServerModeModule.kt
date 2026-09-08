@@ -8,6 +8,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 import ua.polodarb.gmsflags.BuildConfig
+import ua.polodarb.gmsflags.analytics.CrashReporter
 import ua.polodarb.gmsflags.data.repository.servermode.ServerModeRepository
 import ua.polodarb.gmsflags.remoteconfig.RemoteFetch
 import ua.polodarb.gmsflags.remoteconfig.RemoteFlagStore
@@ -24,12 +25,22 @@ val serverModeModule = module {
     single<FirebaseRemoteConfig> { Firebase.remoteConfig.withDebugFetchInterval() }
     single<ServerModeRepository> {
         val remoteConfig: FirebaseRemoteConfig = get()
+        val crashReporter: CrashReporter = get()
         DefaultServerModeRepository(
             sticky = StickyRemoteValue(
                 key = KEY_OFFLINE_MODE_CACHE,
                 store = get(),
                 fetch = { remoteConfig.fetchOfflineModePayload() },
-                parse = ServerModeJson::parse,
+                parse = { raw ->
+                    ServerModeJson.parse(raw) { error ->
+                        crashReporter.log("Unreadable $KEY_OFFLINE_MODE payload")
+                        crashReporter.recordException(error)
+                    }
+                },
+                onFetchFailure = { error ->
+                    crashReporter.log("Remote config refresh failed for $KEY_OFFLINE_MODE")
+                    error?.let(crashReporter::recordException)
+                },
             ),
         )
     }

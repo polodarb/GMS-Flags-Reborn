@@ -52,6 +52,7 @@ val appModules = listOf(
                 refreshServerMode = get(),
                 hasCachedServerMode = { get<ServerModeRepository>().hasCachedValue },
                 refreshNavigationFlags = get(),
+                crashReporter = get(),
             )
         }
         single<ErrorResolver> { DefaultErrorResolver() }

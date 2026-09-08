@@ -8,10 +8,14 @@ import ua.polodarb.gmsflags.domain.servermode.ServerMode
 internal object ServerModeJson {
     private val json = Json { ignoreUnknownKeys = true }
 
-    fun parse(raw: String?): ServerMode {
-        val payload = raw?.takeIf { it.isNotBlank() }
-            ?.let { runCatching { json.decodeFromString<OfflineModePayload>(it) }.getOrNull() }
-            ?: return ServerMode.Online
+    fun parse(raw: String?, onUnreadablePayload: (IllegalArgumentException) -> Unit): ServerMode {
+        val trimmed = raw?.takeIf { it.isNotBlank() } ?: return ServerMode.Online
+        val payload = try {
+            json.decodeFromString<OfflineModePayload>(trimmed)
+        } catch (error: IllegalArgumentException) {
+            onUnreadablePayload(error)
+            return ServerMode.Online
+        }
         if (!payload.enabled) return ServerMode.Online
         val config = payload.config
         val notice = config?.let {

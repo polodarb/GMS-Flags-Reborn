@@ -119,7 +119,8 @@ class DefaultServerModeRepositoryTest {
             key = KEY,
             store = store,
             fetch = fetchRawConfig,
-            parse = ServerModeJson::parse,
+            parse = { raw -> ServerModeJson.parse(raw) { fail("must not be called") } },
+            onFetchFailure = {},
         ),
     )
 

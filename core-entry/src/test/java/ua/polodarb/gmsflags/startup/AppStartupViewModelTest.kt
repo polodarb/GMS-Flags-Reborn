@@ -14,6 +14,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import ua.polodarb.gmsflags.analytics.RecordingCrashReporter
 import ua.polodarb.gmsflags.domain.navigation.RefreshNavigationFlags
 import ua.polodarb.gmsflags.domain.onboarding.ObserveOnboardingCompletion
 import ua.polodarb.gmsflags.domain.onboarding.RequestRootAccess
@@ -46,6 +47,7 @@ class AppStartupViewModelTest {
             refreshServerMode = RefreshServerMode {},
             hasCachedServerMode = { true },
             refreshNavigationFlags = RefreshNavigationFlags {},
+            crashReporter = RecordingCrashReporter(),
         )
         advanceUntilIdle()
 
@@ -61,6 +63,7 @@ class AppStartupViewModelTest {
             refreshServerMode = RefreshServerMode {},
             hasCachedServerMode = { true },
             refreshNavigationFlags = RefreshNavigationFlags {},
+            crashReporter = RecordingCrashReporter(),
         )
         advanceUntilIdle()
 
@@ -77,6 +80,7 @@ class AppStartupViewModelTest {
                 refreshServerMode = RefreshServerMode { refreshes++ },
                 hasCachedServerMode = { false },
                 refreshNavigationFlags = RefreshNavigationFlags {},
+                crashReporter = RecordingCrashReporter(),
             )
             advanceUntilIdle()
 
@@ -92,6 +96,7 @@ class AppStartupViewModelTest {
             refreshServerMode = RefreshServerMode { awaitCancellation() },
             hasCachedServerMode = { false },
             refreshNavigationFlags = RefreshNavigationFlags {},
+            crashReporter = RecordingCrashReporter(),
         )
         advanceUntilIdle()
 
@@ -106,6 +111,7 @@ class AppStartupViewModelTest {
             refreshServerMode = RefreshServerMode { throw IllegalStateException("boom") },
             hasCachedServerMode = { false },
             refreshNavigationFlags = RefreshNavigationFlags {},
+            crashReporter = RecordingCrashReporter(),
         )
         advanceUntilIdle()
 
@@ -113,8 +119,47 @@ class AppStartupViewModelTest {
     }
 
     @Test
+    fun `a throwing server mode refresh is reported and startup still reaches Ready`() =
+        runTest(dispatcher) {
+            val crashReporter = RecordingCrashReporter()
+            val thrown = IllegalStateException("boom")
+            val viewModel = AppStartupViewModel(
+                observeOnboardingCompletion = ObserveOnboardingCompletion { MutableStateFlow(true) },
+                requestRootAccess = RequestRootAccess { Result.success(Unit) },
+                refreshServerMode = RefreshServerMode { throw thrown },
+                hasCachedServerMode = { false },
+                refreshNavigationFlags = RefreshNavigationFlags {},
+                crashReporter = crashReporter,
+            )
+            advanceUntilIdle()
+
+            assertEquals(AppStartupState.Ready, viewModel.state.value)
+            assertEquals(listOf(thrown), crashReporter.recordedExceptions)
+        }
+
+    @Test
+    fun `a throwing navigation flags refresh is reported and startup still reaches Ready`() =
+        runTest(dispatcher) {
+            val crashReporter = RecordingCrashReporter()
+            val thrown = IllegalStateException("boom")
+            val viewModel = AppStartupViewModel(
+                observeOnboardingCompletion = ObserveOnboardingCompletion { MutableStateFlow(true) },
+                requestRootAccess = RequestRootAccess { Result.success(Unit) },
+                refreshServerMode = RefreshServerMode {},
+                hasCachedServerMode = { true },
+                refreshNavigationFlags = RefreshNavigationFlags { throw thrown },
+                crashReporter = crashReporter,
+            )
+            advanceUntilIdle()
+
+            assertEquals(AppStartupState.Ready, viewModel.state.value)
+            assertEquals(listOf(thrown), crashReporter.recordedExceptions)
+        }
+
+    @Test
     fun `a cancelled refresh does not continue startup`() = runTest(dispatcher) {
         var onboardingReads = 0
+        val crashReporter = RecordingCrashReporter()
         val viewModel = AppStartupViewModel(
             observeOnboardingCompletion = ObserveOnboardingCompletion {
                 onboardingReads++
@@ -124,11 +169,13 @@ class AppStartupViewModelTest {
             refreshServerMode = RefreshServerMode { throw CancellationException("cleared") },
             hasCachedServerMode = { false },
             refreshNavigationFlags = RefreshNavigationFlags {},
+            crashReporter = crashReporter,
         )
         advanceUntilIdle()
 
         assertEquals(0, onboardingReads)
         assertEquals(AppStartupState.Loading, viewModel.state.value)
+        assertEquals(emptyList<Throwable>(), crashReporter.recordedExceptions)
     }
 
     @Test
@@ -140,6 +187,7 @@ class AppStartupViewModelTest {
             refreshServerMode = RefreshServerMode { refreshes++ },
             hasCachedServerMode = { true },
             refreshNavigationFlags = RefreshNavigationFlags {},
+            crashReporter = RecordingCrashReporter(),
         )
         advanceUntilIdle()
 
@@ -156,6 +204,7 @@ class AppStartupViewModelTest {
             refreshServerMode = RefreshServerMode {},
             hasCachedServerMode = { true },
             refreshNavigationFlags = RefreshNavigationFlags { refreshes++ },
+            crashReporter = RecordingCrashReporter(),
         )
         advanceUntilIdle()
 
@@ -171,6 +220,7 @@ class AppStartupViewModelTest {
             refreshServerMode = RefreshServerMode {},
             hasCachedServerMode = { true },
             refreshNavigationFlags = RefreshNavigationFlags { awaitCancellation() },
+            crashReporter = RecordingCrashReporter(),
         )
         advanceUntilIdle()
 
@@ -185,6 +235,7 @@ class AppStartupViewModelTest {
             refreshServerMode = RefreshServerMode {},
             hasCachedServerMode = { true },
             refreshNavigationFlags = RefreshNavigationFlags { throw IllegalStateException("boom") },
+            crashReporter = RecordingCrashReporter(),
         )
         advanceUntilIdle()
 
@@ -200,6 +251,7 @@ class AppStartupViewModelTest {
             refreshServerMode = RefreshServerMode {},
             hasCachedServerMode = { false },
             refreshNavigationFlags = RefreshNavigationFlags { refreshes++ },
+            crashReporter = RecordingCrashReporter(),
         )
         advanceUntilIdle()
 
@@ -217,6 +269,7 @@ class AppStartupViewModelTest {
                 refreshServerMode = RefreshServerMode { awaitCancellation() },
                 hasCachedServerMode = { false },
                 refreshNavigationFlags = RefreshNavigationFlags { refreshes++ },
+                crashReporter = RecordingCrashReporter(),
             )
             advanceUntilIdle()
 

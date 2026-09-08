@@ -3,6 +3,7 @@ package ua.polodarb.gmsflags.navigationflags
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.koin.dsl.module
+import ua.polodarb.gmsflags.analytics.CrashReporter
 import ua.polodarb.gmsflags.data.repository.navigation.NavigationFlagsRepository
 import ua.polodarb.gmsflags.remoteconfig.RemoteFetch
 import ua.polodarb.gmsflags.remoteconfig.StickyRemoteValue
@@ -14,12 +15,17 @@ private const val KEY_HIDE_GMS_INSIGHT_CACHE = "gms_insight_hidden"
 val navigationFlagsModule = module {
     single<NavigationFlagsRepository> {
         val remoteConfig: FirebaseRemoteConfig = get()
+        val crashReporter: CrashReporter = get()
         DefaultNavigationFlagsRepository(
             sticky = StickyRemoteValue(
                 key = KEY_HIDE_GMS_INSIGHT_CACHE,
                 store = get(),
                 fetch = { remoteConfig.fetchGmsInsightHiddenFlag() },
                 parse = ::parseGmsInsightHidden,
+                onFetchFailure = { error ->
+                    crashReporter.log("Remote config refresh failed for $KEY_HIDE_GMS_INSIGHT")
+                    error?.let(crashReporter::recordException)
+                },
             ),
         )
     }

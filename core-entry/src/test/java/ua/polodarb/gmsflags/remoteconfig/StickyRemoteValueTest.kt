@@ -15,6 +15,7 @@ class StickyRemoteValueTest {
             store = FakeStore(cached = "true"),
             fetch = { fail("must not fetch") },
             parse = { it == "true" },
+            onFetchFailure = { fail("must not report") },
         )
 
         assertTrue(sticky.value.value)
@@ -28,6 +29,7 @@ class StickyRemoteValueTest {
             store = FakeStore(cached = null),
             fetch = { fail("must not fetch") },
             parse = { it == "true" },
+            onFetchFailure = { fail("must not report") },
         )
 
         assertFalse(sticky.value.value)
@@ -42,6 +44,7 @@ class StickyRemoteValueTest {
             store = store,
             fetch = { RemoteFetch.Fetched("") },
             parse = { it == "true" },
+            onFetchFailure = { fail("must not report") },
         )
 
         sticky.refresh()
@@ -54,33 +57,40 @@ class StickyRemoteValueTest {
     @Test
     fun `a failed fetch keeps the cache`() = runTest {
         val store = FakeStore(cached = "true")
+        var failures = 0
         val sticky = StickyRemoteValue(
             key = "flag",
             store = store,
             fetch = { RemoteFetch.Failed },
             parse = { it == "true" },
+            onFetchFailure = { failures++ },
         )
 
         sticky.refresh()
 
         assertTrue(sticky.value.value)
         assertEquals(null, store.written)
+        assertEquals(1, failures)
     }
 
     @Test
     fun `a throwing fetch keeps the cache`() = runTest {
         val store = FakeStore(cached = "true")
+        val reported = mutableListOf<Throwable?>()
         val sticky = StickyRemoteValue(
             key = "flag",
             store = store,
             fetch = { throw IOException("no network") },
             parse = { it == "true" },
+            onFetchFailure = { reported.add(it) },
         )
 
         sticky.refresh()
 
         assertTrue(sticky.value.value)
         assertEquals(null, store.written)
+        assertEquals(1, reported.size)
+        assertTrue(reported.single() is IOException)
     }
 
     @Test
@@ -91,6 +101,7 @@ class StickyRemoteValueTest {
             store = store,
             fetch = { RemoteFetch.Fetched("true") },
             parse = { it == "true" },
+            onFetchFailure = { fail("must not report") },
         )
 
         sticky.refresh()

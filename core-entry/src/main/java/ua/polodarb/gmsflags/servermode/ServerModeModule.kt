@@ -9,23 +9,32 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 import ua.polodarb.gmsflags.BuildConfig
 import ua.polodarb.gmsflags.data.repository.servermode.ServerModeRepository
+import ua.polodarb.gmsflags.remoteconfig.RemoteFetch
+import ua.polodarb.gmsflags.remoteconfig.RemoteFlagStore
+import ua.polodarb.gmsflags.remoteconfig.SharedPreferencesRemoteFlagStore
+import ua.polodarb.gmsflags.remoteconfig.StickyRemoteValue
 import kotlin.coroutines.resume
 
 private const val KEY_OFFLINE_MODE = "android_offline_mode"
+private const val KEY_OFFLINE_MODE_CACHE = "offline_mode_json"
 private const val DEBUG_MINIMUM_FETCH_INTERVAL_SECONDS = 0L
 
 val serverModeModule = module {
-    single<ServerModeStore> { SharedPreferencesServerModeStore(androidContext()) }
+    single<RemoteFlagStore> { SharedPreferencesRemoteFlagStore(androidContext()) }
     single<ServerModeRepository> {
         val remoteConfig = Firebase.remoteConfig.withDebugFetchInterval()
         DefaultServerModeRepository(
-            store = get(),
-            fetchRawConfig = { remoteConfig.fetchOfflineModePayload() },
+            sticky = StickyRemoteValue(
+                key = KEY_OFFLINE_MODE_CACHE,
+                store = get(),
+                fetch = { remoteConfig.fetchOfflineModePayload() },
+                parse = ServerModeJson::parse,
+            ),
         )
     }
 }
 
-private fun FirebaseRemoteConfig.withDebugFetchInterval(): FirebaseRemoteConfig = apply {
+internal fun FirebaseRemoteConfig.withDebugFetchInterval(): FirebaseRemoteConfig = apply {
     if (!BuildConfig.DEBUG) return@apply
     setConfigSettingsAsync(
         remoteConfigSettings {
@@ -34,12 +43,12 @@ private fun FirebaseRemoteConfig.withDebugFetchInterval(): FirebaseRemoteConfig 
     )
 }
 
-private suspend fun FirebaseRemoteConfig.fetchOfflineModePayload(): ServerModeFetch {
+private suspend fun FirebaseRemoteConfig.fetchOfflineModePayload(): RemoteFetch {
     val fetched = suspendCancellableCoroutine { continuation ->
         fetchAndActivate().addOnCompleteListener { task ->
             if (continuation.isActive) continuation.resume(task.isSuccessful)
         }
     }
-    if (!fetched) return ServerModeFetch.Failed
-    return ServerModeFetch.Fetched(getString(KEY_OFFLINE_MODE).trim())
+    if (!fetched) return RemoteFetch.Failed
+    return RemoteFetch.Fetched(getString(KEY_OFFLINE_MODE).trim())
 }

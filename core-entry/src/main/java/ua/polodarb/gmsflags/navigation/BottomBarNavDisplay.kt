@@ -28,6 +28,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import org.koin.compose.koinInject
+import ua.polodarb.gmsflags.domain.navigation.ObserveGmsInsightHidden
 import ua.polodarb.gmsflags.domain.servermode.ObserveServerMode
 import ua.polodarb.gmsflags.navigation.model.BottomBarNavigation
 import ua.polodarb.gmsflags.navigation.state.rememberBottomBarNavigationState
@@ -62,7 +63,10 @@ internal fun BottomBarNavDisplay(
 ) {
     val serverMode by koinInject<ObserveServerMode>()().collectAsStateWithLifecycle()
     val offline = serverMode.offline
-    val items = remember(offline) { BottomBarNavigation.items(offline) }
+    val gmsInsightHidden by koinInject<ObserveGmsInsightHidden>()().collectAsStateWithLifecycle()
+    val items = remember(offline, gmsInsightHidden) {
+        BottomBarNavigation.items(offline, gmsInsightHidden)
+    }
     val navigationState = rememberBottomBarNavigationState(
         startDestination = if (offline) BottomBarDestination.Apps else BottomBarDestination.Suggestions,
         destinations = items.map { it.destination },

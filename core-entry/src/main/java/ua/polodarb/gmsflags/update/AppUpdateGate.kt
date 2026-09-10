@@ -33,7 +33,7 @@ import ua.polodarb.gmsflags.domain.update.AppUpdateType
 @Composable
 fun AppUpdateGate() {
     val viewModel: AppUpdateViewModel = koinViewModel()
-    val policy by viewModel.policy.collectAsStateWithLifecycle()
+    val policy by viewModel.sheetPolicy.collectAsStateWithLifecycle()
 
     policy?.let { current ->
         val isForce = current.type == AppUpdateType.FORCE

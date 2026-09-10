@@ -22,8 +22,8 @@ android {
         applicationId = "ua.polodarb.gmsflags.reborn"
         minSdk = 29
         targetSdk = 37
-        versionCode = 107
-        versionName = "1.1.1"
+        versionCode = 108
+        versionName = "1.2.0"
         val serverBaseUrl = providers.gradleProperty("GMS_FLAGS_API_BASE_URL")
             .getOrElse("https://api.polodarb.com/gmsflags/v1")
         buildConfigField("String", "SERVER_BASE_URL", "\"$serverBaseUrl\"")

@@ -47,6 +47,7 @@ import ua.polodarb.gmsflags.presentation.core.ui.layout.GmsTopLevelHeaderState
 import ua.polodarb.gmsflags.presentation.core.ui.layout.LocalGmsTopLevelHeaderState
 import ua.polodarb.gmsflags.presentation.core.ui.layout.LocalGmsTopLevelNotice
 import ua.polodarb.gmsflags.presentation.feature.settings.ui.OverridesPausedNotice
+import ua.polodarb.gmsflags.update.AppUpdateNotice
 
 @Composable
 internal fun BottomBarNavDisplay(
@@ -67,8 +68,9 @@ internal fun BottomBarNavDisplay(
     val items = remember(offline, gmsInsightHidden) {
         BottomBarNavigation.items(offline, gmsInsightHidden)
     }
+    val startDestination = if (offline) BottomBarDestination.Apps else BottomBarDestination.Suggestions
     val navigationState = rememberBottomBarNavigationState(
-        startDestination = if (offline) BottomBarDestination.Apps else BottomBarDestination.Suggestions,
+        startDestination = startDestination,
         destinations = items.map { it.destination },
         configuration = AppNavConfig.config,
     )
@@ -94,6 +96,9 @@ internal fun BottomBarNavDisplay(
 
     CompositionLocalProvider(
         LocalGmsTopLevelNotice provides {
+            if (navigationState.selectedDestination == startDestination) {
+                AppUpdateNotice()
+            }
             OverridesPausedNotice(onClick = onOverridesSelected)
         },
         LocalGmsTopLevelHeaderState provides headerState,

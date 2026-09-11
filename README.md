@@ -2,6 +2,7 @@
 
 **Hidden Google app features, one tap away.**
 
+![Downloads](https://img.shields.io/github/downloads/polodarb/GMS-Flags-Reborn/total?style=for-the-badge)
 ![License](https://img.shields.io/github/license/polodarb/GMS-Flags-Reborn?style=for-the-badge)
 [![Telegram](https://img.shields.io/badge/telegram-telegram?style=for-the-badge&logo=telegram&logoColor=white&label=Channel&color=%23229ED9)](https://t.me/gms_insight)
 

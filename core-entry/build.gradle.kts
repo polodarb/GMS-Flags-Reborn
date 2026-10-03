@@ -14,6 +14,10 @@ secrets {
 
 android {
     namespace = "ua.polodarb.gmsflags"
+    androidResources {
+        generateLocaleConfig = true
+        localeFilters += listOf("en", "ru", "uk", "zh-rCN")
+    }
     compileSdk {
         version = release(37)
     }

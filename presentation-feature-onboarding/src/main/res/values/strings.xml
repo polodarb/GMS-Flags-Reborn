@@ -15,7 +15,7 @@
     <string name="onboarding_privacy">Privacy Policy</string>
     <string name="onboarding_terms_url" translatable="false">https://api.polodarb.com/gmsflags/terms</string>
     <string name="onboarding_privacy_url" translatable="false">https://api.polodarb.com/gmsflags/privacy</string>
-    <string name="onboarding_app_name">GMS Flags</string>
+    <string name="onboarding_app_name" translatable="false">GMS Flags</string>
     <string name="onboarding_version_label" translatable="false">2.0</string>
     <string name="onboarding_soon">Soon</string>
 

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="flag_details_back">返回</string>
+    <string name="flag_details_close_selection">退出选择</string>
+    <plurals name="flag_details_selected_count">
+        <item quantity="other">已选择 %d 项</item>
+    </plurals>
+    <string name="flag_details_filter">筛选 flags</string>
+    <string name="flag_details_bulk_operation_title">正在批量应用</string>
+    <string name="flag_details_bulk_operation_description">大量选择可能需要 10–30 秒，请不要关闭应用</string>
+    <string name="flag_details_control_help">了解 flag 状态</string>
+    <string name="flag_details_search">搜索 flags</string>
+    <string name="flag_details_clear_search">清除搜索</string>
+    <string name="flag_details_copy_selected">复制 flag 名称</string>
+
+    <string name="flag_type_boolean_example">示例：enable_new_ui feature_x 或 enable_new_ui=0</string>
+
+    <string name="flag_reset_default_description">重置为默认值</string>
+    <string name="flag_delete_description">删除 flag</string>
+    <string name="flag_control_help_title">flag 的控制状态</string>
+    <string name="flag_control_help_description">每个 flag 开关有以下四种状态：</string>
+    <string name="flag_control_help_state_default_off">默认关闭（GMS 报告的状态）</string>
+    <string name="flag_control_help_state_default_on">默认开启（GMS 报告的状态）</string>
+    <string name="flag_control_help_state_overridden_off">已覆盖（由你强制关闭）</string>
+    <string name="flag_control_help_state_overridden_on">已覆盖（由你强制开启）</string>
+    <string name="flag_control_help_default_caveat">“默认值”仅表示 GMS 当前报告的状态，之后可能因其内部逻辑而改变。覆盖项则始终优先，不受 GMS 内部判断影响</string>
+    <string name="flag_control_help_reset_note_prefix">圆点表示该 flag 已被覆盖。点按</string>
+    <string name="flag_control_help_reset_note_middle">可重置该 flag；手动添加的 flag 请点按</string>
+    <string name="flag_control_help_reset_note_suffix">以删除该 flag，因为这类 flag 没有默认值可供恢复</string>
+    <string name="flag_type_integer_example">示例：max_retries=3  timeout_ms=5000</string>
+    <string name="flag_type_float_example">示例：sampling_rate=0.1  scale=1.5</string>
+    <string name="flag_type_string_example">示例：region=eu  default_theme=dark</string>
+
+    <string name="flag_filter_all">全部</string>
+    <string name="flag_filter_changed">已更改</string>
+    <string name="flag_filter_disabled">已关闭</string>
+    <string name="flag_filter_enabled">已开启</string>
+    <string name="flag_list_empty">未找到 flags</string>
+    <string name="flag_list_no_matches">没有匹配的 flags</string>
+
+    <string name="flag_actions">flags 操作</string>
+    <string name="flag_actions_expanded">已展开</string>
+    <string name="flag_actions_collapsed">已收起</string>
+    <string name="flag_details_package">包名：%1$s</string>
+    <string name="flag_details_choose_package">选择包</string>
+    <string name="flag_details_search_packages">搜索包</string>
+    <string name="flag_details_packages_empty">没有匹配的包</string>
+    <string name="flag_details_current_package">当前包</string>
+    <string name="flag_details_primary_package">主要包</string>
+    <string name="flag_action_add">添加 flag</string>
+    <string name="flag_action_add_multiple">批量添加 flags</string>
+    <string name="flag_action_import">从文件导入</string>
+    <string name="flag_action_delete_all">删除所有覆盖项</string>
+    <string name="flag_action_launch_app">打开应用</string>
+    <string name="flag_action_app_info">应用信息</string>
+    <string name="flag_action_close_menu">关闭菜单</string>
+
+    <string name="flag_editor_add_title">添加 flag</string>
+    <string name="flag_editor_change_title">修改 flag</string>
+    <string name="flag_editor_name">flag 名称</string>
+    <string name="flag_editor_type">值类型</string>
+    <string name="flag_editor_default">默认值</string>
+    <string name="flag_editor_enabled">已启用</string>
+    <string name="flag_editor_boolean_supporting">读取时此 flag 将返回 true</string>
+    <string name="flag_editor_value">值</string>
+    <string name="flag_editor_add_action">添加 flag</string>
+    <string name="flag_details_scope_action">在 LSPosed 中启用以应用 flag 覆盖项</string>
+    <string name="flag_details_pairip_action">Hook 可能导致此应用崩溃 — 点按查看详情</string>
+    <string name="action_cancel">取消</string>
+    <string name="action_close">关闭</string>
+    <string name="action_save">保存</string>
+    <string name="action_delete">删除</string>
+    <string name="action_share">分享</string>
+    <string name="action_continue">继续</string>
+    <string name="action_retry">重试</string>
+
+    <string name="flag_details_recommendations">推荐</string>
+    <string name="flag_details_online_content_unavailable">在线应用说明不可用</string>
+    <string name="flag_details_support_verified">已验证</string>
+    <string name="flag_details_support_partial">部分支持</string>
+    <string name="flag_details_support_experimental">实验性</string>
+    <string name="flag_details_support_unknown">支持状态未知</string>
+    <string name="flag_annotation_caution">注意</string>
+    <string name="flag_annotation_dangerous">有风险</string>
+
+    <string name="delete_overrides_title">删除所有覆盖项？</string>
+    <string name="delete_overrides_message">此包的所有自定义值都将被移除</string>
+    <string name="export_flags_title">分享所选 flags</string>
+    <string name="export_file_name">文件名</string>
+    <string name="report_flags_title">报告所选 flags</string>
+    <string name="report_flags_description">有什么问题？</string>
+
+    <string name="selection_options">选择操作</string>
+    <string name="selection_enable">启用所选项</string>
+    <string name="selection_disable">停用所选项</string>
+    <string name="selection_reset_default">重置为默认值</string>
+    <string name="selection_select_all">全选</string>
+    <string name="selection_report">报告所选 flags</string>
+    <string name="selection_share">分享所选 flags</string>
+
+    <string name="add_multiple_title">批量添加 flags</string>
+    <string name="add_multiple_enter_flags">输入 flags</string>
+    <string name="add_multiple_boolean_hint">使用空格或换行分隔名称</string>
+    <string name="add_multiple_value_hint">使用 name=value 格式，并以空格或换行分隔</string>
+    <string name="add_multiple_enable_flags">启用新添加的 flags</string>
+    <string name="add_multiple_boolean_value">这些 flags 的值</string>
+    <string name="add_multiple_enabled">已启用</string>
+    <string name="add_multiple_disabled">已停用</string>
+    <string name="add_multiple_formed_flags">已识别 %1$s 个 flags</string>
+    <string name="add_multiple_empty">未添加 flags</string>
+    <string name="add_multiple_review_title">准备添加</string>
+    <string name="add_multiple_review_empty">不同类型的 flags 会显示在这里，并一起添加</string>
+    <string name="add_multiple_more_flags">另有 %1$d 项</string>
+    <string name="add_multiple_save">添加 flags</string>
+    <plurals name="add_multiple_invalid_count">
+        <item quantity="other">%1$d 项的值无效</item>
+    </plurals>
+    <plurals name="add_multiple_save_count">
+        <item quantity="other">添加 %1$d 个 flags</item>
+    </plurals>
+
+    <string name="import_flags_title">导入 flags</string>
+    <string name="import_flags_selection_summary">已选择 %1$d/%2$d 个 flags</string>
+    <string name="import_flags_skipped">已跳过 %1$d 个不受支持的 flags</string>
+    <string name="import_flags_select_all">全选</string>
+    <string name="import_flags_clear_selection">清除选择</string>
+    <string name="import_flags_apply">应用 %1$d 个 flags</string>
+    <string name="import_flags_retry">重试</string>
+    <string name="import_flags_choose_another">选择其他文件</string>
+    <string name="import_flags_choose_application">为此文件选择应用</string>
+    <string name="import_flags_unsupported_package_title">不支持此包</string>
+    <string name="import_flags_unsupported_package_message">所选应用不支持此文件中的包名“%1$s”，没有更改任何 flags</string>
+    <string name="import_flags_unsupported_external_package_message">当前没有可用应用支持此文件中的包名“%1$s”，没有更改任何 flags</string>
+    <string name="import_flags_invalid_file">无法读取此 .gmsflags 文件</string>
+    <string name="import_flags_select_at_least_one">至少选择一个 flag</string>
+    <string name="import_flags_choose_package">选择包</string>
+    <string name="import_flags_flag_unresolved_package">尚未选择包</string>
+    <string name="import_flags_unable_to_apply">无法导入 flags</string>
+
+    <string name="message_flag_reset">flag 已重置</string>
+    <string name="message_overrides_deleted">覆盖项已删除</string>
+    <string name="message_flag_name_empty">flag 名称不能为空</string>
+    <string name="message_invalid_flag_value">flag 值无效</string>
+    <string name="message_unable_access_flags">无法访问 flags 数据</string>
+    <string name="message_invalid_flags">flags 无效</string>
+    <string name="message_add_at_least_one_flag">至少添加一个 flag</string>
+    <string name="message_unable_add_flags">无法添加 flags</string>
+    <string name="message_unable_complete_action">无法完成操作</string>
+    <string name="message_package_copied">包名已复制</string>
+    <plurals name="message_flag_names_copied">
+        <item quantity="other">已复制 %d 个 flag 名称</item>
+    </plurals>
+    <string name="message_unable_launch_app">无法打开此应用</string>
+    <string name="message_bulk_override_warning">一次更改大量 flags 可能导致应用或系统出错。如遇问题，请删除所有覆盖项</string>
+
+    <string name="clipboard_package_name">包名</string>
+    <string name="clipboard_flag_names">flag 名称</string>
+    <string name="share_flags_chooser">分享 flags</string>
+    <string name="report_flags_chooser">报告 flags</string>
+    <string name="report_email_subject">问题报告</string>
+    <string name="report_email_body">包名：%1$s\n\n说明：\n%2$s\n\nflags：\n%3$s</string>
+</resources>

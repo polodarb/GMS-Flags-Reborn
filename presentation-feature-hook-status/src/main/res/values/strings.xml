@@ -27,7 +27,7 @@
     <string name="hook_status_pairip_support">This app bundles libpairipcore.so. PairIP may terminate the process when it detects Xposed or Frida. If the app crashes, remove it from the LSPosed scope; GMS Flags does not bypass PairIP.</string>
     <string name="hook_status_compatibility_badge">Compatibility</string>
     <string name="hook_status_flags_count">%1$d saved flags</string>
-    <string name="hook_status_card_metadata">%1$s · %2$s</string>
+    <string name="hook_status_card_metadata" translatable="false">%1$s · %2$s</string>
     <string name="hook_status_last_checked">Last session: %1$s</string>
     <string name="hook_status_never_checked">No hook session recorded</string>
     <string name="hook_status_details_title">%1$s status</string>

@@ -13,14 +13,14 @@
     <string name="flag_details_clear_search">Clear search</string>
     <string name="flag_details_copy_selected">Copy flag names</string>
 
-    <string name="flag_type_boolean">Bool</string>
-    <string name="flag_type_integer">Int</string>
-    <string name="flag_type_float">Float</string>
-    <string name="flag_type_string">String</string>
+    <string name="flag_type_boolean" translatable="false">Bool</string>
+    <string name="flag_type_integer" translatable="false">Int</string>
+    <string name="flag_type_float" translatable="false">Float</string>
+    <string name="flag_type_string" translatable="false">String</string>
     <string name="flag_type_boolean_example">Example: enable_new_ui feature_x  or  enable_new_ui=0</string>
 
-    <string name="flag_value_false">Default: False</string>
-    <string name="flag_value_true">Default: True</string>
+    <string name="flag_value_false" translatable="false">Default: False</string>
+    <string name="flag_value_true" translatable="false">Default: True</string>
     <string name="flag_reset_default_description">Reset to default</string>
     <string name="flag_delete_description">Delete flag</string>
     <string name="flag_control_help_title">Flag control states</string>
@@ -93,7 +93,7 @@
     <string name="delete_overrides_message">All custom values for this package will be removed.</string>
     <string name="export_flags_title">Share selected flags</string>
     <string name="export_file_name">File name</string>
-    <string name="export_file_suffix">.gmsflags</string>
+    <string name="export_file_suffix" translatable="false">.gmsflags</string>
     <string name="report_flags_title">Report selected flags</string>
     <string name="report_flags_description">What is wrong?</string>
 
@@ -169,5 +169,5 @@
     <string name="report_flags_chooser">Report flags</string>
     <string name="report_email_subject">Problem report</string>
     <string name="report_email_body">Package: %1$s\n\nDescription:\n%2$s\n\nFlags:\n%3$s</string>
-    <string name="default_export_file_name">flags</string>
+    <string name="default_export_file_name" translatable="false">flags</string>
 </resources>

@@ -49,12 +49,12 @@
     <string name="settings_removed_message">All flags and micro-hooks removed</string>
     <string name="settings_paused_notice_title">Overrides are paused</string>
     <string name="settings_paused_notice_description">Apps are using their original flag values.</string>
-    <string name="settings_app_name">GMS Flags</string>
-    <string name="settings_version_short">v%1$s</string>
-    <string name="settings_developer_danyil">Danyil Kobzar</string>
-    <string name="settings_developer_transaero">transaero21</string>
-    <string name="settings_developer_role_lead">Lead Developer</string>
-    <string name="settings_developer_role_xposed">Xposed module Developer</string>
+    <string name="settings_app_name" translatable="false">GMS Flags</string>
+    <string name="settings_version_short" translatable="false">v%1$s</string>
+    <string name="settings_developer_danyil" translatable="false">Danyil Kobzar</string>
+    <string name="settings_developer_transaero" translatable="false">transaero21</string>
+    <string name="settings_developer_role_lead" translatable="false">Lead Developer</string>
+    <string name="settings_developer_role_xposed" translatable="false">Xposed module Developer</string>
     <string name="settings_join_telegram">Join Telegram channel</string>
     <string name="settings_follow_x">Follow on X</string>
     <string name="settings_server_connection">Server connection</string>
@@ -65,8 +65,8 @@
     <string name="settings_server_unavailable">Unavailable</string>
     <string name="settings_offline_mode_title">Offline mode</string>
     <string name="settings_offline_mode_subtitle">The GMS Flags server is off. Apps, flags and overrides keep working locally.</string>
-    <string name="settings_brand_name">GMS Flags</string>
-    <string name="settings_brand_generation">2</string>
+    <string name="settings_brand_name" translatable="false">GMS Flags</string>
+    <string name="settings_brand_generation" translatable="false">2</string>
     <string name="settings_diagnostics_section">Privacy</string>
     <string name="settings_analytics_title">Usage &amp; diagnostics</string>
     <string name="settings_analytics_description">Share anonymous diagnostics to help improve the app.</string>
@@ -91,7 +91,7 @@
     <string name="settings_feedback_sent_close">Close</string>
     <string name="settings_feedback_disclosure_title">What will be sent</string>
     <string name="settings_feedback_field_device">Device</string>
-    <string name="settings_feedback_field_android">Android</string>
+    <string name="settings_feedback_field_android" translatable="false">Android</string>
     <string name="settings_feedback_value_android">%1$s (SDK %2$d)</string>
     <string name="settings_feedback_field_app_version">App version</string>
     <string name="settings_feedback_value_app_version">%1$s (%2$d)</string>

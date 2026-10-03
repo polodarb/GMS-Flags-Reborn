@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_back">返回</string>
+    <string name="onboarding_welcome_title">欢迎使用 flags 管理工具</string>
+    <string name="onboarding_welcome_body">管理 Google 应用中的隐藏 flags</string>
+    <string name="onboarding_welcome_action">开始使用</string>
+    <string name="onboarding_feature_discover">探索 Google 应用中的数百个隐藏 flags</string>
+    <string name="onboarding_feature_override">抢先启用尚未正式发布的功能</string>
+    <string name="onboarding_feature_restore">一键将任何更改恢复为默认值</string>
+    <string name="onboarding_legal_prefix">继续即表示你同意</string>
+    <string name="onboarding_legal_and">和</string>
+    <string name="onboarding_legal_suffix">。</string>
+    <string name="onboarding_terms">使用条款</string>
+    <string name="onboarding_privacy">隐私政策</string>
+    <string name="onboarding_soon">即将推出</string>
+    <string name="onboarding_disclaimer_title">请先了解以下事项</string>
+    <string name="onboarding_disclaimer_body">GMS Flags 会更改其他应用的底层设置。大多数 flags 不会造成问题，但有些可能影响应用的运行</string>
+    <string name="onboarding_disclaimer_point_impact">更改 flags 可能改变应用功能，或导致其暂时无法使用</string>
+    <string name="onboarding_disclaimer_point_reversible">所有覆盖项均可撤销，也可随时重置 flag</string>
+    <string name="onboarding_disclaimer_point_responsibility">请自行判断并承担应用更改带来的风险</string>
+    <string name="onboarding_disclaimer_action">我已了解</string>
+    <string name="onboarding_root_title">授予 Root 权限以启用核心功能</string>
+    <string name="onboarding_root_body">GMS Flags 需要 Root 权限才能读取受保护的 flag 数据并写入覆盖项。只有在执行需要特权的操作时才会请求 Root 权限</string>
+    <string name="onboarding_root_action">授予 Root 权限</string>
+    <string name="onboarding_root_reason_read">读取受支持应用使用的受保护 flag 包</string>
+    <string name="onboarding_root_reason_local">覆盖项保存在本机，由你掌控</string>
+    <string name="onboarding_root_denied">未获得 Root 权限。请在 Root 管理器中批准请求，然后重试</string>
+    <string name="onboarding_notifications_title">及时了解变化</string>
+    <string name="onboarding_notifications_body">开启通知以接收新推荐、兼容性更新和重要 Hook 提醒。之后可在系统设置中更改此选项</string>
+    <string name="onboarding_notifications_action">允许通知</string>
+    <string name="onboarding_notifications_try_again">重试</string>
+    <string name="onboarding_notifications_skip">暂不</string>
+    <string name="onboarding_notifications_denied">通知目前未开启。你可以重试，也可以暂不开启并继续</string>
+    <string name="onboarding_notification_preview_title">精选 flags 配置</string>
+    <string name="onboarding_notification_preview_body">为你的应用准备好经过测试的配置后，我们会通知你</string>
+    <string name="onboarding_completion_failed">无法保存引导进度，请重试</string>
+</resources>

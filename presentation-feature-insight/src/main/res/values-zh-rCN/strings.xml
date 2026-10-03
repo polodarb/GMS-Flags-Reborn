@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="insight_title">了解 Google 正在开发的新内容</string>
+    <string name="insight_description">追踪 Google 应用在版本更新之间的变化，包括 flags、字符串和资源</string>
+    <string name="insight_open_play_store">在 Google Play 获取 GMS Insight</string>
+    <string name="insight_open_app">打开 GMS Insight</string>
+    <string name="insight_what_it_does">不只是更新历史</string>
+    <string name="insight_capability_flags_description">同时追踪字符串和资源变化，更快发现隐藏实验</string>
+    <string name="insight_capability_changes_title">追踪每一项重要变化</string>
+    <string name="insight_capability_changes_description">比较不同版本，查看新增、修改或移除的内容</string>
+    <string name="insight_capability_manifest_title">了解正在筹备的功能</string>
+    <string name="insight_capability_manifest_description">通过清单和 AI 分析，将原始变化与功能联系起来</string>
+    <string name="insight_capability_flags_title">发现新 flags</string>
+    <string name="insight_badge_soon">即将推出</string>
+</resources>

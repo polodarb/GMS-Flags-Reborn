@@ -133,7 +133,7 @@
     <string name="suggestions_details_patch_title">Compatibility patch</string>
     <!-- `purpose` is free-form admin text from the backend (not localized), shown verbatim as a
          supporting line. It is never the primary label. -->
-    <string name="suggestions_details_patch_note">%1$s</string>
+    <string name="suggestions_details_patch_note" translatable="false">%1$s</string>
     <string name="suggestions_details_patch_learn_more">What does this mean?</string>
 
     <!-- Trust states: short chip label + a full description shown in the explainer sheet. -->
@@ -224,7 +224,7 @@
     <string name="suggestions_report_disclosure_title">What will be sent</string>
     <string name="suggestions_report_collecting">Collecting…</string>
     <string name="suggestions_report_field_device">Device</string>
-    <string name="suggestions_report_field_android">Android</string>
+    <string name="suggestions_report_field_android" translatable="false">Android</string>
     <string name="suggestions_report_field_app_version">App version</string>
     <string name="suggestions_report_field_signature">App signature</string>
     <string name="suggestions_report_field_target">Target app</string>
@@ -233,8 +233,8 @@
     <string name="suggestions_report_field_variant">Configuration</string>
     <string name="suggestions_report_field_patch">Patch recipe</string>
     <string name="suggestions_report_field_patch_status">Patch status</string>
-    <string name="suggestions_report_value_android">%1$s (API %2$d)</string>
-    <string name="suggestions_report_value_app_version">%1$s (%2$d)</string>
+    <string name="suggestions_report_value_android" translatable="false">%1$s (API %2$d)</string>
+    <string name="suggestions_report_value_app_version" translatable="false">%1$s (%2$d)</string>
     <string name="suggestions_report_value_unknown">Unknown</string>
     <string name="suggestions_report_value_none">Not available</string>
     <string name="suggestions_report_logs_note">Recent patch logs from the target app will be attached automatically.</string>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="apps_settings">设置</string>
+    <string name="apps_settings_unavailable">设置暂不可用</string>
+    <string name="apps_empty">未找到受支持的应用</string>
+    <string name="apps_search_placeholder">搜索应用或包名</string>
+    <string name="apps_search_empty">没有匹配的应用</string>
+    <string name="apps_scope_missing_badge">不在作用域中</string>
+    <string name="apps_unsupported_badge">不受支持</string>
+    <string name="apps_pairip_badge">不兼容</string>
+    <string name="apps_unsupported_sheet_title">flags 暂不受支持</string>
+    <string name="apps_unsupported_sheet_body">此应用当前安装的版本暂不支持管理 flags</string>
+    <string name="apps_unsupported_sheet_body_version">此应用升级到 v%1$d 后，暂时无法管理其 flags</string>
+    <string name="apps_unsupported_sheet_point_paused_title">访问已暂停</string>
+    <string name="apps_unsupported_sheet_point_paused_desc">为避免异常 flag 影响应用，已暂时停用 flags 管理</string>
+    <string name="apps_unsupported_sheet_point_fix_title">修复方案即将推出</string>
+    <string name="apps_unsupported_sheet_point_fix_desc">应用重新兼容后即可恢复支持</string>
+    <string name="apps_unsupported_sheet_action">知道了</string>
+    <string name="apps_scope_missing_title">LSPosed 作用域未启用</string>
+    <string name="apps_scope_missing_explanation">请先在 LSPosed 模块作用域中启用 %1$s，GMS Flags 才能对其进行 Hook</string>
+    <string name="apps_scope_steps_title">启用方法</string>
+    <string name="apps_scope_step_open_lsposed">打开 LSPosed</string>
+    <string name="apps_scope_step_open_modules">选择“模块”</string>
+    <string name="apps_scope_step_open_gms_flags">打开 GMS Flags</string>
+    <string name="apps_scope_step_enable_app">启用 %1$s 并重启应用</string>
+    <string name="apps_module_scope_banner_title">GMS Flags 在 LSPosed 中未启用</string>
+    <string name="apps_module_scope_banner_description">启用模块后即可应用 flag 覆盖项</string>
+    <string name="apps_module_scope_sheet_title">LSPosed 模块未启用</string>
+    <string name="apps_module_scope_sheet_explanation">请先在 LSPosed 中启用 %1$s 模块，然后才能应用 flag 覆盖项</string>
+    <string name="apps_module_scope_step_enable">启用 %1$s 模块并重启目标应用</string>
+    <string name="apps_offline_badge">离线</string>
+</resources>

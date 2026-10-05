@@ -14,6 +14,7 @@ import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import ua.polodarb.gmsflags.data.phenotype.root.IPhenotypeRootService
 import ua.polodarb.gmsflags.core.root.RootAccessManager
@@ -67,62 +68,67 @@ internal class PhenotypeRootServiceConnector(
         cachedService?.takeIf { it.asBinder().isBinderAlive }?.let { return@withLock it }
         clearDeadConnection()
 
+        // RootService.bind() below asserts it is called on the main thread, which is not
+        // guaranteed here - a caller with no UI context of its own (WorkManager above all) can
+        // reach this from a background dispatcher.
         val binder = withTimeout(connectionTimeoutMillis) {
-            suspendCancellableCoroutine<IBinder> { continuation ->
-                val serviceConnection = object : ServiceConnection {
-                    override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-                        if (service == null && continuation.isActive) {
-                            continuation.resumeWithException(
-                                RootServiceConnectionException(
-                                    "Phenotype root service returned no binder"
+            withContext(Dispatchers.Main.immediate) {
+                suspendCancellableCoroutine<IBinder> { continuation ->
+                    val serviceConnection = object : ServiceConnection {
+                        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+                            if (service == null && continuation.isActive) {
+                                continuation.resumeWithException(
+                                    RootServiceConnectionException(
+                                        "Phenotype root service returned no binder"
+                                    )
                                 )
-                            )
-                        } else if (service != null && continuation.isActive) {
-                            continuation.resume(service)
+                            } else if (service != null && continuation.isActive) {
+                                continuation.resume(service)
+                            }
                         }
-                    }
 
-                    override fun onNullBinding(name: ComponentName?) {
-                        if (continuation.isActive) {
-                            continuation.resumeWithException(
-                                RootServiceConnectionException(
-                                    "Phenotype root service returned no binder"
+                        override fun onNullBinding(name: ComponentName?) {
+                            if (continuation.isActive) {
+                                continuation.resumeWithException(
+                                    RootServiceConnectionException(
+                                        "Phenotype root service returned no binder"
+                                    )
                                 )
-                            )
+                            }
                         }
-                    }
 
-                    override fun onBindingDied(name: ComponentName?) {
-                        cachedService = null
-                        if (continuation.isActive) {
-                            continuation.resumeWithException(
-                                RootServiceConnectionException(
-                                    "Phenotype root service binding died"
+                        override fun onBindingDied(name: ComponentName?) {
+                            cachedService = null
+                            if (continuation.isActive) {
+                                continuation.resumeWithException(
+                                    RootServiceConnectionException(
+                                        "Phenotype root service binding died"
+                                    )
                                 )
-                            )
+                            }
                         }
-                    }
 
-                    override fun onServiceDisconnected(name: ComponentName?) {
-                        cachedService = null
-                        if (continuation.isActive) {
-                            continuation.resumeWithException(
-                                RootServiceConnectionException(
-                                    "Phenotype root service disconnected"
+                        override fun onServiceDisconnected(name: ComponentName?) {
+                            cachedService = null
+                            if (continuation.isActive) {
+                                continuation.resumeWithException(
+                                    RootServiceConnectionException(
+                                        "Phenotype root service disconnected"
+                                    )
                                 )
-                            )
+                            }
                         }
                     }
+                    activeConnection = serviceConnection
+                    continuation.invokeOnCancellation {
+                        runCatching { RootService.unbind(serviceConnection) }
+                        if (activeConnection === serviceConnection) activeConnection = null
+                    }
+                    RootService.bind(
+                        Intent(applicationContext, PhenotypeRootService::class.java),
+                        serviceConnection,
+                    )
                 }
-                activeConnection = serviceConnection
-                continuation.invokeOnCancellation {
-                    runCatching { RootService.unbind(serviceConnection) }
-                    if (activeConnection === serviceConnection) activeConnection = null
-                }
-                RootService.bind(
-                    Intent(applicationContext, PhenotypeRootService::class.java),
-                    serviceConnection,
-                )
             }
         }
 

@@ -69,6 +69,7 @@ val presentationFeatureFlagDetailsModule = module {
             documentSource = get(),
             parser = get(),
             getSupportedApplications = get(),
+            backupCodec = get(),
         )
     }
 }

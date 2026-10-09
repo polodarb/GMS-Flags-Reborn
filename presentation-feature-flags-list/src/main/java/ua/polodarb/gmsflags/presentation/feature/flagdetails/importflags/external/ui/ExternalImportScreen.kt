@@ -18,6 +18,7 @@ fun ExternalImportScreen(
     onBack: () -> Unit,
     onTargetResolved: (ExternalImportTarget) -> Unit,
     onUserInteractionRequired: () -> Unit,
+    onBackupResolved: () -> Unit,
 ) {
     val viewModel: ExternalImportViewModel = koinViewModel(
         key = "external-import:$documentUri",
@@ -27,6 +28,7 @@ fun ExternalImportScreen(
     LaunchedEffect(viewModel) {
         viewModel.effect.collect { effect ->
             when (effect) {
+                ExternalImportEffect.OpenBackup -> onBackupResolved()
                 ExternalImportEffect.NavigateBack -> onBack()
                 is ExternalImportEffect.OpenImport -> onTargetResolved(effect.target)
             }

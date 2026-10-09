@@ -3,7 +3,7 @@ package ua.polodarb.gmsflags.presentation.feature.flagdetails.importflags.docume
 import android.content.ContentResolver
 import android.net.Uri
 import android.provider.OpenableColumns
-import java.io.Reader
+import ua.polodarb.gmsflags.presentation.core.document.readBoundedUtf8
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -16,8 +16,8 @@ internal class ContentResolverFlagImportDocumentSource(
     override suspend fun read(documentUri: String): FlagImportDocument = withContext(ioDispatcher) {
         val uri = Uri.parse(documentUri)
         val displayName = contentResolver.displayNameOrNull(uri)
-        val content = contentResolver.openInputStream(uri)?.bufferedReader()?.use { reader ->
-            reader.readLimited()
+        val content = contentResolver.openInputStream(uri)?.use { stream ->
+            stream.readBoundedUtf8(MAX_DOCUMENT_BYTES)
         }
             ?: error("Unable to open import document")
 
@@ -43,22 +43,7 @@ internal class ContentResolverFlagImportDocumentSource(
         }
     }.getOrNull()
 
-    private fun Reader.readLimited(): String {
-        val result = StringBuilder()
-        val buffer = CharArray(READ_BUFFER_SIZE)
-        while (true) {
-            val count = read(buffer)
-            if (count < 0) break
-            require(result.length + count <= MAX_DOCUMENT_CHARS) {
-                "Import document is too large"
-            }
-            result.append(buffer, 0, count)
-        }
-        return result.toString()
-    }
-
     private companion object {
-        const val READ_BUFFER_SIZE = 8 * 1024
-        const val MAX_DOCUMENT_CHARS = 4 * 1024 * 1024
+        const val MAX_DOCUMENT_BYTES = 64 * 1024 * 1024
     }
 }

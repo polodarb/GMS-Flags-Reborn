@@ -7,7 +7,10 @@ import ua.polodarb.gmsflags.data.phenotype.root.parcel.HookDiagnosticSnapshotPar
 import ua.polodarb.gmsflags.data.phenotype.root.parcel.XposedScopeSnapshotParcel;
 import ua.polodarb.gmsflags.data.phenotype.root.parcel.MicroHookEnvelopeParcel;
 
+import ua.polodarb.gmsflags.data.phenotype.root.parcel.SavedOverrideParcel;
+
 interface IPhenotypeRootService {
+    List<SavedOverrideParcel> readSavedOverridesPage(String androidPackageName, int offset);
     List<PhenotypePackageBindingParcel> readPhenotypePackages();
     PhenotypeFlagPageParcel readFlagsPage(
         String androidPackageName,

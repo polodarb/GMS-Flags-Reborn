@@ -1,5 +1,8 @@
 package ua.polodarb.gmsflags.data.repository.impl.di
 
+import ua.polodarb.gmsflags.domain.backup.FlagsBackupService
+import ua.polodarb.gmsflags.data.repository.impl.flags.FlagsBackupServiceImpl
+
 import org.koin.dsl.module
 import ua.polodarb.gmsflags.data.repository.apps.repository.SupportedApplicationsRepository
 import ua.polodarb.gmsflags.data.repository.apps.repository.XposedScopeRepository
@@ -98,6 +101,18 @@ val dataRepositoryModule = module {
     single<TargetProcessRestarter> { RootTargetProcessRestarter(commandExecutor = get()) }
     single<FlagOverridesChangeBus> { FlagOverridesChangeBusImpl() }
     single<AnalyticsConsentRepository> { AnalyticsConsentRepositoryImpl(get()) }
+    single<FlagsBackupService> {
+        FlagsBackupServiceImpl(
+            savedOverrides = get(),
+            flagsDataSource = get(),
+            installedApps = get(),
+            targets = get(),
+            restarter = get(),
+            changes = get(),
+            controlDataSource = get(),
+            control = get(),
+        )
+    }
     single<FlagDetailsRepository> {
         FlagDetailsRepositoryImpl(
             dataSource = get(),

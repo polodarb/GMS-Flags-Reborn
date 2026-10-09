@@ -3,6 +3,7 @@ package ua.polodarb.gmsflags.data.phenotype.runtime
 import java.io.File
 
 internal interface RuntimeOverrideDatabase {
+    fun readPage(file: File, offset: Int): List<RuntimeFlagOverride>
     fun read(file: File, phenotypePackageName: String): List<RuntimeFlagOverride>
     fun write(
         file: File,

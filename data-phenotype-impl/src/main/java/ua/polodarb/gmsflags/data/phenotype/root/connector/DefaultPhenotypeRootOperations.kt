@@ -6,6 +6,7 @@ import ua.polodarb.gmsflags.data.phenotype.root.flags.OverrideRuntimeController
 import ua.polodarb.gmsflags.data.phenotype.root.flags.PhenotypeFlagStore
 import ua.polodarb.gmsflags.data.phenotype.root.hooks.HookDiagnosticsReader
 import ua.polodarb.gmsflags.data.phenotype.root.hooks.MicroHookStore
+import ua.polodarb.gmsflags.data.phenotype.root.parcel.SavedOverrideParcel
 import ua.polodarb.gmsflags.data.phenotype.root.parcel.HookDiagnosticSnapshotParcel
 import ua.polodarb.gmsflags.data.phenotype.root.parcel.MicroHookEnvelopeParcel
 import ua.polodarb.gmsflags.data.phenotype.root.parcel.PhenotypeFlagPageParcel
@@ -23,6 +24,10 @@ internal class DefaultPhenotypeRootOperations(
     private val xposedLogsReader: XposedLogsReader,
     private val overrideRuntimeController: OverrideRuntimeController,
 ) : PhenotypeRootOperations {
+    override fun readSavedOverridesPage(androidPackageName: String, offset: Int): List<SavedOverrideParcel> {
+        return flagStore.readSavedOverridesPage(androidPackageName, offset)
+    }
+
     override fun readPhenotypePackages(): List<PhenotypePackageBindingParcel> =
         packageReader.readPhenotypePackages().map { binding ->
             PhenotypePackageBindingParcel(

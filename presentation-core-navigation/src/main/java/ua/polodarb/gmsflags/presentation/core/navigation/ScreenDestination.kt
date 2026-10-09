@@ -51,6 +51,15 @@ sealed interface RootDestination : ScreenDestination {
     data object OverridesStorage : RootDestination
 
     @Serializable
+    data class FlagsBackup(val documentUri: String? = null) : RootDestination
+
+    @Serializable
+    data object ExportFlagsBackup : RootDestination
+
+    @Serializable
+    data class ImportFlagsBackup(val documentUri: String? = null) : RootDestination
+
+    @Serializable
     data class HookStatusDetails(
         val androidPackageName: String,
     ) : RootDestination

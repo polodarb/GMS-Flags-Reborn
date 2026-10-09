@@ -16,6 +16,7 @@ class GmsFlagsXmlFormatterTest {
             ),
         )
 
+        assertTrue(xml.contains("<package name=\"test&amp;package\" version=\"1\">"))
         assertTrue(xml.contains("name=\"test&amp;package\""))
         assertTrue(xml.contains("name=\"a&lt;flag\" type=\"boolean\" value=\"true\""))
         assertTrue(xml.contains("value=\"a&quot;b\""))

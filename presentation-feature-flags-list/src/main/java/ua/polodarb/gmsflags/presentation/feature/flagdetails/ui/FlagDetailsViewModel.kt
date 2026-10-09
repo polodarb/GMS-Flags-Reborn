@@ -116,6 +116,10 @@ class FlagDetailsViewModel(
     private fun observeOverrideChanges() {
         viewModelScope.launch {
             observeFlagOverrideChanges().collect { change ->
+                if (change is FlagOverridesChange.ReloadRequired && change.androidPackageName == androidPackageName) {
+                    load()
+                    return@collect
+                }
                 setState {
                     if (
                         change.androidPackageName != androidPackageName ||
@@ -124,6 +128,7 @@ class FlagDetailsViewModel(
                         return@setState this
                     }
                     when (change) {
+                        is FlagOverridesChange.ReloadRequired -> this
                         is FlagOverridesChange.Applied -> withOverrides(change.overrides)
                         is FlagOverridesChange.Removed -> withoutOverrides(change.flagNames)
                         is FlagOverridesChange.PackageCleared -> withoutAllOverrides()

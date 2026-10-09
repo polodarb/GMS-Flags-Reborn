@@ -67,9 +67,33 @@ class PhenotypeFlagStoreTest {
         )
     }
 
+    @Test
+    fun `backup pages preserve custom package identities and exclude base flags`() {
+        database.overridesByPackage["undiscovered"] = List(700) {
+            RuntimeFlagOverride("undiscovered", "flag_$it", 3, "value_$it")
+        }
+        val all = buildList {
+            var offset = 0
+            while (true) {
+                val page = store.readSavedOverridesPage(androidPackageName, offset)
+                if (page.isEmpty()) {
+                    break
+                }
+                addAll(page)
+                offset += page.size
+            }
+        }
+        assertEquals(700, all.size)
+        assertEquals(700, all.map { it.flag.name }.distinct().size)
+        assertTrue(all.all { it.packageName == "undiscovered" && it.flag.overridden && it.flag.originalValue == null })
+    }
+
     private class FakeDatabase : RuntimeOverrideDatabase {
         val overridesByPackage = mutableMapOf<String, List<RuntimeFlagOverride>>()
         val deletedFromPackages = mutableSetOf<String>()
+
+        override fun readPage(file: File, offset: Int): List<RuntimeFlagOverride> =
+            overridesByPackage.values.flatten().sortedWith(compareBy(RuntimeFlagOverride::packageName).thenBy(RuntimeFlagOverride::name)).drop(offset).take(256)
 
         override fun read(file: File, phenotypePackageName: String) =
             overridesByPackage[phenotypePackageName].orEmpty()

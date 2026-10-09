@@ -4,6 +4,11 @@ sealed interface FlagOverridesChange {
     val androidPackageName: String
     val phenotypePackageName: String
 
+    data class ReloadRequired(
+        override val androidPackageName: String,
+        override val phenotypePackageName: String,
+    ) : FlagOverridesChange
+
     data class Applied(
         override val androidPackageName: String,
         override val phenotypePackageName: String,

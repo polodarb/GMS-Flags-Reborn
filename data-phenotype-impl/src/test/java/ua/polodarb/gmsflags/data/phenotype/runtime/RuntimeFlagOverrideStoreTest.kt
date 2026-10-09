@@ -46,6 +46,8 @@ class RuntimeFlagOverrideStoreTest {
         var deleteResult = true
         val deleteAllFiles = mutableListOf<File>()
 
+        override fun readPage(file: File, offset: Int) = emptyList<RuntimeFlagOverride>()
+
         override fun read(file: File, phenotypePackageName: String) = emptyList<RuntimeFlagOverride>()
         override fun write(
             file: File,

@@ -3,6 +3,7 @@ package ua.polodarb.gmsflags.presentation.feature.flagdetails.importflags.extern
 import ua.polodarb.gmsflags.presentation.core.mvi.ViewSideEffect
 
 sealed interface ExternalImportEffect : ViewSideEffect {
+    data object OpenBackup : ExternalImportEffect
     data object NavigateBack : ExternalImportEffect
     data class OpenImport(val target: ExternalImportTarget) : ExternalImportEffect
 }

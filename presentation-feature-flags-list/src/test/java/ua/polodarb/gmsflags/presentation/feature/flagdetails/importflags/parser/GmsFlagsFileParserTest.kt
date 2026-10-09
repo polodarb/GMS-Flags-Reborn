@@ -84,6 +84,21 @@ class GmsFlagsFileParserTest {
     }
 
     @Test
+    fun `accepts version one and legacy unversioned packages`() {
+        val flags = "<flags><flag name=\"enabled\" type=\"boolean\" value=\"true\" /></flags>"
+        val legacy = parser.parse("<package name=\"com.test\">$flags</package>")
+        val versioned = parser.parse("<package name=\"com.test\" version=\"1\">$flags</package>")
+        assertEquals(legacy, versioned)
+    }
+
+    @Test
+    fun `rejects unsupported package format versions`() {
+        assertThrows(IllegalArgumentException::class.java) {
+            parser.parse("<package name=\"com.test\" version=\"2\"><flags /></package>")
+        }
+    }
+
+    @Test
     fun `rejects document type declarations`() {
         assertThrows(IllegalArgumentException::class.java) {
             parser.parse(

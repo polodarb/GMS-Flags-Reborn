@@ -25,6 +25,7 @@ fun EntryProviderScope<NavKey>.flagDetailsEntries(
         documentUri: String,
     ) -> Unit,
     onExternalImportOpeningFinished: (documentUri: String) -> Unit,
+    onBackupResolved: (documentUri: String) -> Unit,
     onRecommendationSelected: (id: Long) -> Unit,
 ) {
     entry<RootDestination.FlagDetails> { destination ->
@@ -83,6 +84,7 @@ fun EntryProviderScope<NavKey>.flagDetailsEntries(
             onTargetResolved = { target ->
                 onExternalImportResolved(target, destination.documentUri)
             },
+            onBackupResolved = { onBackupResolved(destination.documentUri) },
             onUserInteractionRequired = {
                 onExternalImportOpeningFinished(destination.documentUri)
             },

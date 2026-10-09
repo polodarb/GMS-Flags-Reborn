@@ -8,7 +8,7 @@ internal object GmsFlagsXmlFormatter {
     fun format(packageName: String, flags: List<PhenotypeFlag>): String = buildString {
         appendLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
         appendLine("<!-- GMS Flags -->")
-        appendLine("<package name=\"${packageName.xmlEscaped()}\">")
+        appendLine("<package name=\"${packageName.xmlEscaped()}\" version=\"1\">")
         appendLine("  <flags>")
         flags.forEach { flag ->
             appendLine(

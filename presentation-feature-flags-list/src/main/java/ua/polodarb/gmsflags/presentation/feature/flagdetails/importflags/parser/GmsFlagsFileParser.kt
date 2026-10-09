@@ -10,6 +10,7 @@ import ua.polodarb.gmsflags.presentation.feature.flagdetails.importflags.model.I
 
 internal class GmsFlagsFileParser {
     fun parse(xml: String): ImportedFlagBatch {
+        require(xml.length <= 4 * 1024 * 1024) { "Import document is too large" }
         require(xml.isNotBlank()) { "Import document is empty" }
         require(!FORBIDDEN_XML.containsMatchIn(xml)) { "DTD and entities are not supported" }
 
@@ -18,6 +19,10 @@ internal class GmsFlagsFileParser {
             .parse(InputSource(StringReader(xml)))
         val packageElement = document.documentElement
         require(packageElement.tagName == PACKAGE_TAG) { "Root element must be package" }
+
+        require(!packageElement.hasAttribute("version") || packageElement.getAttribute("version") == "1") {
+            "Unsupported package format version"
+        }
 
         val packageName = packageElement.requiredAttribute(NAME_ATTRIBUTE)
         val flags = linkedMapOf<Pair<FlagType, String>, ImportedFlag>()

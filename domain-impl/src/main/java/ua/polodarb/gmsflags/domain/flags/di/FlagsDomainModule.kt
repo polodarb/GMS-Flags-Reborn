@@ -1,5 +1,8 @@
 package ua.polodarb.gmsflags.domain.flags.di
 
+import ua.polodarb.gmsflags.domain.backup.FlagsBackupCodec
+import ua.polodarb.gmsflags.domain.backup.XmlFlagsBackupCodec
+
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import ua.polodarb.gmsflags.domain.flags.ApplyFlagOverrides
@@ -29,6 +32,7 @@ import ua.polodarb.gmsflags.domain.server.content.VerifyHookTrust
 val NEEDLE_TRUSTED_PUBLIC_KEY_QUALIFIER = named("needleTrustedPublicKey")
 
 val flagsDomainModule = module {
+    single<FlagsBackupCodec> { XmlFlagsBackupCodec() }
     factory<GetPhenotypeFlags> { GetPhenotypeFlagsUseCase(get()) }
     factory<ApplyFlagOverrides> { ApplyFlagOverridesUseCase(get()) }
     factory<ApplyMicroHooks> { ApplyMicroHooksUseCase(get()) }

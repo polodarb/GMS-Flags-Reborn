@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ua.polodarb.gmsflags.domain.apps.GetSupportedApplications
+import ua.polodarb.gmsflags.domain.backup.FlagsBackupCodec
 import ua.polodarb.gmsflags.presentation.core.viewmodel.BaseViewModel
 import ua.polodarb.gmsflags.presentation.feature.flagdetails.R
 import ua.polodarb.gmsflags.presentation.feature.flagdetails.importflags.document.FlagImportDocumentSource
@@ -23,6 +24,7 @@ internal class ExternalImportViewModel(
     private val parser: GmsFlagsFileParser,
     private val getSupportedApplications: GetSupportedApplications,
     private val backgroundDispatcher: CoroutineDispatcher = Dispatchers.Default,
+    private val backupCodec: FlagsBackupCodec? = null,
 ) : BaseViewModel<ExternalImportEvent, ExternalImportState, ExternalImportEffect>() {
     override fun initialState() = ExternalImportState()
 
@@ -56,6 +58,10 @@ internal class ExternalImportViewModel(
             }
             try {
                 val document = documentSource.read(documentUri)
+                if (withContext(backgroundDispatcher) { backupCodec?.isBackup(document.content) == true }) {
+                    setEffect { ExternalImportEffect.OpenBackup }
+                    return@launch
+                }
                 val batch = withContext(backgroundDispatcher) { parser.parse(document.content) }
                 val applications = getSupportedApplications().getOrThrow()
                 val targets = applications.mapNotNull { application ->

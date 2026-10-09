@@ -125,6 +125,7 @@ fun RootNavDisplay(
                     onBack = { rootBackStack.removeLastOrNull() },
                     onHookStatus = { rootBackStack.add(RootDestination.HookStatus) },
                     onOverrides = { rootBackStack.add(RootDestination.OverridesStorage) },
+                    onImportBackup = { rootBackStack.add(RootDestination.ImportFlagsBackup()) },
                     onFaq = { rootBackStack.add(RootDestination.Faq) },
                     onImportSelected = { documentUri ->
                         rootBackStack.add(RootDestination.ExternalImportFlags(documentUri))
@@ -197,6 +198,11 @@ fun RootNavDisplay(
                                 )
                             )
                         }
+                    },
+                    onBackupResolved = { documentUri ->
+                        openingExternalImportUri = null
+                        rootBackStack.removeLastOrNull()
+                        rootBackStack.add(RootDestination.ImportFlagsBackup(documentUri))
                     },
                     onExternalImportResolved = { target, documentUri ->
                         rootBackStack.removeLastOrNull()

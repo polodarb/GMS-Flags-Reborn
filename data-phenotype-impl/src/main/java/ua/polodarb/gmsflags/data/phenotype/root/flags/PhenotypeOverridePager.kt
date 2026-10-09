@@ -1,6 +1,7 @@
 package ua.polodarb.gmsflags.data.phenotype.root.flags
 
 import ua.polodarb.gmsflags.data.phenotype.root.parcel.PhenotypeFlagParcel
+import ua.polodarb.gmsflags.domain.flags.FlagOverrideLimits
 
 internal class PhenotypeOverridePager(
     private val maxItemsPerPage: Int = DEFAULT_MAX_ITEMS,
@@ -15,7 +16,7 @@ internal class PhenotypeOverridePager(
         if (overrides.isEmpty()) return emptyList()
         val pages = mutableListOf<List<PhenotypeFlagParcel>>()
         var current = mutableListOf<PhenotypeFlagParcel>()
-        var currentBytes = 0
+        var currentBytes = 0L
 
         overrides.forEach { override ->
             val itemBytes = override.estimatedParcelBytes()
@@ -24,12 +25,12 @@ internal class PhenotypeOverridePager(
             }
             if (
                 current.isNotEmpty() &&
-                (current.size == maxItemsPerPage ||
-                    currentBytes + itemBytes > maxEstimatedBytesPerPage)
+                    (current.size == maxItemsPerPage ||
+                        currentBytes + itemBytes > maxEstimatedBytesPerPage)
             ) {
                 pages += current
                 current = mutableListOf()
-                currentBytes = 0
+                currentBytes = 0L
             }
             current += override
             currentBytes += itemBytes
@@ -38,13 +39,11 @@ internal class PhenotypeOverridePager(
         return pages
     }
 
-    private fun PhenotypeFlagParcel.estimatedParcelBytes(): Int = PARCEL_OVERHEAD_BYTES +
-        (name.length + value.length + (originalValue?.length ?: 0)) * BYTES_PER_CHAR
+    private fun PhenotypeFlagParcel.estimatedParcelBytes(): Long =
+        FlagOverrideLimits.estimatedParcelBytes(name, value, originalValue)
 
     private companion object {
         const val DEFAULT_MAX_ITEMS = 4096
-        const val DEFAULT_MAX_BYTES = 256 * 1024
-        const val PARCEL_OVERHEAD_BYTES = 128
-        const val BYTES_PER_CHAR = 2
+        const val DEFAULT_MAX_BYTES = FlagOverrideLimits.MAX_PARCEL_BYTES
     }
 }

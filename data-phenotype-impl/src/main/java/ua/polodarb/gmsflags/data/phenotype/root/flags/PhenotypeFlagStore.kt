@@ -1,5 +1,6 @@
 package ua.polodarb.gmsflags.data.phenotype.root.flags
 
+import ua.polodarb.gmsflags.data.phenotype.root.parcel.SavedOverrideParcel
 import ua.polodarb.gmsflags.data.phenotype.root.parcel.PhenotypeFlagPageParcel
 import ua.polodarb.gmsflags.data.phenotype.root.parcel.PhenotypeFlagParcel
 import ua.polodarb.gmsflags.data.phenotype.runtime.RuntimeFlagOverride
@@ -11,6 +12,11 @@ internal class PhenotypeFlagStore(
     private val flagReader: PhenotypeFlagReader,
     private val overrideStore: RuntimeFlagOverrideStore,
 ) {
+    fun readSavedOverridesPage(androidPackageName: String, offset: Int): List<SavedOverrideParcel> =
+        overrideStore.readPage(androidPackageName, offset).map {
+            SavedOverrideParcel(it.packageName, PhenotypeFlagParcel(it.name, it.type, null, it.value, true))
+        }
+
     private var cachedSnapshot: FlagSnapshot? = null
 
     @Synchronized

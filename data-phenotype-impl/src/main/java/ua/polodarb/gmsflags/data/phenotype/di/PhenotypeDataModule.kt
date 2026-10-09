@@ -1,5 +1,8 @@
 package ua.polodarb.gmsflags.data.phenotype.di
 
+import ua.polodarb.gmsflags.data.repository.phenotype.SavedOverridesDataSource
+import ua.polodarb.gmsflags.data.phenotype.root.datasource.RootSavedOverridesDataSource
+
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import ua.polodarb.gmsflags.data.phenotype.root.connector.PhenotypeRootServiceConnector
@@ -25,6 +28,9 @@ val phenotypeDataModule = module {
     }
     single<PhenotypePackageReader> {
         RootPhenotypePackageReader(connector = get())
+    }
+    single<SavedOverridesDataSource> {
+        RootSavedOverridesDataSource(get())
     }
     single<PhenotypeFlagsDataSource> { RootPhenotypeFlagsDataSource(connector = get()) }
     single<PhenotypeHooksDataSource> { RootPhenotypeHooksDataSource(connector = get()) }

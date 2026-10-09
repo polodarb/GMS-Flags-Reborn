@@ -48,6 +48,7 @@ internal fun OverridesContent(
     state: OverridesState,
     onBack: () -> Unit,
     onEvent: (OverridesEvent) -> Unit,
+    onBackup: () -> Unit,
 ) {
     TrackScreenView(AnalyticsScreen.Overrides)
 
@@ -104,6 +105,12 @@ internal fun OverridesContent(
                             description = stringResource(R.string.settings_import_flags_description),
                             icon = Icons.Outlined.FolderOpen,
                             onClick = { onEvent(OverridesEvent.ImportClicked) },
+                        )
+                        SettingsRow(
+                            title = stringResource(R.string.backup_title),
+                            description = stringResource(R.string.backup_description),
+                            icon = Icons.Outlined.Description,
+                            onClick = onBackup,
                         )
                         SettingsRow(
                             title = stringResource(R.string.settings_remove_all),

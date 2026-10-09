@@ -6,12 +6,40 @@ import java.io.File
 import ua.polodarb.xposed.info.XposedConstants
 
 internal class SqliteRuntimeOverrideDatabase : RuntimeOverrideDatabase {
-    override fun read(
-        file: File,
-        phenotypePackageName: String,
-    ): List<RuntimeFlagOverride> {
+    override fun readPage(file: File, offset: Int): List<RuntimeFlagOverride> {
+        require(offset >= 0)
         if (!file.isFile) return emptyList()
-        return SQLiteDatabase.openDatabase(file.path, null, SQLiteDatabase.OPEN_READONLY).use { db ->
+        return SQLiteDatabase.openDatabase(file.path, null, SQLiteDatabase.OPEN_READONLY).use { db
+            ->
+            if (!db.hasOverrideTable()) return@use emptyList()
+            db.rawQuery(
+                    "SELECT packageName, name, flagType, value FROM ${XposedConstants.RUNTIME_OVERRIDES_TABLE} ORDER BY packageName, name LIMIT 256 OFFSET ?",
+                    arrayOf(offset.toString()),
+                )
+                .use { cursor ->
+                    buildList {
+                        val budget = SavedOverridePageBudget()
+                        while (cursor.moveToNext()) {
+                            val item = RuntimeFlagOverride(
+                                cursor.getString(0),
+                                cursor.getString(1),
+                                cursor.getInt(2),
+                                cursor.getString(3),
+                            )
+                            if (!budget.add(item.packageName, item.name, item.value)) {
+                                break
+                            }
+                            add(item)
+                        }
+                    }
+                }
+        }
+    }
+
+    override fun read(file: File, phenotypePackageName: String): List<RuntimeFlagOverride> {
+        if (!file.isFile) return emptyList()
+        return SQLiteDatabase.openDatabase(file.path, null, SQLiteDatabase.OPEN_READONLY).use { db
+            ->
             if (!db.hasOverrideTable()) return@use emptyList()
             db.rawQuery(READ_SQL, arrayOf(phenotypePackageName)).use { cursor ->
                 buildList {
@@ -92,17 +120,14 @@ internal class SqliteRuntimeOverrideDatabase : RuntimeOverrideDatabase {
         }
     }
 
-    override fun delete(
-        file: File,
-        phenotypePackageName: String,
-        flagName: String,
-    ): Boolean = editExisting(file) { db ->
-        db.delete(
-            XposedConstants.RUNTIME_OVERRIDES_TABLE,
-            "$COLUMN_PACKAGE = ? AND $COLUMN_NAME = ?",
-            arrayOf(phenotypePackageName, flagName),
-        )
-    }
+    override fun delete(file: File, phenotypePackageName: String, flagName: String): Boolean =
+        editExisting(file) { db ->
+            db.delete(
+                XposedConstants.RUNTIME_OVERRIDES_TABLE,
+                "$COLUMN_PACKAGE = ? AND $COLUMN_NAME = ?",
+                arrayOf(phenotypePackageName, flagName),
+            )
+        }
 
     override fun delete(
         file: File,
@@ -144,7 +169,8 @@ internal class SqliteRuntimeOverrideDatabase : RuntimeOverrideDatabase {
     ): Boolean {
         if (recipeIds.isEmpty()) return false
         if (!file.isFile) return false
-        return SQLiteDatabase.openDatabase(file.path, null, SQLiteDatabase.OPEN_READWRITE).use { db ->
+        return SQLiteDatabase.openDatabase(file.path, null, SQLiteDatabase.OPEN_READWRITE).use { db
+            ->
             if (!db.hasMicroHooksTable()) return@use false
             db.beginTransaction()
             try {
@@ -166,7 +192,8 @@ internal class SqliteRuntimeOverrideDatabase : RuntimeOverrideDatabase {
 
     override fun deleteAll(file: File): Boolean {
         if (!file.isFile) return false
-        return SQLiteDatabase.openDatabase(file.path, null, SQLiteDatabase.OPEN_READWRITE).use { db ->
+        return SQLiteDatabase.openDatabase(file.path, null, SQLiteDatabase.OPEN_READWRITE).use { db
+            ->
             val hasOverrides = db.hasOverrideTable()
             val hasMicroHooks = db.hasMicroHooksTable()
             if (!hasOverrides && !hasMicroHooks) return@use false
@@ -189,7 +216,8 @@ internal class SqliteRuntimeOverrideDatabase : RuntimeOverrideDatabase {
 
     private fun editExisting(file: File, operation: (SQLiteDatabase) -> Unit): Boolean {
         if (!file.isFile) return false
-        return SQLiteDatabase.openDatabase(file.path, null, SQLiteDatabase.OPEN_READWRITE).use { db ->
+        return SQLiteDatabase.openDatabase(file.path, null, SQLiteDatabase.OPEN_READWRITE).use { db
+            ->
             if (!db.hasOverrideTable()) return@use false
             operation(db)
             true
@@ -197,14 +225,16 @@ internal class SqliteRuntimeOverrideDatabase : RuntimeOverrideDatabase {
     }
 
     private fun SQLiteDatabase.hasOverrideTable(): Boolean = rawQuery(
-        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ? LIMIT 1",
-        arrayOf(XposedConstants.RUNTIME_OVERRIDES_TABLE),
-    ).use { it.moveToFirst() }
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ? LIMIT 1",
+            arrayOf(XposedConstants.RUNTIME_OVERRIDES_TABLE),
+        )
+        .use { it.moveToFirst() }
 
     private fun SQLiteDatabase.hasMicroHooksTable(): Boolean = rawQuery(
-        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ? LIMIT 1",
-        arrayOf(XposedConstants.RUNTIME_MICRO_HOOKS_TABLE),
-    ).use { it.moveToFirst() }
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ? LIMIT 1",
+            arrayOf(XposedConstants.RUNTIME_MICRO_HOOKS_TABLE),
+        )
+        .use { it.moveToFirst() }
 
     private companion object {
         const val MAX_DELETE_BATCH_SIZE = 500
@@ -212,13 +242,15 @@ internal class SqliteRuntimeOverrideDatabase : RuntimeOverrideDatabase {
         const val COLUMN_NAME = "name"
         const val COLUMN_TYPE = "flagType"
         const val COLUMN_VALUE = "value"
-        const val READ_SQL = """
+        const val READ_SQL =
+            """
             SELECT packageName, name, flagType, value
             FROM ${XposedConstants.RUNTIME_OVERRIDES_TABLE}
             WHERE packageName = ?
             ORDER BY name ASC
         """
-        const val CREATE_TABLE_SQL = """
+        const val CREATE_TABLE_SQL =
+            """
             CREATE TABLE IF NOT EXISTS ${XposedConstants.RUNTIME_OVERRIDES_TABLE} (
                 packageName TEXT NOT NULL,
                 name TEXT NOT NULL,
@@ -233,7 +265,8 @@ internal class SqliteRuntimeOverrideDatabase : RuntimeOverrideDatabase {
         const val MICRO_HOOK_COLUMN_PAYLOAD_SHA256 = "payloadSha256"
         const val MICRO_HOOK_COLUMN_SIGNATURE_BASE64 = "signatureBase64"
         const val MICRO_HOOK_COLUMN_REQUIRED = "required"
-        const val CREATE_MICRO_HOOKS_TABLE_SQL = """
+        const val CREATE_MICRO_HOOKS_TABLE_SQL =
+            """
             CREATE TABLE IF NOT EXISTS ${XposedConstants.RUNTIME_MICRO_HOOKS_TABLE} (
                 packageName TEXT NOT NULL,
                 recipeId INTEGER NOT NULL,

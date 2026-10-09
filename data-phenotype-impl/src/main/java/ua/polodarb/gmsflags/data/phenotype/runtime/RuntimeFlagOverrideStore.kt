@@ -30,6 +30,9 @@ internal class RuntimeFlagOverrideStore(
         fileAccess = AndroidRuntimeOverrideFileAccess(context.packageManager),
     )
 
+    fun readPage(androidPackageName: String, offset: Int): List<RuntimeFlagOverride> =
+        database.readPage(locator.locate(androidPackageName), offset)
+
     fun read(
         androidPackageName: String,
         phenotypePackageName: String,

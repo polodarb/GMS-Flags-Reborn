@@ -1,6 +1,7 @@
 package ua.polodarb.gmsflags.data.phenotype.root.connector
 
 import ua.polodarb.gmsflags.data.phenotype.root.IPhenotypeRootService
+import ua.polodarb.gmsflags.data.phenotype.root.parcel.SavedOverrideParcel
 import ua.polodarb.gmsflags.data.phenotype.root.parcel.HookDiagnosticSnapshotParcel
 import ua.polodarb.gmsflags.data.phenotype.root.parcel.MicroHookEnvelopeParcel
 import ua.polodarb.gmsflags.data.phenotype.root.parcel.PhenotypeFlagPageParcel
@@ -11,6 +12,9 @@ import ua.polodarb.gmsflags.data.phenotype.root.parcel.XposedScopeSnapshotParcel
 internal class PhenotypeRootBinder(
     private val operations: PhenotypeRootOperations,
 ) : IPhenotypeRootService.Stub() {
+    override fun readSavedOverridesPage(androidPackageName: String, offset: Int): List<SavedOverrideParcel> =
+        operations.readSavedOverridesPage(androidPackageName, offset)
+
     override fun readPhenotypePackages(): List<PhenotypePackageBindingParcel> =
         operations.readPhenotypePackages()
 

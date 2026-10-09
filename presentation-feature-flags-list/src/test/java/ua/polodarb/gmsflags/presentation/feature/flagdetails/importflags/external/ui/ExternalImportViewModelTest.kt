@@ -18,6 +18,8 @@ import ua.polodarb.gmsflags.domain.apps.FlagPackage
 import ua.polodarb.gmsflags.domain.apps.FlagPackageCategory
 import ua.polodarb.gmsflags.domain.apps.GetSupportedApplications
 import ua.polodarb.gmsflags.domain.apps.SupportedApplication
+import ua.polodarb.gmsflags.domain.backup.FlagsBackup
+import ua.polodarb.gmsflags.domain.backup.FlagsBackupCodec
 import ua.polodarb.gmsflags.presentation.feature.flagdetails.importflags.document.FlagImportDocumentSource
 import ua.polodarb.gmsflags.presentation.feature.flagdetails.importflags.external.mvi.ExternalImportEffect
 import ua.polodarb.gmsflags.presentation.feature.flagdetails.importflags.model.FlagImportDocument
@@ -63,13 +65,32 @@ class ExternalImportViewModelTest {
         assertEquals(emptyList<Any>(), viewModel.viewState.value.targets)
     }
 
+    @Test
+    fun `backup file routes to restore preview without legacy target resolution`() = runTest(dispatcher) {
+        val viewModel = ExternalImportViewModel(
+            documentUri = "content://test/backup.xml",
+            documentSource = { FlagImportDocument("backup.xml", "<gms-flags-backup version=\"1\"/>") },
+            parser = GmsFlagsFileParser(),
+            getSupportedApplications = { error("Backup must not resolve legacy targets") },
+            backgroundDispatcher = dispatcher,
+            backupCodec = object : FlagsBackupCodec {
+                override fun isBackup(xml: String) = true
+                override fun encode(backup: FlagsBackup): String = error("unused")
+                override fun decode(xml: String): FlagsBackup = error("Preview handles validation")
+            },
+        )
+        val effect = async { viewModel.effect.first() }
+        advanceUntilIdle()
+        assertEquals(ExternalImportEffect.OpenBackup, effect.await())
+    }
+
     private fun viewModel(applications: List<SupportedApplication>) = ExternalImportViewModel(
         documentUri = "content://test/flags.gmsflags",
-        documentSource = FlagImportDocumentSource {
+        documentSource = {
             FlagImportDocument("flags.gmsflags", XML)
         },
         parser = GmsFlagsFileParser(),
-        getSupportedApplications = GetSupportedApplications { Result.success(applications) },
+        getSupportedApplications = { Result.success(applications) },
         backgroundDispatcher = dispatcher,
     )
 

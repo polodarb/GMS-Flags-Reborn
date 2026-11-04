@@ -9,6 +9,16 @@ import ua.polodarb.gmsflags.data.phenotype.root.parcel.HookStrategyDiagnosticPar
 import ua.polodarb.xposed.info.HookDiagnosticContract
 import ua.polodarb.xposed.info.XposedConstants
 
+/**
+ * The credential-protected runtime directory for [dataDirectory], the one a target can only read
+ * once the device has been unlocked, first; its device-protected twin - readable from the moment
+ * the target's process starts - second.
+ */
+internal fun runtimeDirectoryCandidates(dataDirectory: String): List<File> = listOf(
+    File(dataDirectory, XposedConstants.XPOSED_DIR),
+    File(dataDirectory.replace("/user/", "/user_de/"), XposedConstants.XPOSED_DIR),
+).distinctBy(File::getAbsolutePath)
+
 internal class HookDiagnosticsReader(
     private val packageManager: PackageManager,
     private val pairipCoreDetector: PairipCoreDetector = PairipCoreDetector(),
@@ -26,19 +36,28 @@ internal class HookDiagnosticsReader(
                 add(HookDiagnosticContract.COMPATIBILITY_WARNING_PAIRIP_CORE)
             }
         }
-        val runtimeDirectory = File(dataDirectory, XposedConstants.XPOSED_DIR)
+        // A target that starts before the first unlock after a reboot can only write its session
+        // to device-protected storage, since credential-protected storage isn't readable yet - see
+        // XposedRuntimeDirectory. The session reflecting what that process actually has loaded can
+        // therefore live in either location, regardless of which one is checked here first.
+        val runtimeDirectories = runtimeDirectoryCandidates(dataDirectory)
+
         val overrideCount = readOverrideCount(
-            File(runtimeDirectory, XposedConstants.RUNTIME_OVERRIDES_DB_FILE_NAME)
+            File(runtimeDirectories.first(), XposedConstants.RUNTIME_OVERRIDES_DB_FILE_NAME)
         )
-        val diagnosticsFile = File(
-            runtimeDirectory,
-            XposedConstants.HOOK_DIAGNOSTICS_DB_FILE_NAME,
-        )
-        val session = readLatestSession(
-            file = diagnosticsFile,
-            mainProcessName = androidPackageName,
-        )
-        return if (session == null) {
+        val diagnosticsFiles = runtimeDirectories.map { directory ->
+            File(directory, XposedConstants.HOOK_DIAGNOSTICS_DB_FILE_NAME)
+        }
+        val sessionAndFile = diagnosticsFiles
+            .mapNotNull { file -> readLatestSession(file, androidPackageName)?.let { it to file } }
+            .maxWithOrNull(
+                compareBy(
+                    { (row, _) -> row.processName == androidPackageName },
+                    { (row, _) -> row.startedAt },
+                )
+            )
+
+        return if (sessionAndFile == null) {
             HookDiagnosticSnapshotParcel(
                 androidPackageName = androidPackageName,
                 currentOverrideCount = overrideCount,
@@ -54,6 +73,7 @@ internal class HookDiagnosticsReader(
                 compatibilityWarnings = compatibilityWarnings,
             )
         } else {
+            val (session, diagnosticsFile) = sessionAndFile
             session.copy(
                 androidPackageName = androidPackageName,
                 currentOverrideCount = overrideCount,

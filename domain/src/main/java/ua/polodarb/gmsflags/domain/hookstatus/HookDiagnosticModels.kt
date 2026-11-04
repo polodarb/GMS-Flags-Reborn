@@ -57,6 +57,12 @@ data class HookApplicationStatus(
     val compatibilityWarnings: Set<HookCompatibilityWarning> = emptySet(),
 )
 
+val HookApplicationStatus.needsAttention: Boolean
+    get() = compatibilityWarnings.isNotEmpty() ||
+        health == HookHealth.Error ||
+        health == HookHealth.Partial ||
+        health == HookHealth.RestartRequired
+
 data class HookStatusOverview(
     val applications: List<HookApplicationStatus>,
 ) {
@@ -64,10 +70,5 @@ data class HookStatusOverview(
     val workingApplicationCount: Int = applications.count {
         it.health == HookHealth.Working && it.compatibilityWarnings.isEmpty()
     }
-    val attentionApplicationCount: Int = applications.count {
-        it.compatibilityWarnings.isNotEmpty() ||
-            it.health == HookHealth.Error ||
-            it.health == HookHealth.Partial ||
-            it.health == HookHealth.RestartRequired
-    }
+    val attentionApplicationCount: Int = applications.count(HookApplicationStatus::needsAttention)
 }

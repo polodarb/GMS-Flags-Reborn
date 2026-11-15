@@ -53,7 +53,7 @@ they're ever installed.
 
 ## Supported Apps
 
-46 apps across Google's ecosystem, all with full flag override support:
+Supported apps across Google's ecosystem, with full flag override support:
 
 <details>
 <summary>Show the full list</summary>
@@ -75,7 +75,7 @@ they're ever installed.
 | Gemini | Google Wallet | Tips |
 | Giant | Google Weather | Wear Companion |
 | Gmail | Health Connect | Whisk |
-| Google App | | |
+| Google App | Google Calculator | |
 
 </details>
 

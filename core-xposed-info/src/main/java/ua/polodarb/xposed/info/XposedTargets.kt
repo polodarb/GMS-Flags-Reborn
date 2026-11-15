@@ -4,6 +4,7 @@ object XposedTargets : XposedTargetRegistry {
     const val VENDING_PACKAGE_NAME = "com.android.vending"
     const val GOOGLE_APP_PACKAGE_NAME = "com.google.android.googlequicksearchbox"
     const val CALENDAR_PACKAGE_NAME = "com.google.android.calendar"
+    const val CALCULATOR_PACKAGE_NAME = "com.google.android.calculator"
     const val DIALER_PACKAGE_NAME = "com.google.android.dialer"
     const val FITBIT_PACKAGE_NAME = "com.fitbit.FitbitMobile"
     const val TRANSLATE_PACKAGE_NAME = "com.google.android.apps.translate"
@@ -56,6 +57,8 @@ object XposedTargets : XposedTargetRegistry {
     const val VENDING_STABLE_NEW_FLAGS_PACKAGE_NAME = "com.google.android.finsky.stable_new"
     const val GOOGLE_APP_FLAGS_PACKAGE_NAME = "com.google.android.libraries.search.googleapp.user#com.google.android.googlequicksearchbox"
     const val CALENDAR_FLAGS_PACKAGE_NAME = CALENDAR_PACKAGE_NAME
+    const val CALCULATOR_FLAGS_PACKAGE_NAME = "$CALCULATOR_PACKAGE_NAME.device#$CALCULATOR_PACKAGE_NAME"
+    const val CALCULATOR_USER_FLAGS_PACKAGE_NAME = "$CALCULATOR_PACKAGE_NAME#$CALCULATOR_PACKAGE_NAME"
     const val DIALER_FLAGS_PACKAGE_NAME = DIALER_PACKAGE_NAME
     const val FITBIT_FLAGS_PACKAGE_NAME = "fitbit_android#com.fitbit.FitbitMobile"
     const val KEEP_FLAGS_PACKAGE_NAME = "com.google.android.keep#com.google.android.keep"
@@ -105,6 +108,7 @@ object XposedTargets : XposedTargetRegistry {
         VENDING_PACKAGE_NAME,
         GOOGLE_APP_PACKAGE_NAME,
         CALENDAR_PACKAGE_NAME,
+        CALCULATOR_PACKAGE_NAME,
         DIALER_PACKAGE_NAME,
         FITBIT_PACKAGE_NAME,
         TRANSLATE_PACKAGE_NAME,
@@ -174,6 +178,7 @@ object XposedTargets : XposedTargetRegistry {
         VENDING_PACKAGE_NAME -> VENDING_STABLE_FLAGS_PACKAGE_NAME
         GOOGLE_APP_PACKAGE_NAME -> GOOGLE_APP_FLAGS_PACKAGE_NAME
         CALENDAR_PACKAGE_NAME -> CALENDAR_FLAGS_PACKAGE_NAME
+        CALCULATOR_PACKAGE_NAME -> CALCULATOR_FLAGS_PACKAGE_NAME
         DIALER_PACKAGE_NAME -> DIALER_FLAGS_PACKAGE_NAME
         FITBIT_PACKAGE_NAME -> FITBIT_FLAGS_PACKAGE_NAME
         TRANSLATE_PACKAGE_NAME -> TRANSLATE_PACKAGE_NAME
@@ -226,6 +231,7 @@ object XposedTargets : XposedTargetRegistry {
         androidPackageName
     ) {
         PHOTOS_PACKAGE_NAME -> setOf(PHOTOS_MAIN_FLAGS_PACKAGE_NAME)
+        CALCULATOR_PACKAGE_NAME -> setOf(CALCULATOR_USER_FLAGS_PACKAGE_NAME)
         GOOGLE_CAMERA_PACKAGE_NAME -> setOf(GOOGLE_CAMERA_ALT_FLAGS_PACKAGE_NAME)
         else -> emptySet()
     }

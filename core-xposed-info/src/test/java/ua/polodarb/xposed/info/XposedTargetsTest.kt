@@ -13,6 +13,7 @@ class XposedTargetsTest {
                 "com.android.vending",
                 "com.google.android.googlequicksearchbox",
                 "com.google.android.calendar",
+                "com.google.android.calculator",
                 "com.google.android.dialer",
                 "com.fitbit.FitbitMobile",
                 "com.google.android.apps.translate",
